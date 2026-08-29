@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0ea5e9,100:ef4444&height=220&section=header&text=InJoy%20v3.0&fontSize=58&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Interactive%20Java%20%26%20Spring%20Boot%20Learning%20Universe&descAlignY=60&descAlign=50" width="100%">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0ea5e9,100:ef4444&height=220&section=header&text=InJoy%20v3.0&fontSize=58&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Interactive%20Java%20and%20Spring%20Boot%20Learning%20Universe&descAlignY=60&descAlign=50" width="100%">
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=500&color=0EA5E9&center=true&vCenter=true&width=700&lines=Angular+21+%26+Tailwind+v4+Architecture;Simulated+Device+Unlocking+Dashboard;10+Premium+Java+%26+Spring+Boot+Modules;State+Management+via+Angular+Signals;Dynamic+Interview+Q%26A+Vault;Interactive+Step-by-Step+Timeline" alt="Typing SVG">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=500&color=0EA5E9&center=true&vCenter=true&width=700&lines=Angular+21+and+Tailwind+v4+Architecture;Simulated+Device+Unlocking+Dashboard;10+Premium+Java+and+Spring+Boot+Modules;State+Management+via+Angular+Signals;Dynamic+Interview+QA+Vault;Interactive+Step-by-Step+Timeline" alt="Typing SVG">
 </p>
 
 <p align="center">
