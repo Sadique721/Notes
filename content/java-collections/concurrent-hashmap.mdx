@@ -1,0 +1,403 @@
+---
+title: "ConcurrentHashMap"
+slug: "concurrent-hashmap"
+moduleSlug: "java-collections"
+order: 3
+summaryOneLiner: "ConcurrentHashMap is the production-safe alternative to HashMap for concurrent access — understanding its segment-locking, CAS operations, and atomic methods is essential for multi-threaded applications."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["hashmap-internals", "thread-lifecycle"]
+---
+
+Module 5 → Topic 3 → ConcurrentHashMap (Part 1)
+
+1. ConcurrentHashMap — Introduction
+
+Why Not HashMap in Multi-Threaded Code?
+
+HashMap is NOT thread-safe.
+
+What happens with concurrent access:
+
+Scenario: Two threads simultaneously calling put() on the same HashMap.
+
+Thread A: Calculating bucket index...
+Thread B: Simultaneously calculating bucket index for same bucket...
+Thread A: Writing new node to bucket chain...
+Thread B: Writing new node (overwriting A's node!)...
+
+Result:
+
+DATA LOSS — Thread A's entry disappears.
+INFINITE LOOP (Java 7) — Concurrent resize creates circular linked list.
+WRONG RESULTS — Reads may return stale or inconsistent data.
+
+Alternatives and Their Problems:
+
+Collections.synchronizedMap(new HashMap<>())
+    → Synchronized wrapper. Single lock on entire map.
+    → Only ONE thread can access map at a time.
+    → Extreme contention under concurrent load.
+
+Hashtable
+    → Legacy. synchronized on every method.
+    → Same problem as synchronizedMap — single lock.
+    → Also doesn't allow null keys/values.
+
+ConcurrentHashMap
+    → Designed specifically for concurrent access.
+    → High throughput.
+    → Thread-safe without single global lock.
+
+2. History of ConcurrentHashMap
+
+Java 5 (2004) — First Version
+
+Segment-based locking.
+
+Map divided into 16 segments (default).
+Each segment has its own ReentrantLock.
+Different threads accessing different segments → no contention.
+16 threads can write simultaneously (one per segment).
+
+Java 8 (2014) — Major Redesign
+
+Segment-based locking REMOVED.
+
+New approach: CAS (Compare-And-Swap) + synchronized on individual buckets.
+
+Lock granularity: Individual bucket head, not segment.
+
+Much higher concurrency — thousands of concurrent writers theoretically possible.
+
+Also gained Java 8 features: forEachEntry(), reduce(), compute(), merge().
+
+3. ConcurrentHashMap Internal Architecture (Java 8+)
+
+Same basic structure as HashMap: array of nodes (table).
+
+Key difference: Lock granularity is per-bucket, not per-map.
+
+For READ operations: CAS + volatile reads. NO locking at all.
+For WRITE operations: Synchronized block on bucket head node only.
+
+Key internal details:
+
+volatile Node<K,V>[] table; // volatile — reads always see latest
+
+class Node<K,V> {
+    final int hash;
+    final K key;
+    volatile V value; // volatile for visibility without lock
+    volatile Node<K,V> next; // volatile for visibility
+}
+
+4. put() in ConcurrentHashMap — Step by Step
+
+ConcurrentHashMap.put("key", "value"):
+
+Step 1 — Calculate hash:
+
+int hash = spread(key.hashCode()); // Similar to HashMap's hash mixing
+
+Step 2 — Get table reference (volatile read):
+
+Node<K,V>[] tab = this.table;
+
+Step 3 — Check if table needs initialization:
+
+if (tab == null) {
+    initTable(); // CAS-based initialization
+}
+
+Step 4 — Find bucket:
+
+int i = (n-1) & hash;
+Node<K,V> f = tabAt(tab, i); // volatile read of bucket head
+
+Step 5a — Bucket is empty → CAS insert:
+
+if (f == null) {
+    // Try to insert with CAS — no lock!
+    if (casTabAt(tab, i, null, new Node<>(hash, key, value, null))) {
+        break; // CAS succeeded — done!
+    }
+    // If CAS fails (another thread inserted simultaneously) → retry loop
+}
+
+Step 5b — Bucket is being resized (MOVED marker):
+
+if (f.hash == MOVED) {
+    helpTransfer(tab, f); // Participate in resize
+}
+
+Step 5c — Bucket has existing nodes → synchronized on bucket head:
+
+synchronized (f) { // Lock ONLY this bucket's head
+    // Traverse linked list or tree
+    // Update existing key or add new node
+}
+
+Step 6 — Check treeification:
+
+if (binCount >= TREEIFY_THRESHOLD) {
+    treeifyBin(tab, i);
+}
+
+Step 7 — Check resize:
+
+addCount(1L, binCount); // Atomic size increment + resize check
+
+5. get() in ConcurrentHashMap — Lock-Free
+
+get() uses NO locks.
+
+public V get(Object key) {
+    Node<K,V>[] tab = table; // volatile read
+    int hash = spread(key.hashCode());
+    int n = tab.length;
+    int i = (n-1) & hash;
+
+    Node<K,V> e = tabAt(tab, i); // volatile read of bucket head
+
+    while (e != null) {
+        if (e.hash == hash && (e.key == key || key.equals(e.key))) {
+            return e.val; // volatile read of value
+        }
+        e = e.next; // volatile read of next pointer
+    }
+    return null;
+}
+
+Why no lock for reads?
+
+All node fields (val, next) are volatile.
+Writes are atomic or done via CAS.
+Read always sees a consistent view.
+Readers never block writers and vice versa.
+
+6. Atomic Operations — Key Methods
+
+computeIfAbsent:
+
+// Thread-safe cache population — only computes if absent
+Map<Long, UserProfile> cache = new ConcurrentHashMap<>();
+
+UserProfile profile = cache.computeIfAbsent(userId,
+    id -> userRepository.findById(id).orElseThrow());
+
+// Only ONE thread computes the value — others wait for the result
+// No duplicate computation
+
+computeIfPresent:
+
+// Update value only if key exists
+cache.computeIfPresent(userId,
+    (id, existingProfile) -> existingProfile.withLastSeen(Instant.now()));
+
+compute:
+
+// Compute new value regardless of key existence
+wordCount.compute(word,
+    (key, existing) -> existing == null ? 1 : existing + 1);
+
+merge:
+
+// Count occurrences
+wordCount.merge(word, 1, Integer::sum);
+// If absent: put(word, 1)
+// If present: put(word, existing + 1)
+
+// Merge two maps:
+otherMap.forEach((k, v) -> resultMap.merge(k, v, Integer::sum));
+
+getOrDefault:
+
+int count = wordCount.getOrDefault(word, 0);
+
+7. Size and Counting
+
+ConcurrentHashMap.size() is approximate under concurrent modification.
+
+Why?
+
+No global lock → no single consistent view.
+Different threads may be adding/removing simultaneously.
+
+Alternative: mappingCount() (Java 8+) → returns long (size() is int).
+
+long count = map.mappingCount();
+
+ConcurrentHashMap uses a distributed counter:
+
+Multiple counter cells.
+Each thread updates its own cell.
+sum() aggregates on query.
+
+This is similar to LongAdder — low contention counting.
+
+8. Bulk Operations (Java 8+)
+
+ConcurrentHashMap supports parallel bulk operations:
+
+forEach:
+
+map.forEach(parallelism, (key, value) -> process(key, value));
+
+reduce:
+
+String combined = map.reduce(parallelism,
+    (key, value) -> key + "=" + value,      // transform
+    (a, b) -> a + ", " + b);               // reduce
+
+search:
+
+// Find first entry where value > 1000
+Map.Entry<String, Integer> found = map.search(parallelism,
+    (key, value) -> value > 1000 ? Map.entry(key, value) : null);
+
+Parallelism threshold:
+
+parallelism = 1 → fully parallel (use common pool).
+parallelism = Long.MAX_VALUE → sequential.
+Balance threshold based on map size.
+
+9. Common Patterns in Enterprise Code
+
+Pattern 1 — Thread-Safe Cache
+
+public class ProductCache {
+    private final ConcurrentHashMap<Long, Product> cache = new ConcurrentHashMap<>();
+    private final ProductRepository repository;
+
+    public Product get(Long productId) {
+        return cache.computeIfAbsent(productId, id -> {
+            return repository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+        });
+    }
+
+    public void invalidate(Long productId) {
+        cache.remove(productId);
+    }
+
+    public void refresh(Long productId) {
+        repository.findById(productId).ifPresent(p -> cache.put(productId, p));
+    }
+}
+
+Pattern 2 — Rate Limiter (Per-User Request Counter)
+
+public class RateLimiter {
+    private final ConcurrentHashMap<String, AtomicInteger> counters = new ConcurrentHashMap<>();
+
+    public boolean isAllowed(String userId) {
+        AtomicInteger counter = counters.computeIfAbsent(userId, id -> new AtomicInteger(0));
+        return counter.incrementAndGet() <= 100; // 100 requests per window
+    }
+
+    public void resetCounters() {
+        counters.clear();
+    }
+}
+
+Pattern 3 — Event Counting (Analytics)
+
+public class EventCounter {
+    private final ConcurrentHashMap<String, LongAdder> counts = new ConcurrentHashMap<>();
+
+    public void recordEvent(String eventType) {
+        counts.computeIfAbsent(eventType, k -> new LongAdder()).increment();
+    }
+
+    public long getCount(String eventType) {
+        LongAdder adder = counts.get(eventType);
+        return adder != null ? adder.sum() : 0;
+    }
+
+    public Map<String, Long> getReport() {
+        Map<String, Long> report = new HashMap<>();
+        counts.forEach((type, adder) -> report.put(type, adder.sum()));
+        return report;
+    }
+}
+
+10. ConcurrentHashMap vs Other Thread-Safe Maps
+
+Feature             | ConcurrentHashMap | synchronizedMap | Hashtable | ConcurrentSkipListMap
+────────────────────┼───────────────────┼─────────────────┼───────────┼─────────────────────
+Read lock           | None (volatile)   | Full map lock   | Full lock | None (CAS)
+Write lock          | Per-bucket        | Full map lock   | Full lock | Per-node (CAS)
+Null keys/values    | No                | Yes (from HashMap)| No     | No
+Order               | None              | None            | None      | Sorted by key
+Iterator            | Weakly consistent | Fail-fast       | Fail-fast | Weakly consistent
+Use case            | Fast key-value    | Legacy          | Legacy    | Sorted concurrent
+
+ConcurrentSkipListMap:
+
+Sorted concurrent map.
+Operations O(log n).
+Higher overhead than ConcurrentHashMap.
+Use when: Need sorted key iteration + thread safety.
+
+11. Weakly Consistent Iterators
+
+ConcurrentHashMap's iterators are weakly consistent:
+
+reflect the state at the time iterator was created.
+do NOT throw ConcurrentModificationException.
+may or may not reflect subsequent modifications.
+
+// Safe — no ConcurrentModificationException even with concurrent modification
+for (Map.Entry<String, Integer> entry : map.entrySet()) {
+    if (entry.getValue() < 0) {
+        map.remove(entry.getKey()); // Safe!
+    }
+}
+
+Contrast: HashMap's iterators are fail-fast — any modification throws ConcurrentModificationException.
+
+12. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"How does ConcurrentHashMap achieve thread safety? How is it different from HashMap in Java 8?"
+
+5 Crore Answer:
+
+ConcurrentHashMap achieves thread safety through a fine-grained locking strategy combined with lock-free reads.
+
+In Java 8, the segment-based locking from earlier versions was abandoned in favor of per-bucket synchronization. The internal table is a volatile Node array, with each node's val and next fields also volatile. This means reads (get()) require no locks at all — they use volatile field reads, which guarantee visibility without synchronization. Multiple readers can access any part of the map simultaneously without blocking each other or any writer.
+
+For writes (put()), ConcurrentHashMap uses two strategies depending on the bucket state. For empty buckets, it uses CAS (Compare-And-Swap) — an atomic hardware instruction that sets the value only if it's currently null. This is completely lock-free — no thread blocks. For non-empty buckets (collision chain or tree), it synchronizes on the bucket's head node — only the single bucket is locked, not the entire map. This means thousands of concurrent writers can operate on different buckets simultaneously with no contention.
+
+For complex atomic operations like computeIfAbsent, the lock on the bucket head ensures that the compute function runs exactly once even if multiple threads try to populate the same key simultaneously — no duplicate computation.
+
+Size tracking avoids a global counter — instead, ConcurrentHashMap uses multiple distributed counters (similar to LongAdder), with each cell updated by different threads, aggregated on size() or mappingCount() calls.
+
+The critical differences from HashMap: type is wrong for HashMap in concurrent code — concurrent resize in Java 7 HashMap could create circular linked lists causing infinite loops. Java 8 fixed this algorithmic issue in HashMap, but HashMap still has data loss under concurrent writes. ConcurrentHashMap prevents both through its locking design.
+
+The tradeoff: ConcurrentHashMap doesn't allow null keys or values (null would create ambiguity in CAS operations), and size() is approximate under concurrent modification.
+
+13. Complete Revision Notes
+
+ConcurrentHashMap: thread-safe, high-throughput map for concurrent access.
+Java 5-7: Segment-based locking (16 segments, each with ReentrantLock).
+Java 8+: Per-bucket locking + CAS for empty buckets. No segments.
+Read (get()): Lock-free. Uses volatile reads. Multiple readers never block.
+Write (put()): CAS for empty bucket (atomic, no lock) or synchronized on bucket head.
+Node fields: volatile val and next — ensures visibility without full lock.
+Null keys/values: NOT allowed (unlike HashMap). CAS requires null to be unambiguous.
+size() / mappingCount(): approximate under concurrent modification. Uses distributed LongAdder-style counter.
+computeIfAbsent: Atomic — only one thread computes for a given key even with multiple concurrent callers.
+compute, computeIfPresent, merge: All atomic operations on individual keys.
+Weakly consistent iterator: No ConcurrentModificationException, reflects state at creation or later.
+ConcurrentHashMap vs synchronizedMap: Fine-grained vs coarse-grained locking. ConcurrentHashMap much better throughput.
+ConcurrentSkipListMap: Sorted + thread-safe. O(log n) ops. Use when order needed.
+LongAdder for count: computeIfAbsent(event, k -> new LongAdder()).increment() pattern.
+Java 8 bulk: forEach, reduce, search — with parallelism threshold.
+Treeification: Same TREEIFY_THRESHOLD=8 as HashMap.
+Common pattern: computeIfAbsent for thread-safe caching (no double computation).
+Rate limiter pattern: computeIfAbsent + AtomicInteger for per-user rate limiting.
+Not ordered: Iteration order not guaranteed (use ConcurrentSkipListMap for sorted).
+CAS = Compare-And-Swap: atomic hardware instruction. If current == expected → set to new value. Otherwise retry.

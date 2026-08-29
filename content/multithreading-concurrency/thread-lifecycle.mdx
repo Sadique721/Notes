@@ -1,0 +1,600 @@
+---
+title: "Thread Lifecycle"
+slug: "thread-lifecycle"
+moduleSlug: "multithreading-concurrency"
+order: 1
+summaryOneLiner: "Understanding Java Thread Lifecycle — every state transition, daemon threads, interrupt handling, and thread monitoring — is the foundation for all concurrency and performance engineering."
+estimatedReadMinutes: 45
+generated: false
+prerequisiteTopicSlugs: ["oop-principles"]
+---
+
+Module 8 → Topic 1 → Thread Lifecycle (Part 1)
+
+1. Thread Lifecycle — Introduction
+
+What is a Thread?
+
+Thread = The smallest unit of program execution.
+
+Most developers:
+
+Create threads.
+Start them.
+Hope they work.
+
+Senior engineers must know:
+
+What states does a thread go through?
+When does state transition happen?
+What is the JVM doing in each state?
+How do you monitor thread state in production?
+How do debugging deadlocks relate to thread states?
+How does Virtual Threads (Java 21) change everything?
+
+Definition
+
+A Thread is an independent execution path within a program. Every Java application runs in at least one thread (main thread). The Java Thread Lifecycle describes the sequence of states a thread transitions through from creation to termination.
+
+2. Java Thread States — Complete
+
+Java Thread.State enum defines 6 states:
+
+public enum State {
+    NEW,
+    RUNNABLE,
+    BLOCKED,
+    WAITING,
+    TIMED_WAITING,
+    TERMINATED
+}
+
+Complete State Transition Diagram:
+
+         new Thread()
+              ↓
+           [NEW]
+              │
+         start()
+              ↓
+         [RUNNABLE]  ←──────────────────────────────────────────┐
+              │                                                   │
+         ┌────┴─────────────────────────────────────────────┐   │
+         │           [RUNNABLE substate transitions]        │   │
+         │                                                  │   │
+         │  Thread Scheduler gives CPU → Running           │   │
+         │  Thread Scheduler preempts → Ready (queue)      │   │
+         └────┬─────────────────────────────────────────────┘   │
+              │                                                   │
+              ├──── synchronized (lock unavailable) ──→ [BLOCKED] → lock acquired → [RUNNABLE]
+              │                                                                          ↑
+              ├──── Object.wait() ──────────────────→ [WAITING] → notify()/notifyAll() ─┘
+              │                                                                          ↑
+              ├──── Thread.join() ──────────────────→ [WAITING] → joined thread ends ───┘
+              │                                                                          ↑
+              ├──── LockSupport.park() ─────────────→ [WAITING] → LockSupport.unpark() ─┘
+              │                                                                          ↑
+              ├──── Thread.sleep(ms) ───────────────→ [TIMED_WAITING] → time expires ───┘
+              │                                                                          ↑
+              ├──── Object.wait(ms) ────────────────→ [TIMED_WAITING] → time/notify ────┘
+              │                                                                          ↑
+              ├──── Thread.join(ms) ────────────────→ [TIMED_WAITING] → time/join end ──┘
+              │                                                                          ↑
+              └──── LockSupport.parkNanos/parkUntil → [TIMED_WAITING] → time expires ───┘
+              │
+         run() method completes (or throws uncaught exception)
+              ↓
+         [TERMINATED]
+
+3. State 1 — NEW
+
+Thread created but not started.
+
+Thread t = new Thread(() -> System.out.println("Hello"));
+System.out.println(t.getState()); // NEW
+
+Thread object exists in memory.
+
+JVM has NOT allocated native OS thread yet.
+
+No resources consumed (no OS thread = no OS overhead).
+
+Transition to RUNNABLE: Call t.start().
+
+4. State 2 — RUNNABLE
+
+After start() is called.
+
+RUNNABLE = Can be running OR waiting for CPU time.
+
+Java doesn't distinguish between:
+
+Currently executing on CPU.
+Waiting in thread scheduler queue for CPU.
+
+Both are RUNNABLE in Java's Thread.State.
+
+This is because this distinction is OS-level, not JVM-level.
+
+Thread.start() internally calls:
+
+OS: Create native thread.
+JVM: Mark thread as RUNNABLE.
+OS scheduler: Schedules thread when CPU available.
+
+Thread stays RUNNABLE until:
+
+It voluntarily blocks (wait, sleep, join, park).
+It acquires a lock that's held by another thread → BLOCKED.
+It completes → TERMINATED.
+It's preempted (OS gives CPU to another thread) → stays RUNNABLE (Ready queue).
+
+5. State 3 — BLOCKED
+
+Thread waiting to acquire a monitor lock (synchronized block/method).
+
+Another thread holds the lock.
+
+synchronized (lock) {
+    // Thread A inside synchronized block, holds lock
+    doSomething();
+}
+
+// Thread B trying to enter same synchronized block
+synchronized (lock) { // Thread B → BLOCKED here until Thread A exits
+    doSomethingElse();
+}
+
+Thread B is BLOCKED.
+
+Thread B goes to the lock's BLOCKED queue.
+
+When Thread A exits synchronized block → lock released → JVM picks one BLOCKED thread → that thread becomes RUNNABLE.
+
+BLOCKED vs WAITING:
+
+BLOCKED = Waiting for MONITOR LOCK (synchronized).
+WAITING = Voluntarily gave up CPU (wait/join/park). Not contending for lock.
+
+6. State 4 — WAITING
+
+Thread voluntarily waiting indefinitely.
+
+Three ways to enter WAITING:
+
+Way 1: Object.wait()
+
+synchronized (lock) {
+    while (!conditionMet()) {
+        lock.wait(); // Thread enters WAITING — releases lock!
+    }
+    // Proceed with condition met
+}
+
+// In another thread:
+synchronized (lock) {
+    makeConditionTrue();
+    lock.notify(); // or notifyAll() — wakes waiting thread
+}
+
+Critical: wait() MUST be called inside synchronized block.
+Critical: wait() releases the lock! BLOCKED threads don't release lock.
+Critical: Always call wait() in a loop (not if) — spurious wakeups.
+
+Way 2: Thread.join()
+
+Thread workerThread = new Thread(heavyTask);
+workerThread.start();
+workerThread.join(); // Current thread → WAITING until workerThread finishes
+
+Way 3: LockSupport.park()
+
+LockSupport.park(this); // Current thread → WAITING until unparked
+
+// In another thread:
+LockSupport.unpark(waitingThread); // Wakes the specific thread
+
+LockSupport.park() is the foundation of java.util.concurrent locks.
+
+7. State 5 — TIMED_WAITING
+
+Like WAITING, but with a timeout.
+
+Wakes automatically after timeout.
+
+Also wakes on signal.
+
+Ways to enter TIMED_WAITING:
+
+Thread.sleep(milliseconds):
+
+Thread.sleep(1000); // TIMED_WAITING for 1 second
+
+Does NOT release any locks held by sleeping thread.
+(Contrast with wait() which releases lock)
+No lock needed — can be called anywhere.
+
+Object.wait(milliseconds):
+
+synchronized (lock) {
+    lock.wait(5000); // TIMED_WAITING — wakes after 5s or notify, whichever first
+}
+
+Thread.join(milliseconds):
+
+workerThread.join(5000); // Wait at most 5 seconds for worker to finish
+
+LockSupport.parkNanos(nanoseconds):
+
+LockSupport.parkNanos(1_000_000_000L); // Park for 1 second
+
+8. State 6 — TERMINATED
+
+Thread has finished execution.
+
+run() method returned normally.
+OR uncaught exception thrown in run().
+
+Thread t = new Thread(() -> System.out.println("Done"));
+t.start();
+t.join(); // Wait for t to finish
+System.out.println(t.getState()); // TERMINATED
+
+Dead thread:
+
+Cannot be restarted. t.start() on TERMINATED thread → IllegalThreadStateException.
+Thread object still in memory (can be queried for state, name, etc.).
+But OS thread is gone.
+
+9. Thread Creation Methods
+
+Method 1 — Extending Thread
+
+class MyThread extends Thread {
+    @Override
+    public void run() {
+        System.out.println("Running in: " + Thread.currentThread().getName());
+    }
+}
+
+MyThread t = new MyThread();
+t.start();
+
+Problem: Inherits from Thread → cannot extend another class.
+
+Method 2 — Implementing Runnable (Preferred)
+
+Runnable task = () -> System.out.println("Running!");
+Thread t = new Thread(task);
+t.setName("worker-thread-1");
+t.start();
+
+Better: Separation of task (Runnable) from execution mechanism (Thread).
+
+Method 3 — Callable with Future
+
+Callable<Integer> task = () -> {
+    // Can return value and throw checked exceptions
+    Thread.sleep(1000);
+    return 42;
+};
+
+ExecutorService executor = Executors.newFixedThreadPool(4);
+Future<Integer> future = executor.submit(task);
+Integer result = future.get(); // Blocks until result available
+
+Method 4 — ThreadFactory (Enterprise Pattern)
+
+ThreadFactory namedFactory = new ThreadFactoryBuilder()
+    .setNameFormat("order-processor-%d")
+    .setDaemon(false)
+    .setUncaughtExceptionHandler((t, e) -> {
+        log.error("Uncaught exception in thread: {}", t.getName(), e);
+        alertingService.send("Thread failure: " + t.getName());
+    })
+    .build();
+
+ExecutorService pool = Executors.newFixedThreadPool(10, namedFactory);
+
+10. Daemon Threads
+
+Two types of threads:
+
+User Threads (non-daemon):
+
+Default.
+JVM waits for ALL user threads to complete before shutting down.
+Your business logic threads.
+
+Daemon Threads:
+
+Background service threads.
+JVM shuts down when ONLY daemon threads remain.
+Example: GC thread, JVM housekeeping threads.
+
+Thread t = new Thread(backgroundTask);
+t.setDaemon(true); // Must set BEFORE start()
+t.start();
+
+Daemon threads:
+
+Must set daemon=true before start().
+If daemon=false after start() → IllegalThreadStateException.
+
+Real-world use:
+
+Background cache refresh.
+Heartbeat monitor.
+Session cleanup.
+
+11. Thread Interruption
+
+Cooperative thread cancellation mechanism.
+
+void interrupt(): Sets interrupt flag on thread.
+
+thread.interrupt(); // Sets interrupt flag
+
+Thread checks its interrupt status:
+
+Way 1 — Thread.interrupted():
+
+if (Thread.interrupted()) {
+    // Clear flag and check
+    throw new InterruptedException();
+}
+
+Way 2 — Thread.isInterrupted():
+
+while (!Thread.currentThread().isInterrupted()) {
+    doWork();
+}
+
+Way 3 — Blocking methods throw InterruptedException:
+
+Thread.sleep(1000); // Wakes immediately, throws InterruptedException if interrupted
+Object.wait();      // Same
+thread.join();      // Same
+
+Correct interruption handling:
+
+public void run() {
+    try {
+        while (!Thread.currentThread().isInterrupted()) {
+            processTask();
+        }
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt(); // Restore interrupt flag!
+        log.info("Thread interrupted gracefully: {}", Thread.currentThread().getName());
+    }
+}
+
+Why restore interrupt flag?
+
+InterruptedException clears the interrupt flag.
+Callers may check isInterrupted() — they need to see thread was interrupted.
+Re-set it: Thread.currentThread().interrupt().
+
+12. Thread Priority
+
+Hint to scheduler, NOT guarantee.
+
+Range: Thread.MIN_PRIORITY (1) to Thread.MAX_PRIORITY (10).
+Default: Thread.NORM_PRIORITY (5).
+
+t.setPriority(Thread.MAX_PRIORITY);
+
+OS scheduler may ignore priorities.
+
+Do NOT rely on priority for correctness.
+
+Use for performance hints only (GC thread higher priority than background reporter).
+
+13. Thread Groups
+
+Threads can be organized into groups.
+
+ThreadGroup group = new ThreadGroup("order-processing");
+Thread t1 = new Thread(group, task1, "worker-1");
+Thread t2 = new Thread(group, task2, "worker-2");
+
+// Interrupt all threads in group
+group.interrupt();
+
+// List all threads in group
+group.list();
+
+Mostly replaced by ExecutorService in modern Java.
+
+14. Thread Monitoring — Production
+
+View thread states in running JVM:
+
+jstack <pid>  // Thread dump — all threads and their current state/stack
+
+Thread dump shows:
+
+"http-nio-8080-exec-1" #42 daemon prio=5 os_prio=0 tid=0x00007f... nid=0x... waiting on condition [0x...]
+   java.lang.Thread.State: WAITING (parking)
+    at sun.misc.Unsafe.park(Native Method)
+    - parking to wait for  <0x...> (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)
+
+Can identify:
+
+Deadlocked threads (Thread A waiting for B, B waiting for A).
+All threads BLOCKED on same lock → contention issue.
+Runnable threads doing heavy computation.
+Too many threads in TIMED_WAITING (idle thread pool?).
+
+Deadlock Detection in Thread Dump:
+
+Found one Java-level deadlock:
+=============================
+"Thread-1":
+  waiting to lock monitor 0x... (object 0x..., a com.example.Account),
+  which is held by "Thread-2"
+"Thread-2":
+  waiting to lock monitor 0x... (object 0x..., a com.example.Account),
+  which is held by "Thread-1"
+
+15. Real-World Enterprise Examples
+
+Example 1 — Thread State Analysis: Order Service
+
+Thread dump of order-service showing issue:
+
+"order-handler-1" BLOCKED on DatabaseConnection lock
+"order-handler-2" BLOCKED on DatabaseConnection lock
+...
+"order-handler-50" BLOCKED on DatabaseConnection lock
+
+"db-connection-thread" TIMED_WAITING (sleeping for 30s due to DB timeout)
+
+Analysis:
+
+DB connection thread sleeping.
+All order handlers BLOCKED waiting for DB lock.
+Root cause: DB down → slow timeout → threads stuck → orders not processed.
+
+Fix: Connection pool timeout, circuit breaker, fallback.
+
+Example 2 — WAITING threads in Banking
+
+Thread dump:
+
+"transaction-processor-1" WAITING (in Object.wait())
+"transaction-processor-2" WAITING
+...
+
+All transaction processors waiting for new work → notify() not being called.
+
+Root cause: Queue feeder thread died → nobody publishing work → processors wait forever.
+
+Fix: Monitor thread health, restart on failure, use BlockingQueue instead of wait/notify.
+
+16. Virtual Threads (Java 21) — Brief Introduction
+
+Traditional threads are OS threads.
+
+Heavy: 1MB stack by default.
+Context switch: expensive OS operation.
+Limited: Can't have 1 million traditional threads.
+
+Virtual Threads (Project Loom, Java 19 preview, Java 21 stable):
+
+Lightweight JVM-managed threads.
+Mounted on OS threads (carrier threads) only when running.
+Unmounted when blocking (I/O, wait, sleep).
+
+Thread vt = Thread.ofVirtual().start(() -> {
+    Thread.sleep(1000); // OS thread NOT blocked during sleep!
+    doWork();
+});
+
+Benefits:
+
+Create millions of virtual threads (vs thousands of OS threads).
+Perfect for I/O-bound workloads (HTTP calls, DB queries).
+Use thread-per-request model for simplicity.
+
+Spring Boot 3.2+: Tomcat uses virtual threads automatically.
+
+17. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain Java Thread lifecycle states and the difference between BLOCKED and WAITING."
+
+5 Crore Answer:
+
+Java defines six thread states in the Thread.State enum.
+
+A thread begins in NEW — created but not started, no native OS thread allocated yet.
+
+Calling start() moves it to RUNNABLE. Importantly, RUNNABLE doesn't mean "currently executing" — it encompasses both the executing state and the ready-to-run state waiting for CPU time, because this distinction is OS-level and not visible to the JVM.
+
+BLOCKED and WAITING are the two key waiting states, and they're fundamentally different.
+
+BLOCKED means a thread is competing for a monitor lock — trying to enter a synchronized block or method while another thread holds that lock. The thread is passively queued waiting for lock release. It didn't choose to stop; the lock is preventing entry. Critically, a BLOCKED thread has not released any locks it already holds.
+
+WAITING means a thread has deliberately given up CPU execution by calling Object.wait(), Thread.join(), or LockSupport.park(). It's not competing for anything — it's waiting for an explicit signal. Object.wait() is crucial: it must be called within a synchronized block, and it releases the monitor lock while waiting — allowing other threads to enter the synchronized block and eventually call notify().
+
+TIMED_WAITING is like WAITING but with a timeout — Thread.sleep(), Object.wait(millis), Thread.join(millis) — the thread wakes automatically if not signaled.
+
+TERMINATED means run() has completed or thrown an uncaught exception.
+
+The practical significance: in a thread dump, many threads in BLOCKED on the same lock indicates lock contention. Many in WAITING indicates they're properly idle in a thread pool or producer-consumer pattern. Deadlocks show threads A BLOCKED waiting for B's lock, B BLOCKED waiting for A's lock — a circular dependency.
+
+18. Follow-Up Interview Questions
+
+Q1. What is the difference between sleep() and wait()?
+
+Thread.sleep(ms): TIMED_WAITING. Does NOT release lock. Can be called anywhere. Wakes after timeout. Static method — acts on current thread.
+
+Object.wait(): WAITING or TIMED_WAITING. RELEASES the monitor lock. Must be called in synchronized block. Wakes on notify()/notifyAll() or timeout. May have spurious wakeups — always use in a loop.
+
+Q2. What is a spurious wakeup?
+
+A thread waiting on wait() or park() can wake up without being notified, without timeout, and without interruption.
+
+This is a known behavior of POSIX condition variables (underlying OS primitive).
+
+That's why: ALWAYS use wait() in a while loop, not an if:
+
+// WRONG
+if (!condition) lock.wait();
+
+// CORRECT
+while (!condition) lock.wait();
+
+Q3. What is the difference between notify() and notifyAll()?
+
+notify(): Wakes ONE waiting thread (arbitrary choice). Others remain WAITING.
+notifyAll(): Wakes ALL waiting threads. All move to BLOCKED competing for lock. Only one proceeds; others return to WAITING.
+
+Use notifyAll() when multiple threads wait for different conditions.
+Use notify() only when all threads wait for the same condition and one proceeding is sufficient.
+
+Q4. Can you restart a TERMINATED thread?
+
+No. Calling start() on a TERMINATED thread throws IllegalThreadStateException.
+
+Create a new Thread object to run the task again.
+
+Q5. What is a deadlock and how do you detect it?
+
+Deadlock: Thread A holds lock L1, waits for L2. Thread B holds L2, waits for L1. Neither can proceed.
+
+Detection:
+Thread dump (jstack): Shows "Found Java-level deadlock" section.
+JMX: ThreadMXBean.findDeadlockedThreads().
+VisualVM, JConsole.
+
+Prevention:
+Lock ordering: All threads acquire locks in same fixed order.
+tryLock() with timeout: ReentrantLock.tryLock(100, TimeUnit.MILLISECONDS) → give up if can't acquire.
+Lock-free algorithms: java.util.concurrent classes.
+Avoid nested locks.
+
+19. Complete Revision Notes
+
+6 Thread States: NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED.
+NEW: Thread created, no OS thread allocated. start() → RUNNABLE.
+RUNNABLE: Executing or waiting for CPU. OS scheduler decides when on CPU.
+BLOCKED: Waiting for monitor lock (synchronized). Passive — lock held by another thread.
+WAITING: Voluntary wait via wait(), join(), park(). Must be signaled to resume.
+TIMED_WAITING: Timed wait via sleep(), wait(ms), join(ms), parkNanos(). Auto-wake.
+TERMINATED: run() completed or threw uncaught exception.
+BLOCKED vs WAITING: BLOCKED = competing for lock. WAITING = chose to wait, released lock.
+wait() must be in synchronized block, releases lock, use in while loop (spurious wakeups).
+sleep() does NOT release lock. No synchronized required. Any thread can call.
+interrupt() sets flag. sleep/wait/join throw InterruptedException. Always restore flag.
+Daemon threads: JVM exits when only daemon threads remain. Background tasks.
+Thread priority: hint only. Don't rely for correctness.
+Thread dump (jstack): shows all thread states — deadlock detection, contention analysis.
+Virtual threads (Java 21): lightweight, JVM-managed, millions possible, perfect for I/O-bound work.
+notify() wakes one. notifyAll() wakes all waiting threads.
+Cannot restart TERMINATED thread — create new Thread object.
+ThreadFactory: customize name, daemon, exception handler for thread pools.
+Deadlock: circular lock dependency. Prevent with lock ordering, tryLock timeouts.
+Producer-consumer pattern: uses wait/notify or BlockingQueue for coordination.

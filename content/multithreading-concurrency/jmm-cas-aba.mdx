@@ -1,0 +1,439 @@
+---
+title: "Java Memory Model, CAS, ABA"
+slug: "jmm-cas-aba"
+moduleSlug: "multithreading-concurrency"
+order: 4
+summaryOneLiner: "The Java Memory Model defines how threads share memory — volatile, happens-before, and CAS operations form the foundation of all lock-free concurrent algorithms in Java."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["thread-lifecycle"]
+---
+
+Module 8 → Topic 4 → Java Memory Model, CAS, ABA (Part 1)
+
+1. Java Memory Model — Introduction
+
+Why JMM Matters?
+
+Most Java developers assume:
+
+"If I write a value in Thread A, Thread B will see it immediately."
+
+This is WRONG without proper synchronization.
+
+Modern hardware problem:
+
+Each CPU core has its own cache (L1, L2, L3).
+Thread A (on Core 1) writes value → stored in Core 1's cache.
+Thread B (on Core 2) reads value → reads from Core 2's cache.
+Core 2's cache has stale value!
+
+Without JMM visibility guarantees:
+
+boolean running = true; // Thread A and B share this
+
+// Thread B:
+while (running) {
+    doWork();
+}
+
+// Thread A:
+running = false; // Should stop Thread B
+
+// Without volatile: Thread B might NEVER see running=false!
+// Compiler/CPU optimized running into a register — never re-reads memory.
+
+Definition
+
+The Java Memory Model (JMM) defines the rules that govern how threads communicate through shared memory — when writes by one thread become visible to another, and what ordering guarantees exist.
+
+2. JMM Core Concepts
+
+Concept 1 — Main Memory vs Working Memory
+
+JMM defines:
+
+Main Memory: Shared memory (RAM). All threads see this.
+Working Memory: Each thread's private cache/registers. (CPU cache abstraction)
+
+Without synchronization:
+
+Thread writes to its Working Memory only.
+Thread reads from its Working Memory.
+No guaranteed flush to Main Memory.
+No guaranteed read from Main Memory.
+
+Concept 2 — Happens-Before Relationship
+
+"A happens-before B" means:
+All effects of A are visible to B.
+
+JMM guarantees happens-before in these cases:
+
+1. Within a single thread: Each action happens-before the next.
+2. Monitor lock: Unlock happens-before subsequent lock of same monitor.
+3. volatile write: volatile write happens-before subsequent volatile read of same variable.
+4. Thread.start(): start() call happens-before any action in the started thread.
+5. Thread.join(): All actions in thread happen-before join() returns.
+6. Thread.interrupt(): interrupt() happens-before the interrupted thread detects interruption.
+7. Transitivity: If A hb B and B hb C, then A hb C.
+
+Without happens-before: No visibility guarantee.
+
+3. volatile Keyword
+
+volatile ensures:
+
+Visibility: Writes immediately flushed to Main Memory. Reads always from Main Memory.
+Ordering: No reordering of volatile read/write with surrounding operations.
+
+Fixes the running example:
+
+volatile boolean running = true;
+
+// Thread B: Now reads from main memory — will see running=false
+while (running) {
+    doWork();
+}
+
+// Thread A: Write goes to main memory immediately
+running = false; // Thread B will see this
+
+volatile guarantees:
+
+Every write → flushed to main memory.
+Every read → reads from main memory.
+Establishes happens-before: volatile write happens-before volatile read.
+
+volatile does NOT guarantee atomicity of compound operations:
+
+volatile int counter = 0;
+
+// Thread A: counter++
+// Thread B: counter++
+
+// counter++ = READ counter → ADD 1 → WRITE counter
+// These three operations are NOT atomic!
+// Both threads can read same value, both add 1, both write same result → lost update!
+
+// volatile only makes individual reads and writes atomic, not compound operations.
+
+For atomic compound operations: Use AtomicInteger, AtomicLong, AtomicReference.
+
+4. Memory Barriers (CPU-Level Mechanism)
+
+volatile is implemented using memory barriers (fence instructions).
+
+volatile write → StoreStore barrier + StoreLoad barrier:
+
+No stores reordered BEFORE this store.
+Prevents write after store being moved before.
+Flushes store buffer to main memory.
+
+volatile read → LoadLoad barrier + LoadStore barrier:
+
+No loads reordered AFTER this load.
+Invalidates local cache for this variable.
+Forces re-read from main memory.
+
+Memory barriers prevent CPU's out-of-order execution from crossing them.
+
+5. Double-Checked Locking — Classic JMM Problem
+
+Most famous JMM bug:
+
+// BROKEN — without volatile (Java 4 and earlier)
+class Singleton {
+    private static Singleton instance;
+
+    public static Singleton getInstance() {
+        if (instance == null) {           // Check 1 (no lock)
+            synchronized (Singleton.class) {
+                if (instance == null) {   // Check 2 (with lock)
+                    instance = new Singleton(); // PROBLEM HERE!
+                }
+            }
+        }
+        return instance;
+    }
+}
+
+// Problem: instance = new Singleton() is NOT atomic:
+// 1. Allocate memory for Singleton object
+// 2. Initialize the object (call constructor)
+// 3. Assign reference to instance
+
+// CPU/compiler can reorder steps 2 and 3:
+// 1. Allocate memory
+// 3. Assign reference to instance (instance != null now, but not initialized!)
+// 2. Initialize object
+
+// Thread B checks instance != null (step 3 done but step 2 not yet)
+// Thread B gets partially initialized Singleton!
+
+// FIX — add volatile:
+private static volatile Singleton instance;
+// volatile prevents reordering of object construction assignment
+
+This is THE classic JMM example.
+
+6. Atomic Classes — CAS-Based Concurrency
+
+java.util.concurrent.atomic package provides lock-free atomic operations.
+
+AtomicInteger, AtomicLong, AtomicBoolean, AtomicReference.
+
+AtomicInteger operations:
+
+AtomicInteger counter = new AtomicInteger(0);
+
+int val = counter.get();                  // Read
+counter.set(10);                          // Write
+int old = counter.getAndIncrement();      // counter++ atomically
+int newVal = counter.incrementAndGet();   // ++counter atomically
+int old = counter.getAndAdd(5);          // counter += 5 atomically
+boolean success = counter.compareAndSet(expected, newValue); // CAS
+
+7. CAS — Compare-And-Swap
+
+CAS = Compare-And-Swap (or Compare-And-Exchange).
+
+The atomic foundation of all lock-free programming.
+
+Hardware-level atomic instruction: cmpxchg on x86.
+
+Logic:
+
+public boolean compareAndSwap(Object target, long offset, Object expected, Object newValue) {
+    // ATOMIC: All or nothing, not interruptible
+    if (current value at offset == expected) {
+        set value at offset = newValue;
+        return true; // Success
+    }
+    return false; // Failure (value was changed by another thread)
+}
+
+CAS in Java — sun.misc.Unsafe:
+
+// AtomicInteger.incrementAndGet() implementation:
+public final int incrementAndGet() {
+    for (;;) { // Spin loop
+        int current = get(); // Read current value
+        int next = current + 1; // Compute new value
+        if (compareAndSet(current, next)) { // Try to set
+            return next; // If CAS succeeded, return new value
+        }
+        // If CAS failed (another thread changed value), retry
+    }
+}
+
+CAS retry loop pattern:
+
+Read current value.
+Compute new value.
+CAS: if still current → set to new value → done.
+If CAS fails → another thread changed it → retry from step 1.
+
+CAS Properties:
+
+Non-blocking: Threads don't block each other.
+Optimistic: Assumes no contention, retries on failure.
+Progress guarantee: At least one thread always makes progress.
+No deadlock: No locks → no deadlock.
+
+8. ABA Problem
+
+CAS's fundamental weakness.
+
+Scenario:
+
+Thread A reads value = "A".
+Thread A is preempted.
+Thread B changes value: A → B → A (changes twice, ends up back at A).
+Thread A resumes CAS: current == expected ("A" == "A") → CAS succeeds!
+
+But the value CHANGED and changed back.
+
+If Thread A's logic depended on the value being unchanged, it's now wrong.
+
+Example — ABA in Stack:
+
+// Lock-free stack (push/pop using CAS)
+AtomicReference<Node> top = new AtomicReference<>(node1); // [node1 → node2 → node3]
+
+// Thread A: Wants to pop node1
+Node oldTop = top.get(); // oldTop = node1
+Thread.sleep(100); // Preempted
+
+// Thread B: Pops node1 AND node2
+top.compareAndSet(node1, node2); // [node2 → node3]
+top.compareAndSet(node2, node3); // [node3]
+// Thread B also PUSHES node1 back (reuses the node object):
+top.compareAndSet(node3, node1); // [node1 → node3] ← node1 reused but next is now node3!
+
+// Thread A resumes:
+top.compareAndSet(node1, oldTop.next); // oldTop.next = node2 (stale!)
+// CAS succeeds! (top is still node1) but sets top to node2 — node2 was already freed!
+// NODE2 DANGLING! Stack corrupted!
+
+ABA Problem Solutions:
+
+Solution 1 — AtomicStampedReference (Version counter):
+
+AtomicStampedReference<Node> top = new AtomicStampedReference<>(node1, 0);
+
+// CAS includes version/stamp — ABA detected because stamp changes
+int[] stampHolder = new int[1];
+Node oldTop = top.get(stampHolder);
+int oldStamp = stampHolder[0];
+
+// ... later:
+top.compareAndSet(oldTop, newTop, oldStamp, oldStamp + 1); // Fails if stamp changed!
+
+Even if value changed back to original, the stamp is different.
+
+Solution 2 — AtomicMarkableReference (Single boolean mark):
+
+AtomicMarkableReference<Node> ref = new AtomicMarkableReference<>(node, false);
+// Used for marking a reference as "logically deleted"
+
+9. LongAdder and LongAccumulator — Better than AtomicLong for Counting
+
+AtomicLong counter = new AtomicLong();
+counter.incrementAndGet(); // OK for low contention
+
+// HIGH CONTENTION: Many threads incrementing same AtomicLong → CAS contention!
+// All threads retry in loop → CPU spinning → performance degrades
+
+LongAdder:
+
+LongAdder adder = new LongAdder();
+adder.increment(); // Thread-safe, low contention
+adder.add(5);
+long total = adder.sum(); // Get total
+
+How LongAdder works:
+
+Multiple cells (one per CPU core or contention point).
+Each thread increments its own cell (reduces CAS contention).
+sum() aggregates all cells.
+
+Result: Much lower contention. Excellent for high-throughput counting.
+
+Use when:
+
+AtomicLong: Frequent reads AND writes (need current value often).
+LongAdder: Frequent updates, infrequent reads (metrics, counters).
+
+10. ReentrantLock vs synchronized
+
+Both provide mutual exclusion:
+
+synchronized (lock) {
+    // Critical section
+}
+
+// vs
+
+ReentrantLock lock = new ReentrantLock();
+lock.lock();
+try {
+    // Critical section
+} finally {
+    lock.unlock(); // MUST be in finally!
+}
+
+Advantages of ReentrantLock:
+
+tryLock(timeout):
+
+// Don't wait forever — give up after 100ms
+if (lock.tryLock(100, TimeUnit.MILLISECONDS)) {
+    try {
+        // Critical section
+    } finally {
+        lock.unlock();
+    }
+} else {
+    // Could not acquire lock — handle differently
+    return Optional.empty();
+}
+
+lockInterruptibly():
+
+lock.lockInterruptibly(); // Can be interrupted while waiting
+
+Multiple Condition variables:
+
+Condition notEmpty = lock.newCondition();
+Condition notFull = lock.newCondition();
+
+// Producer
+lock.lock();
+try {
+    while (isFull()) notFull.await();
+    enqueue(item);
+    notEmpty.signal();
+} finally {
+    lock.unlock();
+}
+
+// Consumer
+lock.lock();
+try {
+    while (isEmpty()) notEmpty.await();
+    Object item = dequeue();
+    notFull.signal();
+} finally {
+    lock.unlock();
+}
+
+synchronized only has one condition variable (Object.wait/notify/notifyAll).
+
+11. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain the Java Memory Model. What is happens-before? What is CAS and what is the ABA problem?"
+
+5 Crore Answer:
+
+The Java Memory Model (JMM) defines the rules by which threads communicate through shared memory. It abstracts over hardware memory models — CPU caches, memory barriers, out-of-order execution — providing a uniform guarantee independent of the hardware.
+
+The foundational concept is happens-before. If action A happens-before action B, all effects of A are visible to B. The JMM specifies several happens-before relationships: monitor unlock happens-before a subsequent lock of the same monitor; a volatile write happens-before a subsequent volatile read of the same variable; Thread.start() happens-before any action in the started thread; all actions in a thread happen-before Thread.join() returns.
+
+Without a happens-before relationship, there's no visibility guarantee. A thread may see a stale value from its CPU cache rather than the latest write from another thread.
+
+volatile achieves visibility by inserting memory barriers — CPU instructions that flush and invalidate caches. A volatile write is guaranteed to be visible to all subsequent volatile reads. But volatile only ensures atomicity for single reads and writes — not compound operations like counter++.
+
+CAS (Compare-And-Swap) is a hardware-level atomic instruction that enables lock-free algorithms. It atomically reads a value, compares with an expected value, and writes a new value only if they match — in one uninterruptible operation. Java's AtomicInteger, AtomicLong, and AtomicReference all use CAS internally. The implementation pattern is a spin loop: read, compute, CAS; if CAS fails, another thread modified the value, so retry.
+
+The ABA problem: Thread A reads value A. Thread B changes A → B → A (modifies and restores). Thread A's CAS sees A == expected A, so it succeeds — but the value changed twice in the interim, possibly with structural side effects. The solution is AtomicStampedReference, which adds a version counter — even if the value returns to A, the stamp changes, making the CAS fail correctly.
+
+LongAdder solves AtomicLong's contention under high concurrency by distributing increments across multiple cells — each thread updates its own cell, sum() aggregates — dramatically reducing CAS retry pressure.
+
+12. Complete Revision Notes
+
+JMM: defines visibility and ordering guarantees for threads sharing memory.
+Working Memory: thread-private cache/registers. Main Memory: shared RAM.
+Without synchronization: writes may not be visible to other threads.
+Happens-before (HB): A hb B → all effects of A visible to B.
+HB sources: within-thread program order, monitor lock/unlock, volatile read/write, start/join, interrupt.
+HB transitivity: A hb B, B hb C → A hb C.
+volatile: ensures visibility (flush/read main memory) + no reordering with surrounding ops.
+volatile does NOT make compound ops (++, +=) atomic.
+Memory barriers: StoreLoad, LoadLoad etc. — prevent CPU reordering across volatile.
+Double-checked locking bug: non-volatile instance → object partially visible (step 2/3 reordering).
+Fix: private static volatile Singleton instance;
+AtomicInteger, AtomicLong, AtomicBoolean, AtomicReference: CAS-based atomic operations.
+CAS: hardware atomic instruction. Read → compare → write if unchanged. Returns success/failure.
+CAS loop: read, compute, CAS; if fail (another thread changed) → retry.
+CAS is non-blocking, optimistic, deadlock-free.
+ABA problem: value changes A→B→A between CAS read and write → CAS incorrectly succeeds.
+ABA fix: AtomicStampedReference — adds version counter to detect A→B→A.
+LongAdder: distributed counters per CPU → less CAS contention → better high-throughput counting.
+AtomicLong vs LongAdder: AtomicLong for frequent reads; LongAdder for frequent writes/counting.
+ReentrantLock advantages: tryLock (timeout), lockInterruptibly, multiple Conditions.
+synchronized: simpler, no explicit unlock needed (finally not required).
+Virtual threads: use ReentrantLock NOT synchronized (synchronized causes carrier thread pinning).
+VarHandle (Java 9+): more flexible, type-safe alternative to Unsafe for CAS.

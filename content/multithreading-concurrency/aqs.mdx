@@ -1,0 +1,411 @@
+---
+title: "AQS — AbstractQueuedSynchronizer"
+slug: "aqs"
+moduleSlug: "multithreading-concurrency"
+order: 5
+summaryOneLiner: "AbstractQueuedSynchronizer is the framework beneath all java.util.concurrent locks — understanding its CLH queue, state management, and exclusive/shared modes explains how ReentrantLock, Semaphore, and CountDownLatch work."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["thread-lifecycle", "jmm-cas-aba"]
+---
+
+Module 8 → Topic 5 → AQS — AbstractQueuedSynchronizer (Part 1)
+
+1. AQS — Introduction
+
+What is AQS?
+
+AQS = AbstractQueuedSynchronizer.
+
+Package: java.util.concurrent.locks.
+
+The skeleton framework for building synchronizers — objects that control thread access to shared resources.
+
+AQS is the foundation of:
+
+ReentrantLock
+ReentrantReadWriteLock
+Semaphore
+CountDownLatch
+CyclicBarrier
+LinkedTransferQueue
+Phaser (partially)
+
+If you understand AQS, you understand how all these work internally.
+
+Why AQS?
+
+Before java.util.concurrent (Java 5):
+
+Only synchronized and Object.wait/notify.
+
+Limitations:
+
+Can't interrupt waiting for lock.
+Can't try-lock with timeout.
+No fair/unfair ordering control.
+No separate condition variables.
+
+AQS solves all of these by providing:
+
+An atomic state variable.
+A queue of waiting threads.
+Mechanisms to park/unpark threads.
+Framework for acquiring/releasing with customizable semantics.
+
+2. AQS Core Structure
+
+public abstract class AbstractQueuedSynchronizer {
+
+    // THE STATE — Single integer. Semantics defined by each implementation.
+    private volatile int state;
+
+    // Atomic CAS on state (via VarHandle/Unsafe)
+    protected final boolean compareAndSetState(int expect, int update) { }
+
+    // State getters/setters
+    protected final int getState() { return state; }
+    protected final void setState(int newState) { this.state = newState; }
+
+    // THE QUEUE — CLH variant (doubly-linked list of waiting threads)
+    private transient volatile Node head;
+    private transient volatile Node tail;
+
+    // Methods subclasses MUST implement (for exclusive mode):
+    protected boolean tryAcquire(int arg) { throw new UnsupportedOperationException(); }
+    protected boolean tryRelease(int arg) { throw new UnsupportedOperationException(); }
+
+    // Methods subclasses MUST implement (for shared mode):
+    protected int tryAcquireShared(int arg) { throw new UnsupportedOperationException(); }
+    protected boolean tryReleaseShared(int arg) { throw new UnsupportedOperationException(); }
+
+    // Public methods used by synchronizer implementations:
+    public final void acquire(int arg) { }         // Lock (exclusive)
+    public final boolean release(int arg) { }      // Unlock (exclusive)
+    public final void acquireShared(int arg) { }   // Lock (shared)
+    public final boolean releaseShared(int arg) { } // Unlock (shared)
+
+    // Timed acquire:
+    public final boolean tryAcquireNanos(int arg, long nanosTimeout) { }
+
+    // Interruptible acquire:
+    public final void acquireInterruptibly(int arg) { }
+}
+
+3. The CLH Queue — How Threads Wait
+
+CLH Queue (Craig, Landin, Hagersten variant):
+
+A virtual doubly-linked list of Node objects.
+
+Each Node represents a waiting thread.
+
+static final class Node {
+    static final int CANCELLED = 1;  // Thread was interrupted or timed out
+    static final int SIGNAL = -1;    // Next thread needs to be woken up
+    static final int CONDITION = -2; // Thread is in a condition queue
+    static final int PROPAGATE = -3; // For shared mode release propagation
+
+    volatile int waitStatus;  // One of above, or 0 (initial)
+    volatile Node prev;       // Previous node
+    volatile Node next;       // Next node
+    volatile Thread thread;   // Thread waiting in this node
+    Node nextWaiter;          // For Condition queues
+}
+
+Queue structure:
+
+[HEAD (dummy)] ↔ [Node1: Thread-A] ↔ [Node2: Thread-B] ↔ [Node3: Thread-C] ← TAIL
+
+Head is always a dummy node (no thread).
+Threads are added to TAIL.
+Thread at position 1 (after head) is the "first in queue" — next to acquire.
+
+4. acquire() — Acquiring a Lock
+
+public final void acquire(int arg) {
+    if (!tryAcquire(arg) &&          // Try to acquire immediately
+        acquireQueued(                // If failed, queue and wait
+            addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();
+}
+
+Step 1 — tryAcquire(arg):
+
+Implemented by subclass.
+If lock is free (state == 0): set state=1, record owner thread → return true.
+If current thread already owns lock (reentrant): increment state → return true.
+If another thread owns lock → return false.
+
+Step 2 — addWaiter():
+
+Create new Node for current thread.
+Append to tail of CLH queue using CAS.
+
+Step 3 — acquireQueued():
+
+Spin/wait loop:
+
+final boolean acquireQueued(final Node node, int arg) {
+    for (;;) {
+        final Node p = node.predecessor();
+        // If this node is first in queue, try to acquire
+        if (p == head && tryAcquire(arg)) {
+            setHead(node); // Become head (dummy)
+            p.next = null; // Help GC
+            return false;  // Not interrupted
+        }
+        // Should I park (sleep)?
+        if (shouldParkAfterFailedAcquire(p, node)) {
+            // Park (block) until unparked by release()
+            LockSupport.park(this);
+            // Woke up — check if interrupted
+            if (Thread.interrupted()) return true; // Was interrupted
+        }
+    }
+}
+
+shouldParkAfterFailedAcquire():
+
+Checks predecessor's waitStatus.
+If predecessor is SIGNAL (-1): yes, park.
+If predecessor is CANCELLED (1): remove cancelled predecessors, retry.
+Otherwise: set predecessor waitStatus = SIGNAL, retry spin.
+
+5. release() — Releasing a Lock
+
+public final boolean release(int arg) {
+    if (tryRelease(arg)) {         // Decrement state / set to 0
+        Node h = head;
+        if (h != null && h.waitStatus != 0) {
+            unparkSuccessor(h);    // Wake up the next waiting thread!
+        }
+        return true;
+    }
+    return false;
+}
+
+unparkSuccessor():
+
+Finds the first non-cancelled successor.
+Calls LockSupport.unpark(thread) — wakes it up.
+That thread resumes in acquireQueued() spin loop and tries tryAcquire() again.
+
+6. ReentrantLock — AQS Implementation
+
+ReentrantLock contains inner Sync class extending AQS.
+
+class NonfairSync extends Sync {
+    final boolean initialTryLock() {
+        Thread current = Thread.currentThread();
+        if (compareAndSetState(0, 1)) { // state 0 → 1 means "acquired"
+            setExclusiveOwnerThread(current);
+            return true;
+        } else if (getExclusiveOwnerThread() == current) {
+            // Same thread — reentrant!
+            int c = getState();
+            if (++c < 0) throw new Error("Maximum lock count exceeded");
+            setState(c); // Increment hold count
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean tryAcquire(int acquires) {
+        if (getState() == 0 && compareAndSetState(0, acquires)) {
+            setExclusiveOwnerThread(Thread.currentThread());
+            return true;
+        }
+        return false;
+    }
+}
+
+class FairSync extends Sync {
+    @Override
+    protected boolean tryAcquire(int acquires) {
+        if (getState() == 0 &&
+            !hasQueuedPredecessors() && // FAIRNESS CHECK — no earlier waiter!
+            compareAndSetState(0, acquires)) {
+            setExclusiveOwnerThread(Thread.currentThread());
+            return true;
+        }
+        // ... reentrant check
+        return false;
+    }
+}
+
+Fair vs Non-fair:
+
+Fair: Threads acquire in FIFO order. No starvation. Lower throughput (more context switches).
+Non-fair (default): Threads that just released can re-acquire before queued threads wake up. Better throughput. Possible starvation.
+
+For most applications: Non-fair (default) is better.
+
+7. Semaphore — Shared Mode AQS
+
+Semaphore permits multiple threads.
+
+State = number of available permits.
+
+tryAcquireShared(int acquires):
+
+int available = getState();
+int remaining = available - acquires;
+if (remaining < 0 || compareAndSetState(available, remaining)) {
+    return remaining; // Negative = failure, >= 0 = success
+}
+
+tryReleaseShared(int releases):
+
+int next = getState() + releases;
+return compareAndSetState(getState(), next);
+
+Semaphore usage:
+
+Semaphore permits = new Semaphore(5); // 5 permits
+
+// Acquire permit (blocking)
+permits.acquire();
+try {
+    // Critical section — at most 5 threads here
+} finally {
+    permits.release(); // Return permit
+}
+
+// Try to acquire without blocking
+if (permits.tryAcquire()) {
+    try {
+        // ...
+    } finally {
+        permits.release();
+    }
+}
+
+Use cases: Rate limiting, connection pool simulation, bounded resource access.
+
+8. CountDownLatch — One-Time Gate
+
+state = count.
+
+countDown(): state--. If state reaches 0 → release all waiting threads.
+await(): block until state == 0.
+
+Internal tryReleaseShared:
+
+protected boolean tryReleaseShared(int releases) {
+    for (;;) {
+        int c = getState();
+        if (c == 0) return false;
+        int nextc = c - 1;
+        if (compareAndSetState(c, nextc)) return nextc == 0; // true if reached 0
+    }
+}
+
+Usage:
+
+CountDownLatch startGate = new CountDownLatch(1);
+CountDownLatch endGate = new CountDownLatch(5);
+
+for (int i = 0; i < 5; i++) {
+    new Thread(() -> {
+        try {
+            startGate.await(); // Wait for start signal
+            doWork();
+        } finally {
+            endGate.countDown(); // Signal completion
+        }
+    }).start();
+}
+
+startGate.countDown(); // Release all workers simultaneously
+endGate.await();       // Wait for all workers to finish
+
+9. Condition — AQS Condition Queues
+
+ReentrantLock.newCondition() returns a ConditionObject.
+
+ConditionObject maintains a separate condition queue.
+
+await():
+
+Releases lock (adds entry to lock's main CLH queue would happen on signal).
+Adds current thread to condition queue.
+Parks thread.
+
+signal():
+
+Moves first thread from condition queue to CLH queue.
+That thread waits to re-acquire the lock.
+
+ReentrantLock lock = new ReentrantLock();
+Condition notEmpty = lock.newCondition();
+Condition notFull = lock.newCondition();
+Queue<Item> queue = new ArrayDeque<>();
+
+void produce(Item item) throws InterruptedException {
+    lock.lock();
+    try {
+        while (queue.size() == MAX_SIZE) notFull.await();
+        queue.add(item);
+        notEmpty.signal();
+    } finally {
+        lock.unlock();
+    }
+}
+
+Item consume() throws InterruptedException {
+    lock.lock();
+    try {
+        while (queue.isEmpty()) notEmpty.await();
+        Item item = queue.poll();
+        notFull.signal();
+        return item;
+    } finally {
+        lock.unlock();
+    }
+}
+
+10. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"How does AbstractQueuedSynchronizer work? Explain how ReentrantLock is built on it."
+
+5 Crore Answer:
+
+AbstractQueuedSynchronizer is the framework beneath all high-level synchronizers in java.util.concurrent. It provides two primitive mechanisms: an atomic integer state variable and a FIFO queue of waiting threads, built as a CLH (Craig-Landin-Hagersten) variant doubly-linked list.
+
+AQS itself doesn't define what state means — that's left to subclasses. For ReentrantLock, state 0 means unlocked, state N means locked with hold count N (supporting reentrancy). For Semaphore, state represents available permits. For CountDownLatch, state is the count.
+
+The acquire flow: First, tryAcquire() attempts immediate acquisition using CAS on state. If successful, done. If it fails, the current thread is wrapped in a Node and enqueued at the CLH queue tail using CAS. The thread then enters a spin loop: if it's the first in the queue, it retries tryAcquire() immediately. Otherwise, it checks if it should park — it does so if its predecessor has waitStatus = SIGNAL (meaning "wake me up when you release"). LockSupport.park() suspends the thread until explicitly unparked.
+
+The release flow: tryRelease() decrements state (or sets to 0). If the CLH queue has a successor, LockSupport.unpark() wakes it, and that thread retries tryAcquire().
+
+ReentrantLock has two implementations: NonfairSync and FairSync. FairSync adds a hasQueuedPredecessors() check — if any thread is already queued, the current thread won't bypass them even if tryAcquire() could succeed. Non-fair doesn't check, allowing newly-arriving threads to "cut in" before sleeping threads wake up — this improves throughput dramatically because it avoids the expensive wake-sleep cycle for a thread that might immediately yield the lock again.
+
+The Condition implementation uses a separate condition queue. await() releases the lock and suspends the thread in the condition queue. signal() transfers the first thread from the condition queue back into the main CLH lock queue, where it competes normally to re-acquire the lock.
+
+11. Complete Revision Notes
+
+AQS: foundation for ReentrantLock, Semaphore, CountDownLatch, CyclicBarrier, RRWL.
+AQS core: volatile int state (semantics defined by subclass) + CLH queue of waiting threads.
+CLH queue: doubly-linked list of Node objects. head=dummy, tail=last waiter.
+Node: waitStatus (CANCELLED=1, SIGNAL=-1, CONDITION=-2, PROPAGATE=-3) + thread + prev/next.
+SIGNAL: "please unpark me when you release" — predecessor's status.
+acquire(): tryAcquire() → addWaiter() → acquireQueued() → park → wake → retry.
+release(): tryRelease() → unparkSuccessor() → woken thread retries tryAcquire().
+tryAcquire(): CAS on state. Returns true if acquired, false if not.
+tryRelease(): Decrement state. Returns true if fully released.
+ReentrantLock.state: 0=unlocked, N=hold count (N=1 first lock, 2 after second reentrant lock).
+FairSync: hasQueuedPredecessors() check — no bypassing queued threads.
+NonfairSync: allows freshly-running threads to acquire before waking queued threads.
+Fair: FIFO, no starvation, lower throughput. Non-fair: higher throughput, possible starvation.
+Semaphore: shared mode AQS. State = available permits. Multiple threads allowed.
+CountDownLatch: one-time gate. state = count. await() blocks until state = 0.
+CyclicBarrier: reusable gate. Built on ReentrantLock + Condition, not AQS directly.
+Condition: separate queue per condition. await() = release lock + park in condition queue.
+signal(): move from condition queue → main CLH queue.
+LockSupport.park(): suspend thread. LockSupport.unpark(thread): resume specific thread.
+park/unpark vs wait/notify: unpark can be called BEFORE park (permit-based). No monitor required.
+AQS exclusive mode: one thread at a time. AQS shared mode: multiple threads concurrently.
+tryAcquireShared returns int: negative = failure, 0 = success exclusive, positive = success shared.

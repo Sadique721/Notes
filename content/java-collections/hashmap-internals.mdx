@@ -1,0 +1,612 @@
+---
+title: "HashMap Internals"
+slug: "hashmap-internals"
+moduleSlug: "java-collections"
+order: 2
+summaryOneLiner: "HashMap is Java's most-used data structure — understanding its hash function, bucket array, treeification, resizing, and concurrency implications is mandatory for senior interviews."
+estimatedReadMinutes: 45
+generated: false
+prerequisiteTopicSlugs: ["oop-principles", "generics"]
+---
+![Keywords: HashMap, Bucket, Hash Collision, Rehashing | Hint: An array grid of bucket nodes, with some buckets expanding into linked lists or red-black trees.](/illustrations/topics/hashmap_internals_hero.gif)
+
+
+Module 5 → Topic 2 → HashMap Internals (Part 1)
+
+1. HashMap — Introduction
+
+HashMap is one of the most asked topics in Java interviews.
+
+Almost GUARANTEED in every senior Java interview.
+
+Why?
+
+HashMap is used everywhere in Java code.
+Its internal implementation reveals deep Java knowledge.
+Interviewers use it to assess: data structures, hashing, linked lists, tree structures, concurrency.
+
+What is HashMap?
+
+HashMap<K, V> is a data structure that stores key-value pairs with:
+
+O(1) average time for get, put, remove operations.
+No ordering guarantee (use LinkedHashMap for insertion order).
+Allows one null key, multiple null values.
+Not thread-safe (use ConcurrentHashMap for thread safety).
+
+2. History of HashMap
+
+Before HashMap — Hashtable (Java 1.0)
+
+Java 1.0 had Hashtable.
+
+Problems:
+
+Synchronized on every method → performance bottleneck.
+No null keys/values.
+Legacy class — poor API design.
+
+After HashMap — Java 1.2 (1998)
+
+Collections framework introduced.
+HashMap added — unsynchronized, high performance.
+Null key/values allowed.
+
+Major Evolution — Java 8 (2014)
+
+Critical internal change: Treeification.
+
+Before Java 8:
+
+Collision chains were always linked lists.
+Worst case: O(n) for get when many collisions.
+
+Java 8 and after:
+
+When a bucket's linked list grows beyond 8 nodes, it is converted to a Red-Black Tree.
+Worst case: O(log n) for get.
+
+This change fixed HashMap's susceptibility to hash collision attacks (Hash DoS).
+
+3. Internal Data Structure
+
+HashMap internally uses:
+
+An array of Node<K,V> (called the "table" or "bucket array").
+
+Each element in the array is the head of a linked list or Red-Black Tree.
+
+Structure:
+
+table (Node[] array)
+├── [0] → null
+├── [1] → Node{key="Alice", value=25, hash=..., next=null}
+├── [2] → Node{key="Bob", value=30, hash=..., next=Node{key="Charlie", value=35, hash=..., next=null}}
+│           (collision — two keys hash to bucket 2)
+├── [3] → null
+├── [4] → TreeNode{key="D1", ...} → Red-Black Tree (8+ nodes in bucket)
+└── ...
+
+Node class structure:
+
+static class Node<K,V> implements Map.Entry<K,V> {
+    final int hash;     // Cached hash of key
+    final K key;        // The key
+    V value;            // The value
+    Node<K,V> next;     // Next node in linked list (for collisions)
+
+    Node(int hash, K key, V value, Node<K,V> next) {
+        this.hash = hash;
+        this.key = key;
+        this.value = value;
+        this.next = next;
+    }
+}
+
+4. Key Internal Parameters
+
+DEFAULT_INITIAL_CAPACITY = 16
+
+The initial array size.
+
+Must always be a power of 2.
+
+Why power of 2?
+
+Allows bitwise AND for index calculation: index = hash & (capacity - 1)
+Faster than modulo: index = hash % capacity
+When capacity = 16, (capacity-1) = 15 = 0b1111 → extracts lower 4 bits of hash
+
+DEFAULT_LOAD_FACTOR = 0.75
+
+Threshold for resizing.
+
+When size > capacity * loadFactor, array is doubled.
+
+With default: when size > 16 * 0.75 = 12 entries, resize to 32.
+
+Load factor balances:
+
+Too low (0.5): Many resizes, wastes memory (array half full).
+Too high (1.0): Many collisions before resize, slow get/put.
+0.75: Good balance — math shows approximately 0.86 entries per bucket.
+
+TREEIFY_THRESHOLD = 8
+
+When a bucket's linked list reaches 8 nodes → convert to Red-Black Tree.
+
+UNTREEIFY_THRESHOLD = 6
+
+When nodes in tree fall to 6 → convert back to linked list.
+
+MIN_TREEIFY_CAPACITY = 64
+
+Array must be at least 64 before treeification happens.
+
+If smaller, resize instead.
+
+5. How put() Works — Complete Internal Mechanism
+
+map.put("Alice", 25);
+
+Step 1 — Calculate hashCode()
+
+int rawHash = "Alice".hashCode(); // String's hashCode implementation
+
+String hashCode() = s[0]*31^(n-1) + s[1]*31^(n-2) + ... + s[n-1]
+
+"Alice" = 'A'*31^4 + 'l'*31^3 + 'i'*31^2 + 'c'*31 + 'e'
+= 65*923521 + 108*29791 + 105*961 + 99*31 + 101
+= 2032866150 (example value)
+
+Step 2 — Apply HashMap's internal hash() function
+
+// HashMap's hash() — crucial internal detail
+static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+
+This XORs the high 16 bits with low 16 bits.
+
+Why?
+
+For small arrays (capacity = 16), only lower 4 bits of hash matter.
+Without this mixing, many hash codes with different upper bits but same lower bits would cluster in same bucket.
+This mixing spreads distribution — reduces collisions.
+
+Step 3 — Calculate bucket index
+
+int index = (capacity - 1) & hash;
+// With capacity=16: 15 & hash = hash & 0b1111 = lower 4 bits of hash
+
+Step 4 — Check if bucket is empty
+
+If table[index] == null:
+
+New node created and placed directly in table[index].
+
+Done. O(1).
+
+Step 5 — Collision exists — traverse chain
+
+If table[index] != null:
+
+Traverse linked list (or tree).
+
+For each existing node:
+
+If same key (by reference == or equals()):
+    Update value.
+    Return old value.
+
+If no matching key found:
+    Add new node at END of chain.
+    nodeCount in bucket++.
+
+Step 6 — Check treeification threshold
+
+If bucket size >= TREEIFY_THRESHOLD (8):
+
+If table.length < MIN_TREEIFY_CAPACITY (64):
+    Resize instead.
+Else:
+    Convert linked list to Red-Black Tree.
+
+Step 7 — Check resize
+
+size++
+
+If size > threshold (capacity * loadFactor):
+
+Resize: double capacity, rehash all entries.
+
+6. How get() Works
+
+map.get("Alice");
+
+Step 1: hash("Alice") — same calculation as put.
+
+Step 2: index = (n-1) & hash — same.
+
+Step 3: Table[index] lookup.
+
+If null: return null.
+
+Step 4: Check first node:
+
+if (first.hash == hash && (first.key == key || key.equals(first.key)))
+    return first.value;
+
+Step 5: If collision:
+
+If tree: Binary search tree traversal → O(log n).
+If linked list: Sequential traversal → O(n) worst case.
+
+For linked list collision check:
+
+while (e.next != null) {
+    e = e.next;
+    if (e.hash == hash && (e.key == key || key.equals(e.key)))
+        return e.value;
+}
+
+7. Resizing — Rehashing
+
+When size exceeds threshold:
+
+Old capacity: 16, New capacity: 32.
+
+New table created (size 32).
+
+ALL existing entries re-indexed:
+
+For each entry:
+    new index = hash & (32-1) = hash & 0b11111
+
+Key insight: Entry goes to either:
+
+Old index (lower bit is 0)
+Old index + old capacity (lower bit is 1)
+
+Only the next bit of hash determines new position.
+
+No full recalculation of hash — just check one bit.
+
+Resizing chain example:
+
+Before resize (capacity=16, index=4):
+Bucket[4] → Node{hash=...0100...} → Node{hash=...10100...} → null
+
+After resize (capacity=32):
+Bucket[4]  → Node{hash=...0100...}  (bit 4 = 0 → stays at 4)
+Bucket[20] → Node{hash=...10100...} (bit 4 = 1 → moves to 4+16=20)
+
+Resizing Time Complexity: O(n)
+
+All n entries must be rehashed.
+
+Amortized put: Still O(1) — resize happens O(log n) times total.
+
+8. hashCode() and equals() Contract
+
+The HashMap Contract
+
+If two keys are equal (key1.equals(key2) == true):
+    They MUST have same hashCode.
+
+If two keys have same hashCode:
+    They may or may not be equal (collision allowed).
+
+Why this matters:
+
+Keys with same hash → stored in same bucket (may be different keys).
+Keys with different hash → DEFINITELY different keys (no need to check equals).
+
+Violation Example:
+
+class BadKey {
+    int id;
+
+    @Override
+    public boolean equals(Object o) {
+        return this.id == ((BadKey)o).id;
+    }
+
+    // FORGOT to override hashCode!
+    // Two BadKey objects with same id will have DIFFERENT hashCodes
+    // They'll be placed in DIFFERENT buckets
+    // map.get(new BadKey(1)) won't find key even though a BadKey(1) was put!
+}
+
+BadKey k1 = new BadKey(1);
+BadKey k2 = new BadKey(1);
+k1.equals(k2); // true
+k1.hashCode() == k2.hashCode(); // false (uses Object.hashCode — address-based)
+
+map.put(k1, "value");
+map.get(k2); // Returns NULL! Bug! k2 goes to different bucket.
+
+Rule: ALWAYS override both hashCode() and equals() together.
+
+Ideal hashCode() Properties:
+
+Consistent: same object → same hash every time (within one JVM run).
+Equal objects: k1.equals(k2) → k1.hashCode() == k2.hashCode().
+Different objects → SHOULD have different hashes (not required, but reduces collisions).
+
+Good hashCode() in Java 7+:
+
+@Override
+public int hashCode() {
+    return Objects.hash(id, name, email); // Uses prime multiplication
+}
+
+// Equivalent to:
+int result = 17;
+result = 31 * result + id;
+result = 31 * result + (name != null ? name.hashCode() : 0);
+result = 31 * result + (email != null ? email.hashCode() : 0);
+return result;
+
+Why 31?
+
+Prime number → reduces hash collisions.
+31 = 2^5 - 1 → compiler optimizes 31*n to (n<<5) - n (shift is faster than multiply).
+
+9. String hashCode() — Caching
+
+String is the most common HashMap key.
+
+String.hashCode() is cached after first calculation.
+
+public int hashCode() {
+    int h = hash; // Cached value (field in String class)
+    if (h == 0 && !hashIsZero) {
+        // Calculate hash
+        byte[] val = this.value;
+        for (byte v : val) {
+            h = 31 * h + (v & 0xff);
+        }
+        if (h == 0) hashIsZero = true;
+        else hash = h; // Cache it!
+    }
+    return h;
+}
+
+First call: O(n) — calculates and caches.
+Subsequent calls: O(1) — returns cached value.
+
+This is why String is ideal as HashMap key.
+
+10. Null Key Handling
+
+HashMap allows ONE null key.
+
+Null key is always stored in bucket[0].
+
+hash(null) = 0 (by definition in HashMap.hash())
+Index = (n-1) & 0 = 0
+
+put(null, value):
+
+No hashCode() called (would throw NullPointerException).
+Stored at table[0].
+
+get(null):
+
+Looks in table[0].
+Linear search for key == null.
+
+11. Red-Black Tree in Buckets (Java 8+)
+
+When bucket has 8+ nodes, convert to TreeNode (Red-Black Tree).
+
+TreeNode structure:
+
+static final class TreeNode<K,V> extends LinkedHashMap.Entry<K,V> {
+    TreeNode<K,V> parent;
+    TreeNode<K,V> left;
+    TreeNode<K,V> right;
+    TreeNode<K,V> prev;  // Needed for removal
+    boolean red;
+}
+
+TreeNode maintains:
+
+Parent, left, right pointers (tree structure).
+Also prev pointer (for linked list structure — tree nodes also form doubly-linked list).
+Red/black coloring for Red-Black Tree balancing.
+
+TreeNode Operations:
+
+Find: O(log n) — binary search on hash.
+Insert: O(log n) — with rotation to maintain balance.
+Delete: O(log n) — with rotation.
+
+When does tree revert to list?
+
+If nodes < UNTREEIFY_THRESHOLD (6) after removal → convert back to linked list.
+
+12. Thread Safety Issues
+
+HashMap is NOT thread-safe.
+
+Classic problem in Java 7 — Infinite Loop on Resize
+
+Multiple threads concurrently resizing HashMap could create a circular reference in linked lists → infinite loop in get().
+
+Fixed in Java 8:
+
+Java 8 uses a new resizing algorithm that doesn't create cycles.
+But concurrent put/get still causes data loss.
+
+Thread-safe alternatives:
+
+Collections.synchronizedMap(new HashMap<>())
+    → Synchronized wrapper — single lock — poor concurrency.
+
+ConcurrentHashMap
+    → Segment-based locking (Java 6-7) → CAS + synchronized on bucket head (Java 8+).
+    → High concurrency, excellent performance.
+
+Hashtable
+    → Legacy — synchronized every method — worst performance.
+
+13. Performance Considerations
+
+Good hashCode():
+
+Distributes keys uniformly across buckets.
+Minimizes collisions.
+Fast to compute.
+
+Bad hashCode() impact:
+
+All keys → same bucket → linked list O(n).
+Even with treeification: O(log n) → still worse than expected O(1).
+
+Initial Capacity Planning:
+
+If you know ~100 entries:
+Set capacity = 100 / 0.75 = ~134 → round up to next power of 2 = 256.
+
+new HashMap<>(256); // No resize needed
+
+This avoids resize operations during population.
+
+14. Real-World Enterprise Examples
+
+Example 1 — FAANG: Rate Limiting (HashMap as Counter)
+
+// Request counter per user — in-memory rate limiting
+Map<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
+
+public boolean isRateLimited(String userId) {
+    AtomicInteger count = requestCounts.computeIfAbsent(userId, k -> new AtomicInteger(0));
+    return count.incrementAndGet() > 100; // 100 requests limit
+}
+
+Example 2 — Banking: Transaction Index
+
+// Index transactions by account for O(1) lookup
+Map<String, List<Transaction>> transactionsByAccount = new HashMap<>();
+
+public void indexTransaction(Transaction tx) {
+    transactionsByAccount
+        .computeIfAbsent(tx.getAccountNumber(), k -> new ArrayList<>())
+        .add(tx);
+}
+
+public List<Transaction> getAccountTransactions(String accountNumber) {
+    return transactionsByAccount.getOrDefault(accountNumber, Collections.emptyList());
+}
+
+Example 3 — Caching Pattern
+
+Map<Long, Product> productCache = new LinkedHashMap<Long, Product>(1000, 0.75f, true) {
+    // Access-order LRU cache
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<Long, Product> eldest) {
+        return size() > 1000; // Evict if > 1000 entries
+    }
+};
+
+15. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain the internal working of HashMap. What changed in Java 8?"
+
+5 Crore Answer:
+
+HashMap is implemented as an array of Node objects — the "table" or bucket array. Keys are mapped to bucket indices using a two-step hashing process: first, the key's hashCode() is obtained, then a secondary spread function XORs the high 16 bits with the low 16 bits — this "hash mixing" ensures that hash codes that only differ in the upper bits don't all collide in small arrays.
+
+The bucket index is computed as (capacity - 1) & hash — using bitwise AND instead of modulo because capacity is always a power of 2, making this equivalent but significantly faster.
+
+On put(), if the target bucket is empty, the node is placed directly. If occupied (collision), HashMap traverses the existing chain comparing keys using both hash equality and equals() — because same hash doesn't mean same key. If a matching key is found, the value is updated. If not, a new node is appended.
+
+The critical Java 8 change: before Java 8, collision chains were always linked lists with O(n) worst-case traversal. Java 8 introduced treeification — when a single bucket accumulates 8 or more nodes, the linked list is converted to a Red-Black Tree, reducing worst-case to O(log n). The tree reverts to a linked list when nodes fall below 6.
+
+When size exceeds capacity * 0.75 (the load factor), HashMap resizes — doubling capacity and rehashing. The clever optimization here is that because capacity doubles (adds one bit), each entry either stays at its current index or moves to current-index + old-capacity, depending on whether the new high bit of its hash is 0 or 1. No full hash recalculation is needed.
+
+The hashCode/equals contract is fundamental: equal keys must have equal hashCodes. Violating this — like overriding equals without overriding hashCode — causes get() to fail silently because the key lands in a different bucket than where it was put.
+
+For concurrent access, HashMap is not safe — use ConcurrentHashMap instead.
+
+16. Follow-Up Interview Questions
+
+Q1. Why does HashMap capacity need to be a power of 2?
+
+To use bitwise AND for index calculation: index = hash & (n-1).
+
+When n is a power of 2, n-1 has all lower bits set (e.g., 16-1=15=0b1111).
+This masks the hash to just its lower bits, computing the same result as hash % n but much faster.
+If n is not a power of 2, bitwise AND gives wrong distribution.
+
+Q2. What is the time complexity of HashMap operations?
+
+Average case (good hash distribution):
+put: O(1)
+get: O(1)
+remove: O(1)
+
+Worst case (all keys hash to same bucket):
+Before Java 8: O(n) — all in linked list.
+Java 8+: O(log n) — treeified after 8 collisions.
+
+Q3. What makes a good key for HashMap?
+
+Immutable — hashCode should never change after insertion (mutable key can cause key to be unfindable).
+Correct equals/hashCode implementation.
+Fast hashCode computation.
+Good hash distribution (avoids clustering).
+
+Best keys: String (immutable, cached hashCode, widely tested).
+Integer (immutable, hashCode = value).
+UUID (immutable, good distribution).
+
+Q4. What is the difference between HashMap and LinkedHashMap?
+
+HashMap: No ordering guarantee.
+LinkedHashMap: Maintains insertion order (default) or access order (access-order=true).
+LinkedHashMap extends HashMap — adds doubly-linked list through entries for ordering.
+Slightly higher memory and overhead.
+
+Usage: LRU cache (access-order + removeEldestEntry override).
+
+Q5. When would you choose TreeMap over HashMap?
+
+TreeMap maintains sorted key order.
+get/put: O(log n) — slower than HashMap.
+Use when: Need sorted iteration, range queries (headMap, tailMap), floor/ceiling operations.
+Example: sorted leaderboard, time-range queries.
+
+Q6. How does Java 8 fix the infinite loop issue in Java 7 HashMap resize?
+
+Java 7: During resize with concurrent threads, if two threads simultaneously resize, the entry relinking could create a cycle in the linked list → infinite loop in get().
+
+Java 8: Uses a two-pointer technique during resize — maintains separate "low" and "high" lists for entries that stay or move, links them only after building complete chains. This prevents cycles even in concurrent scenarios (though data loss is still possible — use ConcurrentHashMap for safety).
+
+17. Complete Revision Notes
+
+HashMap = array (table) + linked list (or tree) per bucket.
+Default capacity = 16 (always power of 2), load factor = 0.75.
+Hash calculation: key.hashCode() then XOR with h>>>16 (spread high bits).
+Bucket index: (capacity-1) & hash — bitwise AND, not modulo.
+Collision: multiple keys same bucket → linked list or tree chain.
+Java 8: treeification at 8 nodes → Red-Black Tree → O(log n) worst case.
+Untreeify at 6 nodes, min table size for treeify = 64.
+Resize: capacity doubled when size > capacity * 0.75, all entries rehashed.
+Rehash optimization: entry goes to same index or same+old-capacity based on one bit.
+hashCode/equals contract: equal objects must have equal hashCode.
+Override both hashCode AND equals or neither — never just one.
+String.hashCode() cached after first call — excellent as key.
+Null key stored at bucket[0] (hash=0).
+Not thread-safe — use ConcurrentHashMap for concurrent access.
+Java 7 concurrent resize bug → infinite loop (fixed in Java 8).
+computeIfAbsent, getOrDefault, merge — important Java 8 HashMap methods.
+Good initial capacity: expectedSize / 0.75 (round up to power of 2) to avoid resize.
+LinkedHashMap: HashMap + ordering. TreeMap: sorted keys but O(log n).
+HashMap uses 31 as prime multiplier in Object.hashCode() computation.
+Pattern: Red-Black Tree nodes maintain both tree pointers AND linked list prev pointer.

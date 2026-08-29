@@ -1,0 +1,980 @@
+---
+title: "OOP Principles"
+slug: "oop-principles"
+moduleSlug: "core-java"
+order: 1
+summaryOneLiner: "Object-Oriented Programming Principles — Encapsulation, Inheritance, Polymorphism, Abstraction, and SOLID — form the backbone of all enterprise Java and Spring development."
+estimatedReadMinutes: 45
+generated: false
+prerequisiteTopicSlugs: []
+---
+
+![Keywords: Abstraction, Encapsulation, Inheritance, Polymorphism | Hint: Four pillars (OOP core pillars) supporting a central architectural framework representing solid software architecture.](/illustrations/topics/oop_principles_hero.gif)
+
+Module 4 → Topic 1 → OOP Principles (Part 1)
+
+Note: We will cover OOP Principles in extreme depth — every word, history, internal mechanism, real-world examples, analogies, and ₹5 Crore package interview Q&A covering all principles including SOLID.
+
+1. OOP Principles — Introduction
+
+First understand why OOP was needed.
+
+Before OOP — Procedural Programming Problems (1960s-1980s)
+
+C language dominated.
+
+Procedural programming:
+
+Code is a sequence of functions.
+Data and functions are separate.
+Global state was common.
+No natural grouping of related data and behavior.
+
+Problems:
+
+Spaghetti code — hard to follow the flow.
+Global variables — any function could modify any data.
+Hard to scale large systems.
+No code reuse mechanism.
+Difficult to model real-world entities.
+Maintenance nightmare in large codebases.
+
+Example of procedural banking system:
+
+// Global state — dangerous!
+double accountBalance = 1000.0;
+String accountHolder = "Alice";
+
+// Any function can modify anything
+void deposit(double amount) {
+    accountBalance += amount; // No access control
+}
+
+void withdraw(double amount) {
+    accountBalance -= amount; // No validation possible easily
+}
+
+// This could be called accidentally from anywhere
+void resetBalance() {
+    accountBalance = 0; // Catastrophic in banking!
+}
+
+Problems:
+
+No access control.
+Any code can corrupt any data.
+Impossible to track who changed what.
+Hard to add validation.
+Cannot represent complex real-world entities naturally.
+
+Solution — Object-Oriented Programming
+
+OOP bola:
+
+Combine data and behavior into objects.
+Control access to data.
+Model the real world naturally.
+Enable code reuse through inheritance.
+Enable flexibility through polymorphism.
+
+2. Word-by-Word Analysis
+
+Word 1 → Object
+
+An Object is a self-contained unit that combines:
+
+State (data / fields)
+Behavior (methods / functions)
+
+Real-world objects:
+
+Car
+    State: color, speed, fuel level
+    Behavior: accelerate, brake, refuel
+
+Bank Account
+    State: balance, accountNumber, owner
+    Behavior: deposit, withdraw, getBalance
+
+In Java:
+
+public class BankAccount {
+    // State
+    private double balance;
+    private String accountNumber;
+    private String owner;
+
+    // Behavior
+    public void deposit(double amount) { ... }
+    public void withdraw(double amount) { ... }
+    public double getBalance() { ... }
+}
+
+Word 2 → Oriented
+
+Oriented = centered around, designed around.
+
+Object-Oriented = designed around objects.
+
+Everything is modeled as objects interacting with each other.
+
+Word 3 → Principles
+
+Rules that govern how OOP should be implemented correctly.
+
+The 4 core OOP principles:
+
+Encapsulation
+Inheritance
+Polymorphism
+Abstraction
+
+Plus SOLID principles for clean design.
+
+3. Principle 1 — Encapsulation
+
+Definition
+
+Encapsulation = Wrapping data (state) and methods (behavior) together into a single unit (class) AND restricting direct access to the internal state from outside.
+
+Two parts:
+
+Part 1 — Data + Methods in one class (bundling).
+Part 2 — Hiding internal state (access control).
+
+Both parts must be present for true encapsulation.
+
+Why Encapsulation Was Needed
+
+Without encapsulation (procedural):
+
+double balance = 1000.0; // Anyone can set it to negative
+balance = -5000.0; // Legal! Catastrophic!
+
+With encapsulation:
+
+BankAccount account = new BankAccount(1000.0);
+account.balance = -5000.0; // COMPILE ERROR — private field
+account.withdraw(5000.0); // Goes through validation method
+
+Implementation in Java
+
+public class BankAccount {
+    private double balance; // private = encapsulated
+    private String accountNumber;
+
+    public BankAccount(String accountNumber, double initialBalance) {
+        this.accountNumber = accountNumber;
+        if (initialBalance < 0) {
+            throw new IllegalArgumentException("Initial balance cannot be negative");
+        }
+        this.balance = initialBalance;
+    }
+
+    // Controlled access via getter
+    public double getBalance() {
+        return balance;
+    }
+
+    // Controlled modification via method
+    public void deposit(double amount) {
+        if (amount <= 0) throw new IllegalArgumentException("Deposit amount must be positive");
+        this.balance += amount;
+    }
+
+    public void withdraw(double amount) {
+        if (amount <= 0) throw new IllegalArgumentException("Amount must be positive");
+        if (amount > balance) throw new InsufficientFundsException("Insufficient balance");
+        this.balance -= amount;
+    }
+}
+
+Benefits:
+
+Validation enforced — invalid state impossible.
+Implementation can change without affecting callers.
+Data integrity maintained.
+Code easier to debug (single place to set balance).
+
+Real-World Enterprise Example — SBI Banking
+
+SBI BankAccount class:
+
+balance field — private. Only internal methods can modify.
+Core banking system cannot directly set balance to any value.
+Every credit/debit goes through validated methods.
+Every transaction audited.
+Balance can never go below -overdraftLimit without explicit approval.
+
+Access Modifiers in Java (Encapsulation Tools)
+
+private    → Only within same class
+(package)  → Within same package
+protected  → Same package + subclasses
+public     → Everywhere
+
+Best practices:
+
+Fields → private
+Getters/Setters → public (only if needed)
+Internal helper methods → private
+API methods → public
+
+4. Principle 2 — Inheritance
+
+Definition
+
+Inheritance = A mechanism where a child class (subclass) acquires properties and behaviors of a parent class (superclass), enabling code reuse and establishing IS-A relationship.
+
+Why Inheritance Was Needed
+
+Without inheritance:
+
+class SavingsAccount {
+    private double balance;
+    private String accountNumber;
+    public void deposit(double amount) { ... }
+    public void withdraw(double amount) { ... }
+    public double getInterestRate() { return 3.5; }
+}
+
+class CurrentAccount {
+    private double balance;  // Duplicated!
+    private String accountNumber; // Duplicated!
+    public void deposit(double amount) { ... } // Duplicated!
+    public void withdraw(double amount) { ... } // Duplicated!
+    public double getOverdraftLimit() { return 10000; }
+}
+
+Problems:
+
+Code duplication.
+Bug fix in deposit() → must fix in both classes.
+Maintenance nightmare.
+
+With inheritance:
+
+// Parent class — common functionality
+public class BankAccount {
+    protected double balance;
+    protected String accountNumber;
+
+    public void deposit(double amount) {
+        if (amount <= 0) throw new IllegalArgumentException();
+        this.balance += amount;
+    }
+
+    public void withdraw(double amount) {
+        if (amount > balance) throw new InsufficientFundsException();
+        this.balance -= amount;
+    }
+}
+
+// Child class — extends parent, adds specific behavior
+public class SavingsAccount extends BankAccount {
+    private double interestRate = 3.5;
+
+    public void applyInterest() {
+        this.balance += this.balance * interestRate / 100;
+    }
+}
+
+public class CurrentAccount extends BankAccount {
+    private double overdraftLimit = 10000;
+
+    @Override
+    public void withdraw(double amount) {
+        if (amount > balance + overdraftLimit) throw new InsufficientFundsException();
+        this.balance -= amount;
+    }
+}
+
+Benefits:
+
+Code reuse — deposit/withdraw written once.
+Bug fix in parent fixes all children.
+Natural hierarchy — mirrors real world.
+Polymorphism enabled.
+
+Types of Inheritance in Java
+
+Single Inheritance (supported)
+    A extends B
+
+Multilevel Inheritance (supported)
+    C extends B extends A
+
+Hierarchical Inheritance (supported)
+    B extends A
+    C extends A
+
+Multiple Inheritance (NOT supported for classes in Java)
+    Reason: Diamond Problem
+
+Diamond Problem:
+
+class A {
+    void display() { System.out.println("A"); }
+}
+class B extends A {
+    @Override void display() { System.out.println("B"); }
+}
+class C extends A {
+    @Override void display() { System.out.println("C"); }
+}
+class D extends B, C { // Not allowed in Java!
+    // Which display() to call — B's or C's?
+}
+
+Solution: Java uses interfaces with default methods for multiple inheritance of behavior.
+
+Method Overriding
+
+Child class provides specific implementation of parent method.
+
+public class CurrentAccount extends BankAccount {
+    @Override
+    public void withdraw(double amount) {
+        // Overdraft allowed for current account
+        if (amount > balance + overdraftLimit) throw new InsufficientFundsException();
+        this.balance -= amount;
+    }
+}
+
+Rules for Overriding:
+
+Same method name, parameters, return type.
+@Override annotation (recommended — catches errors).
+Access modifier cannot be more restrictive.
+Cannot override static methods (method hiding, not overriding).
+Cannot override final methods.
+Cannot override private methods.
+
+super keyword
+
+super.withdraw(amount) — calls parent's withdraw.
+super() — calls parent's constructor.
+
+5. Principle 3 — Polymorphism
+
+Definition
+
+Polymorphism = One entity (method/reference) taking many forms.
+
+From Greek:
+
+Poly = Many
+Morph = Form
+
+Two types in Java:
+
+Compile-time Polymorphism (Static) — Method Overloading
+Runtime Polymorphism (Dynamic) — Method Overriding + Upcasting
+
+Type 1 — Compile-Time Polymorphism (Method Overloading)
+
+Same method name, different parameters.
+
+public class NotificationService {
+    public void send(String message) {
+        System.out.println("SMS: " + message);
+    }
+
+    public void send(String message, String email) {
+        System.out.println("Email to " + email + ": " + message);
+    }
+
+    public void send(String message, List<String> recipients) {
+        recipients.forEach(r -> System.out.println("Bulk to " + r + ": " + message));
+    }
+}
+
+Resolved at compile time — which overload to call is decided when compiling.
+
+Type 2 — Runtime Polymorphism (Method Overriding)
+
+Parent reference pointing to child object.
+
+// Parent reference
+BankAccount account;
+
+// Can hold any subtype
+account = new SavingsAccount();
+account.withdraw(100); // Calls SavingsAccount.withdraw()
+
+account = new CurrentAccount();
+account.withdraw(100); // Calls CurrentAccount.withdraw() — allows overdraft
+
+Same reference variable, different behavior based on actual object type.
+
+Decided at RUNTIME by JVM.
+
+This is dynamic dispatch.
+
+Power of Runtime Polymorphism
+
+// Process any account type — works without knowing specific type
+public void processWithdrawal(BankAccount account, double amount) {
+    account.withdraw(amount); // Correct implementation called automatically
+}
+
+// Works for all subtypes
+processWithdrawal(new SavingsAccount(), 100);
+processWithdrawal(new CurrentAccount(), 5000); // Uses overdraft
+
+Without polymorphism:
+
+void processWithdrawal(Object account, double amount) {
+    if (account instanceof SavingsAccount) {
+        ((SavingsAccount) account).withdraw(amount);
+    } else if (account instanceof CurrentAccount) {
+        ((CurrentAccount) account).withdraw(amount);
+    }
+    // Every new account type requires code change here!
+}
+
+With polymorphism:
+
+void processWithdrawal(BankAccount account, double amount) {
+    account.withdraw(amount); // Open for extension, closed for modification
+}
+
+6. Principle 4 — Abstraction
+
+Definition
+
+Abstraction = Hiding implementation details and exposing only what is necessary to the user.
+
+Show WHAT, hide HOW.
+
+Two levels in Java:
+
+Abstract Classes — partial abstraction
+Interfaces — full abstraction (conceptually)
+
+Why Abstraction Was Needed
+
+Without abstraction:
+
+User needs to know EVERYTHING about implementation.
+
+Example:
+
+// Without abstraction — user must know all implementation details
+void sendPayment() {
+    // Open TCP connection
+    Socket socket = new Socket("payment-gateway.com", 443);
+    // SSL handshake
+    SSLSocket sslSocket = ...
+    // Format request
+    String request = "POST /pay HTTP/1.1\nAmount: 100\n...";
+    // Send bytes
+    socket.getOutputStream().write(request.getBytes());
+    // Parse response
+    // Close connection
+}
+
+With abstraction:
+
+// User only knows the contract
+PaymentGateway gateway = new VisaGateway();
+gateway.processPayment(100.0, "USD");
+
+User doesn't need to know TCP, SSL, HTTP — those are hidden behind the abstraction.
+
+Abstract Class
+
+public abstract class PaymentGateway {
+    // Common fields
+    protected String merchantId;
+    protected String apiKey;
+
+    // Concrete method — shared implementation
+    public void validateAmount(double amount) {
+        if (amount <= 0) throw new IllegalArgumentException("Invalid amount");
+    }
+
+    // Abstract method — each gateway implements differently
+    public abstract TransactionResult processPayment(double amount, String currency);
+    public abstract void refund(String transactionId);
+}
+
+public class VisaGateway extends PaymentGateway {
+    @Override
+    public TransactionResult processPayment(double amount, String currency) {
+        // Visa-specific implementation
+    }
+
+    @Override
+    public void refund(String transactionId) {
+        // Visa refund implementation
+    }
+}
+
+Interface
+
+public interface Sortable {
+    void sort(); // Contract — no implementation
+    int size();
+}
+
+public interface Payable {
+    TransactionResult pay(double amount);
+    void refund(String id);
+}
+
+// Class can implement multiple interfaces
+public class Order implements Sortable, Payable {
+    @Override
+    public void sort() { /* ... */ }
+
+    @Override
+    public int size() { return items.size(); }
+
+    @Override
+    public TransactionResult pay(double amount) { /* ... */ }
+
+    @Override
+    public void refund(String id) { /* ... */ }
+}
+
+Abstract Class vs Interface
+
+Feature                  | Abstract Class      | Interface
+─────────────────────────┼─────────────────────┼──────────────────────
+Constructor              | Yes                 | No
+Fields                   | Any visibility      | public static final only
+Method implementation    | Can have concrete   | default methods only
+Multiple inheritance     | No (one parent)     | Yes (multiple interfaces)
+IS-A vs CAN-DO           | IS-A relationship   | CAN-DO capability
+When to use              | Shared code + IS-A  | Contract + CAN-DO
+
+7. SOLID Principles
+
+SOLID = Five object-oriented design principles for maintainable, extensible, robust code.
+
+Introduced by Robert C. Martin (Uncle Bob).
+
+SOLID is most important for ₹5 Crore interviews.
+
+S — Single Responsibility Principle
+
+"A class should have only one reason to change."
+
+One class = One responsibility.
+
+BAD:
+
+public class UserService {
+    public void createUser(User user) { /* ... */ }
+    public void sendWelcomeEmail(User user) { /* ... */ } // Different responsibility!
+    public User findById(Long id) { /* ... */ }
+    public void generateReport() { /* ... */ } // Different responsibility!
+    public void exportToCSV() { /* ... */ } // Different responsibility!
+}
+
+GOOD:
+
+public class UserService {
+    public void createUser(User user) { /* ... */ }
+    public User findById(Long id) { /* ... */ }
+}
+
+public class EmailService {
+    public void sendWelcomeEmail(User user) { /* ... */ }
+}
+
+public class ReportService {
+    public void generateReport() { /* ... */ }
+    public void exportToCSV() { /* ... */ }
+}
+
+Why SRP matters:
+
+One change in email logic won't affect user creation logic.
+Easier to test each class in isolation.
+Easier to find bugs (single purpose = clear responsibility).
+Lower coupling between concerns.
+
+O — Open/Closed Principle
+
+"Software entities should be open for extension, but closed for modification."
+
+Extend behavior by adding new code, NOT by changing existing code.
+
+BAD:
+
+public class PaymentProcessor {
+    public void process(String paymentType, double amount) {
+        if (paymentType.equals("CREDIT_CARD")) {
+            // Credit card processing
+        } else if (paymentType.equals("UPI")) {
+            // UPI processing
+        }
+        // Adding new payment type requires modifying this class!
+    }
+}
+
+GOOD:
+
+public interface PaymentStrategy {
+    TransactionResult process(double amount);
+}
+
+public class CreditCardPayment implements PaymentStrategy {
+    @Override
+    public TransactionResult process(double amount) { /* ... */ }
+}
+
+public class UpiPayment implements PaymentStrategy {
+    @Override
+    public TransactionResult process(double amount) { /* ... */ }
+}
+
+// Add new payment type? Just add new class! Don't modify existing code.
+public class CryptoPayment implements PaymentStrategy {
+    @Override
+    public TransactionResult process(double amount) { /* ... */ }
+}
+
+public class PaymentProcessor {
+    public void process(PaymentStrategy strategy, double amount) {
+        strategy.process(amount); // No modification needed for new types!
+    }
+}
+
+L — Liskov Substitution Principle
+
+"Objects of a subclass should be able to replace objects of the superclass without breaking the application."
+
+BAD:
+
+class Rectangle {
+    protected int width, height;
+
+    public void setWidth(int width) { this.width = width; }
+    public void setHeight(int height) { this.height = height; }
+    public int getArea() { return width * height; }
+}
+
+class Square extends Rectangle {
+    @Override
+    public void setWidth(int width) {
+        this.width = width;
+        this.height = width; // Square must have equal sides!
+    }
+
+    @Override
+    public void setHeight(int height) {
+        this.width = height;
+        this.height = height;
+    }
+}
+
+// LSP Violation:
+void resize(Rectangle rect) {
+    rect.setWidth(5);
+    rect.setHeight(4);
+    // Expected area: 20, but if Square passed: 4*4=16 — broken!
+    assert rect.getArea() == 20; // FAILS for Square
+}
+
+GOOD (separate hierarchies):
+
+interface Shape {
+    int getArea();
+}
+
+class Rectangle implements Shape { /* ... */ }
+class Square implements Shape { /* ... */ }
+
+I — Interface Segregation Principle
+
+"Clients should not be forced to depend on interfaces they do not use."
+
+Don't create fat interfaces.
+
+BAD:
+
+interface Worker {
+    void work();
+    void eat(); // Robot can't eat!
+    void sleep(); // Robot doesn't sleep!
+}
+
+class HumanWorker implements Worker {
+    public void work() { /* ... */ }
+    public void eat() { /* ... */ }
+    public void sleep() { /* ... */ }
+}
+
+class RobotWorker implements Worker {
+    public void work() { /* ... */ }
+    public void eat() { /* Meaningless! */ }
+    public void sleep() { /* Meaningless! */ }
+}
+
+GOOD:
+
+interface Workable {
+    void work();
+}
+
+interface Feedable {
+    void eat();
+}
+
+interface Restable {
+    void sleep();
+}
+
+class HumanWorker implements Workable, Feedable, Restable { /* ... */ }
+class RobotWorker implements Workable { /* Only what's needed */ }
+
+In Spring context:
+
+Spring's interfaces are well-segregated.
+
+ApplicationContext implements many focused interfaces:
+
+BeanFactory (getBean)
+MessageSource (getMessage)
+ApplicationEventPublisher (publishEvent)
+ResourcePatternResolver (getResources)
+
+D — Dependency Inversion Principle
+
+"High-level modules should not depend on low-level modules. Both should depend on abstractions."
+
+This directly enables Spring's IoC/DI.
+
+BAD:
+
+// High-level module depends on low-level concrete class
+class OrderService {
+    private MySQLOrderRepository repository; // Depends on MySQL specifically!
+
+    OrderService() {
+        this.repository = new MySQLOrderRepository(); // Tight coupling!
+    }
+}
+
+// Switching to PostgreSQL requires modifying OrderService!
+
+GOOD:
+
+// Both depend on abstraction (interface)
+interface OrderRepository { // Abstraction
+    Order findById(Long id);
+    void save(Order order);
+}
+
+class OrderService { // High-level module
+    private OrderRepository repository; // Depends on abstraction!
+
+    @Autowired
+    OrderService(OrderRepository repository) {
+        this.repository = repository; // Spring injects correct implementation
+    }
+}
+
+@Repository
+class MySQLOrderRepository implements OrderRepository { /* ... */ }
+
+@Repository
+class PostgreSQLOrderRepository implements OrderRepository { /* ... */ }
+
+Spring implements DIP via IoC Container.
+
+Developer says: I need an OrderRepository.
+Spring injects: The correct implementation based on config.
+
+8. Real-World Enterprise Examples
+
+Example 1 — FAANG: Netflix Streaming
+
+public abstract class StreamingProtocol {
+    // Abstraction
+    public abstract byte[] fetchNextChunk(String contentId, int chunkIndex);
+    public abstract void reportQuality(QualityMetrics metrics);
+
+    // Template method (concrete)
+    public final void stream(String contentId, StreamCallback callback) {
+        int index = 0;
+        while (true) {
+            byte[] chunk = fetchNextChunk(contentId, index++);
+            if (chunk == null) break;
+            callback.onChunk(chunk);
+        }
+    }
+}
+
+public class HLSProtocol extends StreamingProtocol { /* HTTP Live Streaming */ }
+public class DASHProtocol extends StreamingProtocol { /* Dynamic Adaptive Streaming */ }
+
+Example 2 — Banking: SBI Payment Processing
+
+// OCP + DIP + LSP in banking
+public interface PaymentProcessor {
+    PaymentResult process(PaymentRequest request);
+}
+
+@Service("neftProcessor")
+public class NEFTProcessor implements PaymentProcessor {
+    @Override
+    public PaymentResult process(PaymentRequest request) { /* NEFT logic */ }
+}
+
+@Service("rtgsProcessor")
+public class RTGSProcessor implements PaymentProcessor {
+    @Override
+    public PaymentResult process(PaymentRequest request) { /* RTGS logic for > 2 lakhs */ }
+}
+
+@Service("impsProcessor")
+public class IMPSProcessor implements PaymentProcessor {
+    @Override
+    public PaymentResult process(PaymentRequest request) { /* IMPS 24/7 */ }
+}
+
+Adding new UPI processor? Just add new class. Nothing existing changes.
+
+Example 3 — E-Commerce: Flipkart Discount Engine
+
+// Open for extension — adding new discount types doesn't modify existing code
+public interface DiscountStrategy {
+    double apply(double price, Order order);
+}
+
+@Component
+public class FestivalDiscount implements DiscountStrategy {
+    @Override
+    public double apply(double price, Order order) {
+        return price * 0.85; // 15% off during festival
+    }
+}
+
+@Component
+public class LoyaltyDiscount implements DiscountStrategy {
+    @Override
+    public double apply(double price, Order order) {
+        return order.getCustomer().getLoyaltyPoints() > 1000 ? price * 0.90 : price;
+    }
+}
+
+@Service
+public class PricingService {
+    private final List<DiscountStrategy> discountStrategies;
+
+    @Autowired
+    public PricingService(List<DiscountStrategy> discountStrategies) {
+        this.discountStrategies = discountStrategies;
+    }
+
+    public double calculateFinalPrice(double basePrice, Order order) {
+        double price = basePrice;
+        for (DiscountStrategy strategy : discountStrategies) {
+            price = strategy.apply(price, order);
+        }
+        return price;
+    }
+}
+
+9. ₹5 Crore Package Level Interview Answer
+
+Interviewer:
+
+"Explain SOLID principles with real-world examples."
+
+5 Crore Level Answer:
+
+SOLID principles are five fundamental design guidelines introduced by Robert C. Martin that help build software that is easy to maintain, extend, and scale. In enterprise applications, these are not optional — they are the foundation of sustainable architecture.
+
+Single Responsibility: Each class has exactly one reason to change. In a payment system, OrderService handles order business logic, EmailService handles notifications, and PaymentService handles payment processing. When the email template changes, only EmailService is modified — OrderService and PaymentService are untouched.
+
+Open/Closed: New behavior is added through extension, not modification. For example, adding a new payment method — say, cryptocurrency — means creating a new CryptoPaymentStrategy class that implements the PaymentStrategy interface. The PaymentProcessor class that dispatches payment doesn't change at all. This is critical in production systems where modifying existing code introduces regression risk.
+
+Liskov Substitution: Subtypes must be fully substitutable for their parent. If OrderProcessor works with a BaseRepository, it must work correctly with any subtype — MySQLOrderRepository, PostgreSQLOrderRepository, or even an InMemoryOrderRepository used in tests — without behavioral surprises.
+
+Interface Segregation: Instead of one massive interface with 20 methods, we create focused interfaces. A ReportGenerator only implements Exportable and Pageable, not methods related to caching or security that are irrelevant to it. This reduces coupling and makes implementations cleaner.
+
+Dependency Inversion: High-level modules should depend on abstractions. OrderService depends on the OrderRepository interface, not on any specific database implementation. Spring's IoC Container is the practical implementation of this principle — it injects the correct concrete implementation at runtime while the dependent class only knows the interface.
+
+Together, SOLID principles make codebases that are testable because dependencies can be mocked, extendable because new features don't require modifying existing code, and maintainable because each component has a clear, narrow purpose.
+
+10. Follow-Up Interview Questions
+
+Q1. What is the difference between Abstraction and Encapsulation?
+
+Abstraction: Hiding what is not necessary for the user. Showing WHAT without showing HOW. Example: BankAccount.withdraw() — user knows it withdraws money, doesn't know internal calculation.
+
+Encapsulation: Wrapping data and behavior together, and restricting access to internal state. Example: balance field is private — can only be changed via validated methods.
+
+Relation: Abstraction focuses on the design level (interfaces, abstract classes). Encapsulation focuses on the implementation level (access modifiers, getters/setters).
+
+Q2. Can you achieve polymorphism without inheritance?
+
+Yes — through interfaces.
+
+Payable payable;
+payable = new CreditCard(); // implements Payable
+payable = new UPI(); // implements Payable
+
+CreditCard and UPI don't inherit from each other.
+Both implement Payable interface.
+Polymorphic behavior achieved through interface.
+
+Q3. What is method overloading vs overriding?
+
+Overloading: Same method name, different parameters in the SAME class. Compile-time decision. Also called static polymorphism.
+
+Overriding: Child class provides specific implementation of parent's method. Same signature. Runtime decision based on actual object type. Also called dynamic polymorphism.
+
+Q4. Why is multiple class inheritance not allowed in Java?
+
+Diamond problem: If class D inherits from B and C, and B and C both override method from A, JVM cannot determine which version to use.
+
+Java solution: Multiple interface implementation allowed (ISP). Interface default methods provide behavior, but if multiple interfaces have same default method, implementing class must override it — removing ambiguity.
+
+Q5. How do SOLID principles relate to Spring Framework?
+
+Every Spring design decision reflects SOLID principles:
+
+SRP: Each Spring module has one purpose — spring-data for database, spring-security for security, spring-web for web.
+OCP: Spring's DispatcherServlet dispatches to handlers without knowing specific handler implementations.
+LSP: Any DataSource implementation (HikariCP, DBCP, H2) can substitute for the DataSource interface.
+ISP: Spring has many focused interfaces — BeanFactory, ApplicationEventPublisher, MessageSource — rather than one massive context interface.
+DIP: IoC Container is the implementation of DIP — high-level services depend on interfaces; container injects implementations.
+
+Q6. What is the Dependency Inversion Principle vs Dependency Injection?
+
+DIP is the principle: High-level modules should not depend on low-level modules. Both depend on abstractions.
+
+DI is the mechanism: Concrete dependencies are provided (injected) from outside rather than created inside the class.
+
+Spring's IoC Container uses DI to implement DIP.
+
+11. Complete Revision Notes
+
+OOP solves problems of procedural programming — tight coupling, no access control, code duplication.
+Four OOP Principles: Encapsulation, Inheritance, Polymorphism, Abstraction.
+Encapsulation: data + behavior in one class + restrict access (private fields, public methods).
+Inheritance: child class acquires parent properties/behavior (IS-A relationship, code reuse).
+Polymorphism: one entity many forms — overloading (compile-time) and overriding (runtime).
+Abstraction: hide implementation details — abstract classes and interfaces.
+Abstract class: partial abstraction, can have concrete methods, single inheritance.
+Interface: full abstraction (conceptually), multiple implementation, CAN-DO capability.
+SOLID — S: Single Responsibility, each class one reason to change.
+SOLID — O: Open/Closed, open for extension closed for modification.
+SOLID — L: Liskov Substitution, subtypes must substitute supertypes without breaking.
+SOLID — I: Interface Segregation, don't force clients to depend on unused methods.
+SOLID — D: Dependency Inversion, depend on abstractions not concretions.
+Method overloading = static polymorphism (compile-time), different parameters.
+Method overriding = dynamic polymorphism (runtime), same signature, different class.
+Multiple class inheritance not in Java due to diamond problem.
+Multiple interface implementation allowed.
+SOLID principles are directly reflected in Spring Framework design.
+Dependency Inversion Principle is implemented by Spring IoC Container via Dependency Injection.
+Encapsulation → Spring beans are POJOs with private fields and public methods.
+Polymorphism → Spring selects correct bean implementation at runtime via DI.
+Abstraction → Spring programming model uses interfaces throughout (Repository, Service, Controller).

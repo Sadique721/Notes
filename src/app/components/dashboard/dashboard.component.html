@@ -1,0 +1,297 @@
+<div class="flex min-h-screen w-full bg-[#f4f6f9] text-[#333333] font-sans overflow-x-hidden antialiased">
+  <!-- ── SIDEBAR ── -->
+  <aside class="w-64 bg-[#1a1c23] text-white/80 flex-shrink-0 flex flex-col justify-between border-r border-[#2d313c] z-10">
+    <div>
+      <!-- Brand Header -->
+      <div class="h-16 flex items-center px-6 gap-3 border-b border-[#2d313c]">
+        <div class="w-2.5 h-2.5 rounded-full bg-[#10E39B]"></div>
+        <span class="font-bold text-sm tracking-wider uppercase text-white">Admin Panel</span>
+      </div>
+
+      <!-- Sidebar Menu -->
+      <nav class="p-4 space-y-1">
+        <a routerLink="/" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-white bg-[#2d313c]/30 border-l-4 border-[#10E39B] transition-all text-xs font-semibold">
+          <svg class="w-4 h-4 text-[#10E39B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Dashboard</span>
+        </a>
+
+        <!-- Sliding Curriculum Drawer trigger -->
+        <button (click)="navService.openCurriculum()" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white cursor-pointer">
+          <svg class="w-4 h-4 text-[#10E39B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          <span>Overall Modules</span>
+        </button>
+        
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M12 4v16M4 12h16"/></svg>
+          <span>API Providers</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6"/></svg>
+          <span>Services</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4 8 4 8-4zM4 12l8 4 8-4M4 17l8 4 8-4"/></svg>
+          <span>Inventory</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          <span>Orders</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100-8 4 4 0 000 8zm14 14v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>Users</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <span>Message</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          <span>Payments</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          <span>Invoices</span>
+        </a>
+
+        <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-white/5 transition-all text-xs text-white/70 hover:text-white">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 18V6M6 12h12"/></svg>
+          <span>Currency</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom Utility Menu -->
+    <div class="p-4 border-t border-[#2d313c]">
+      <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/5 transition-all text-xs hover:text-white text-white/60 mb-1">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span>Settings</span>
+      </a>
+      <a routerLink="/modules" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/5 transition-all text-xs hover:text-white text-white/60 mb-1">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        <span>View Website</span>
+      </a>
+      <a routerLink="/" class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/5 transition-all text-xs hover:text-white text-white/60">
+        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT AREA ── -->
+  <main class="flex-1 flex flex-col min-w-0">
+    <!-- Top Header Row -->
+    <header class="h-16 bg-white border-b border-[#e2e8f0] flex items-center justify-between px-8">
+      <h1 class="font-bold text-lg text-[#1a1c23]">Dashboard</h1>
+      <div class="flex items-center gap-4">
+        <span class="text-xs text-white bg-[#1a1c23]/80 px-3 py-1 rounded-full font-mono uppercase tracking-widest font-semibold flex items-center gap-1.5 border border-[#2d313c]">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#10E39B] animate-pulse"></span>
+          Live Connected
+        </span>
+      </div>
+    </header>
+
+    <!-- Dashboard Panels Grid Container -->
+    <div class="p-8 space-y-8 max-w-7xl w-full mx-auto">
+      
+      <!-- Stats Cards Section -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5">
+        <!-- 1. Users -->
+        <div class="bg-white border border-[#e2e8f0] p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-2 bg-[#d1fae5] text-[#10E39B] rounded-lg">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 100-8 4 4 0 000 8z"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Users</p>
+            <h3 class="text-lg font-bold text-[#1a1c23] mt-0.5">14055</h3>
+          </div>
+        </div>
+
+        <!-- 2. Total Orders -->
+        <div class="bg-white border border-[#e2e8f0] p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-2 bg-[#e0f2fe] text-[#38BDF8] rounded-lg">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Orders</p>
+            <h3 class="text-lg font-bold text-[#1a1c23] mt-0.5">63132</h3>
+          </div>
+        </div>
+
+        <!-- 3. Pending Orders -->
+        <div class="bg-white border border-[#e2e8f0] p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-2 bg-[#fef3c7] text-[#FBBF24] rounded-lg">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Pending Orders</p>
+            <h3 class="text-lg font-bold text-[#1a1c23] mt-0.5">96</h3>
+          </div>
+        </div>
+
+        <!-- 4. Active Services -->
+        <div class="bg-white border border-[#e2e8f0] p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-2 bg-[#fdf2f8] text-[#E879F9] rounded-lg">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Active Services</p>
+            <h3 class="text-lg font-bold text-[#1a1c23] mt-0.5">6896</h3>
+          </div>
+        </div>
+
+        <!-- 5. API Connected -->
+        <div class="bg-white border border-[#e2e8f0] p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-2 bg-[#ecfdf5] text-[#22D3EE] rounded-lg">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 12h16M12 4v16"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">API Connected</p>
+            <h3 class="text-lg font-bold text-[#1a1c23] mt-0.5">11</h3>
+          </div>
+        </div>
+
+        <!-- 6. Total Profits -->
+        <div class="bg-white border border-[#e2e8f0] p-4 rounded-xl flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+          <div class="p-2 bg-[#ecfdf5] text-[#10E39B] rounded-lg">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 18V6"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Profits</p>
+            <h3 class="text-lg font-bold text-[#1a1c23] mt-0.5">5,120,176</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders Panel -->
+      <div class="bg-white border border-[#e2e8f0] rounded-2xl shadow-sm overflow-hidden">
+        <!-- Panel Header, Search, and Tabs -->
+        <div class="p-6 border-b border-[#e2e8f0] space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h3 class="font-bold text-sm text-[#1a1c23] tracking-wide">Recent Orders</h3>
+            
+            <!-- Search Bar -->
+            <div class="relative flex items-center w-full md:w-80">
+              <input 
+                type="text" 
+                placeholder="Search Order ID, customer, service..."
+                [(ngModel)]="searchQuery"
+                class="w-full text-xs pl-8 pr-16 py-2 border border-[#cbd5e1] rounded-lg focus:outline-none focus:border-[#10E39B] bg-[#f8f9fa]"
+              />
+              <svg class="absolute left-2.5 w-4 h-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <button class="absolute right-1 px-3 py-1 bg-[#10E39B] hover:bg-[#0bc283] text-white rounded text-[10px] font-bold transition-colors">
+                Search
+              </button>
+            </div>
+          </div>
+
+          <!-- Status Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1">
+            <button 
+              (click)="selectTab('Pending')"
+              [class]="activeTab === 'Pending' ? 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-[#10E39B] text-white border-[#10E39B]' : 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-white text-[#64748b] hover:text-[#1e293b] border-[#cbd5e1]'"
+            >
+              Pending <span class="ml-1 bg-[#d97706]/10 px-1.5 py-0.5 rounded text-[10px] text-[#d97706]">96</span>
+            </button>
+
+            <button 
+              (click)="selectTab('Processing')"
+              [class]="activeTab === 'Processing' ? 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-[#10E39B] text-white border-[#10E39B]' : 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-white text-[#64748b] hover:text-[#1e293b] border-[#cbd5e1]'"
+            >
+              Processing
+            </button>
+
+            <button 
+              (click)="selectTab('Success')"
+              [class]="activeTab === 'Success' ? 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-[#10E39B] text-white border-[#10E39B]' : 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-white text-[#64748b] hover:text-[#1e293b] border-[#cbd5e1]'"
+            >
+              Success <span class="ml-1 bg-[#059669]/10 px-1.5 py-0.5 rounded text-[10px] text-[#059669]">62132</span>
+            </button>
+
+            <button 
+              (click)="selectTab('Rejected')"
+              [class]="activeTab === 'Rejected' ? 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-[#10E39B] text-white border-[#10E39B]' : 'px-4 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer bg-white text-[#64748b] hover:text-[#1e293b] border-[#cbd5e1]'"
+            >
+              Reject <span class="ml-1 bg-red-600/10 px-1.5 py-0.5 rounded text-[10px] text-red-600">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Orders Data Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-[#f8f9fa] border-b border-[#e2e8f0] text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
+                <th class="px-6 py-3.5">Ref</th>
+                <th class="px-6 py-3.5">User</th>
+                <th class="px-6 py-3.5">Service</th>
+                <th class="px-6 py-3.5">Price</th>
+                <th class="px-6 py-3.5">Status</th>
+                <th class="px-6 py-3.5">Date</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#e2e8f0] text-xs">
+              <tr 
+                *ngFor="let order of filteredOrders" 
+                (click)="navigateToTopic(order.topicSlug)"
+                class="hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <td class="px-6 py-3.5 font-bold text-[#3b82f6] hover:underline">
+                  {{ order.ref }}
+                </td>
+                <td class="px-6 py-3.5 font-medium text-[#1a1c23]">
+                  {{ order.user }}
+                </td>
+                <td class="px-6 py-3.5 text-[#1a1c23]">
+                  {{ order.service }}
+                </td>
+                <td class="px-6 py-3.5 font-mono font-semibold text-[#1a1c23]">
+                  {{ order.price }}
+                </td>
+                <td class="px-6 py-3.5">
+                  <span [class]="order.status === 'Pending' ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fef3c7] text-[#d97706]' : 
+                                 order.status === 'Success' ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#d1fae5] text-[#059669]' : 
+                                 order.status === 'Processing' ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#e0f2fe] text-[#0284c7]' : 
+                                 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#fee2e2] text-[#dc2626]'">
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-3.5 text-[#64748b]">
+                  {{ order.date }}
+                </td>
+              </tr>
+              <tr *ngIf="filteredOrders.length === 0">
+                <td colSpan="6" class="px-6 py-12 text-center text-slate-400 font-mono">
+                  No orders matching the active filters.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls Footer -->
+        <div class="p-4 border-t border-[#e2e8f0] flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#f8f9fa]">
+          <span class="text-xs text-slate-500">
+            Showing 1 to {{ filteredOrders.length }} of 96 orders
+          </span>
+          <div class="flex items-center gap-1">
+            <button class="px-2.5 py-1 border border-[#cbd5e1] rounded hover:bg-[#cbd5e1]/10 text-xs transition-colors cursor-pointer">&lt;</button>
+            <button class="px-2.5 py-1 bg-[#10E39B] text-white rounded text-xs font-bold transition-colors cursor-pointer">1</button>
+            <button class="px-2.5 py-1 border border-[#cbd5e1] rounded hover:bg-[#cbd5e1]/10 text-xs transition-colors cursor-pointer">2</button>
+            <button class="px-2.5 py-1 border border-[#cbd5e1] rounded hover:bg-[#cbd5e1]/10 text-xs transition-colors cursor-pointer">3</button>
+            <span class="px-1 text-xs text-slate-400 font-mono">...</span>
+            <button class="px-2.5 py-1 border border-[#cbd5e1] rounded hover:bg-[#cbd5e1]/10 text-xs transition-colors cursor-pointer">12</button>
+            <button class="px-2.5 py-1 border border-[#cbd5e1] rounded hover:bg-[#cbd5e1]/10 text-xs transition-colors cursor-pointer">&gt;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

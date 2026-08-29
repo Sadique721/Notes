@@ -1,0 +1,773 @@
+---
+title: "Generics"
+slug: "generics"
+moduleSlug: "core-java"
+order: 3
+summaryOneLiner: "Java Generics enable type-safe, reusable code — understanding type erasure, bounded wildcards, and covariance is critical for senior-level Java interviews."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["oop-principles"]
+---
+
+![Keywords: Generics, Type Safety, Subtyping, Compilation | Hint: A type-safe funnel sorting generic objects into their corresponding typed collections without runtime overhead.](/illustrations/topics/generics_hero.gif)
+
+Module 4 → Topic 3 → Generics (Part 1)
+
+1. Generics — Introduction
+
+What problem did Generics solve?
+
+Before Generics — Java 1.4 and earlier (pre-2004)
+
+All collections were raw types:
+
+List list = new ArrayList();
+list.add("Hello");
+list.add(42);       // Can add anything!
+list.add(new Order()); // No type safety!
+
+String s = (String) list.get(0); // Must cast — error-prone
+String s2 = (String) list.get(1); // RUNTIME ClassCastException! 42 is not String
+
+Problems:
+
+No compile-time type safety.
+ClassCastException at runtime.
+No code clarity — what does this list hold?
+Manual casting everywhere.
+
+After Generics — Java 5 (2004)
+
+List<String> list = new ArrayList<>();
+list.add("Hello");
+list.add(42);       // COMPILE ERROR! Type safety enforced
+list.add(new Order()); // COMPILE ERROR!
+
+String s = list.get(0); // No cast needed — type known at compile time
+// ClassCastException IMPOSSIBLE
+
+Definition
+
+Generics are a Java language feature (introduced in Java 5) that enable classes, interfaces, and methods to be parameterized by type, allowing code to be written once and used with different types while maintaining compile-time type safety.
+
+2. Word-by-Word Analysis
+
+Word 1 → Generic
+
+Generic = applicable to many types.
+
+Not specific to one type.
+
+Generic code works correctly with any type that satisfies constraints.
+
+Word 2 → Type Parameter
+
+A placeholder for a type, specified when using the generic class/method.
+
+By convention:
+
+T — Type (general purpose)
+E — Element (used in collections)
+K — Key (used in Maps)
+V — Value (used in Maps)
+N — Number
+R — Return type
+S, U, V — Second, third, fourth types
+
+Word 3 → Parameterized Type
+
+When you provide actual type for type parameter:
+
+List<String> — String is the type argument for E
+Map<String, Integer> — String for K, Integer for V
+Optional<User> — User for T
+
+3. Generic Classes
+
+Define your own generic class:
+
+// Generic container — works for any type
+public class Box<T> {
+    private T value;
+
+    public Box(T value) {
+        this.value = value;
+    }
+
+    public T getValue() {
+        return value;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "Box[" + value + "]";
+    }
+}
+
+Usage:
+
+Box<String> stringBox = new Box<>("Hello");
+String s = stringBox.getValue(); // Returns String — no cast needed
+
+Box<Integer> intBox = new Box<>(42);
+Integer i = intBox.getValue(); // Returns Integer — no cast needed
+
+Box<Order> orderBox = new Box<>(new Order());
+Order o = orderBox.getValue(); // Returns Order — no cast needed
+
+// One implementation — works for ALL types!
+
+Multiple Type Parameters
+
+public class Pair<K, V> {
+    private final K key;
+    private final V value;
+
+    public Pair(K key, V value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    public K getKey() { return key; }
+    public V getValue() { return value; }
+}
+
+Pair<String, Integer> pair = new Pair<>("age", 25);
+String k = pair.getKey();    // "age"
+Integer v = pair.getValue(); // 25
+
+Pair<User, List<Order>> complex = new Pair<>(user, orders);
+
+4. Generic Interfaces
+
+public interface Repository<T, ID> {
+    Optional<T> findById(ID id);
+    List<T> findAll();
+    T save(T entity);
+    void delete(ID id);
+}
+
+public class UserRepository implements Repository<User, Long> {
+    @Override
+    public Optional<User> findById(Long id) { ... }
+
+    @Override
+    public List<User> findAll() { ... }
+
+    @Override
+    public User save(User user) { ... }
+
+    @Override
+    public void delete(Long id) { ... }
+}
+
+This is EXACTLY how Spring Data JPA repositories work:
+
+// Spring Data JPA
+public interface UserRepository extends JpaRepository<User, Long> {
+    // JpaRepository<T, ID> is generic
+    // T = User, ID = Long
+    Optional<User> findByEmail(String email);
+}
+
+5. Generic Methods
+
+A method can have its own type parameters, independent of class:
+
+public class Utility {
+    // Generic method — T is method's own type parameter
+    public static <T> void swap(T[] array, int i, int j) {
+        T temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+
+    // Generic method returning generic type
+    public static <T> List<T> repeat(T item, int times) {
+        List<T> result = new ArrayList<>();
+        for (int i = 0; i < times; i++) {
+            result.add(item);
+        }
+        return result;
+    }
+}
+
+Usage:
+
+Integer[] numbers = {1, 2, 3, 4, 5};
+Utility.swap(numbers, 0, 4); // [5, 2, 3, 4, 1]
+
+String[] names = {"Alice", "Bob"};
+Utility.swap(names, 0, 1); // ["Bob", "Alice"]
+
+List<String> threeHellos = Utility.repeat("Hello", 3);
+// ["Hello", "Hello", "Hello"]
+
+Type inference — Java infers T from arguments:
+
+// Explicit type (not needed usually)
+List<String> result = Utility.<String>repeat("Hi", 3);
+
+// Type inferred from argument — preferred
+List<String> result = Utility.repeat("Hi", 3); // T inferred as String
+
+6. Bounded Type Parameters
+
+Upper Bound — extends
+
+Restrict T to be a specific type or its subtypes.
+
+// T must be Number or a subtype (Integer, Long, Double, etc.)
+public static <T extends Number> double sum(List<T> list) {
+    double total = 0;
+    for (T item : list) {
+        total += item.doubleValue(); // Can call Number methods!
+    }
+    return total;
+}
+
+Usage:
+
+sum(List.of(1, 2, 3));           // Integer extends Number ✓
+sum(List.of(1.5, 2.5, 3.5));     // Double extends Number ✓
+sum(List.of("a", "b"));          // COMPILE ERROR! String does not extend Number
+
+Multiple Bounds:
+
+// T must extend Comparable AND Serializable
+public static <T extends Comparable<T> & Serializable> T findMax(List<T> list) {
+    return list.stream().max(Comparator.naturalOrder()).orElseThrow();
+}
+
+Lower Bound — super (only for wildcards)
+
+See Wildcards section below.
+
+7. Wildcards — The Most Complex Part of Generics
+
+Wildcard = ? — represents an unknown type.
+
+Three types:
+
+Wildcard 1 — Unbounded: <?>
+
+"Any type"
+
+public void printList(List<?> list) {
+    for (Object item : list) {
+        System.out.println(item); // Can print any type
+    }
+}
+
+printList(new ArrayList<String>());  // Works
+printList(new ArrayList<Integer>()); // Works
+printList(new ArrayList<Order>());   // Works
+
+Note: Cannot add to List<?> (except null).
+
+List<?> list = new ArrayList<String>();
+list.add("Hello"); // COMPILE ERROR! Cannot add to wildcard list
+list.add(null);    // OK
+
+Wildcard 2 — Upper Bounded: <? extends T>
+
+"T or any subtype of T"
+
+// Works with List<Number>, List<Integer>, List<Double>, etc.
+public double sumNumbers(List<? extends Number> list) {
+    double sum = 0;
+    for (Number n : list) { // Can READ as Number
+        sum += n.doubleValue();
+    }
+    return sum;
+}
+
+List<Integer> ints = List.of(1, 2, 3);
+List<Double> doubles = List.of(1.1, 2.2, 3.3);
+
+sumNumbers(ints);    // Works — Integer extends Number
+sumNumbers(doubles); // Works — Double extends Number
+
+Note: Cannot add to upper-bounded wildcard list (PECS rule).
+
+Wildcard 3 — Lower Bounded: <? super T>
+
+"T or any supertype of T"
+
+// Works with List<Integer>, List<Number>, List<Object>
+public void addIntegers(List<? super Integer> list) {
+    list.add(1);   // Can ADD Integer or subtypes
+    list.add(2);
+    list.add(3);
+}
+
+List<Integer> ints = new ArrayList<>();
+List<Number> numbers = new ArrayList<>();
+List<Object> objects = new ArrayList<>();
+
+addIntegers(ints);    // Works — Integer is Integer
+addIntegers(numbers); // Works — Integer super is Number
+addIntegers(objects); // Works — Integer super is Object
+
+8. PECS Principle — Producer Extends, Consumer Super
+
+The most important wildcard rule.
+
+PECS = Producer Extends, Consumer Super
+
+Producer (source you READ from) → use <? extends T>
+Consumer (destination you WRITE to) → use <? super T>
+
+Example — Collections.copy():
+
+// dest consumes (we write to it) → super
+// src produces (we read from it) → extends
+public static <T> void copy(List<? super T> dest, List<? extends T> src) {
+    for (T e : src) {  // Read from src
+        dest.add(e);   // Write to dest
+    }
+}
+
+Real-world example:
+
+// Sort with custom comparator
+public static <T> void sort(List<T> list, Comparator<? super T> comparator) {
+    // Comparator CONSUMES T to compare — super T
+}
+
+List<Integer> ints = new ArrayList<>(List.of(3, 1, 2));
+Comparator<Number> numComp = Comparator.comparingDouble(Number::doubleValue);
+sort(ints, numComp); // Works! Comparator<Number> is ? super Integer
+
+9. Type Erasure — Critical Internal Mechanism
+
+This is THE most important generic concept for senior interviews.
+
+What is Type Erasure?
+
+At RUNTIME, all generic type information is ERASED.
+
+The JVM does not know about generic types at runtime.
+
+Generics exist only at compile time for type checking.
+
+After compilation, all type parameters are replaced with:
+
+Object (for unbounded parameters)
+The upper bound class (for bounded parameters)
+
+Before compilation (source code):
+
+List<String> strings = new ArrayList<>();
+strings.add("Hello");
+String s = strings.get(0);
+
+After compilation (what JVM sees — bytecode equivalent):
+
+List strings = new ArrayList(); // Raw type!
+strings.add("Hello");
+String s = (String) strings.get(0); // Compiler inserted cast
+
+The compiler:
+
+1. Checks type safety (at compile time).
+2. Erases type parameters.
+3. Inserts casts where needed.
+
+Type Erasure Consequences
+
+Consequence 1 — Cannot use instanceof with generic type:
+
+// COMPILE ERROR
+if (obj instanceof List<String>) { }
+
+// Must use raw type
+if (obj instanceof List<?>) { }
+
+Consequence 2 — Cannot create generic arrays:
+
+// COMPILE ERROR
+List<String>[] array = new ArrayList<String>[10];
+
+// Workaround (unchecked cast)
+@SuppressWarnings("unchecked")
+List<String>[] array = new ArrayList[10];
+
+Consequence 3 — Cannot instantiate type parameter:
+
+public class Container<T> {
+    public T create() {
+        return new T(); // COMPILE ERROR — T erased to Object at runtime
+    }
+}
+
+// Workaround — pass Class<T>
+public class Container<T> {
+    private final Class<T> type;
+
+    public Container(Class<T> type) {
+        this.type = type;
+    }
+
+    public T create() throws Exception {
+        return type.getDeclaredConstructor().newInstance(); // Reflection
+    }
+}
+
+Consequence 4 — Cannot overload with only generic type different:
+
+// COMPILE ERROR — after erasure, both become void process(List list)
+public void process(List<String> list) { }
+public void process(List<Integer> list) { }
+
+Consequence 5 — Reflection cannot see generic type at runtime:
+
+List<String> list = new ArrayList<>();
+list.getClass().getTypeParameters(); // Returns [E] — parameter name, not String
+
+// But: field/method/parameter generic types accessible via reflection:
+class MyClass {
+    List<String> strings; // Accessible via field.getGenericType()
+}
+
+Field field = MyClass.class.getDeclaredField("strings");
+ParameterizedType type = (ParameterizedType) field.getGenericType();
+Type[] args = type.getActualTypeArguments();
+// args[0] = String.class — accessible because it's in class signature, not runtime
+
+10. Reifiable Types
+
+A reifiable type is one whose full type information is available at runtime.
+
+Reifiable types:
+
+Primitive types: int, long, double
+Non-generic classes: String, Integer, Order
+Raw types: List, Map
+Unbounded wildcards: List<?>, Map<?,?>
+Arrays of reifiable types: String[], int[]
+
+Non-reifiable types (type info erased):
+
+List<String>
+Map<String, Integer>
+List<? extends Number>
+
+11. Generic Collections in Java — Full List
+
+Java Collections Framework uses generics throughout:
+
+// List
+List<E>
+    ├── ArrayList<E>
+    ├── LinkedList<E>
+    └── Vector<E>
+
+// Set
+Set<E>
+    ├── HashSet<E>
+    ├── LinkedHashSet<E>
+    └── TreeSet<E>
+
+// Map
+Map<K, V>
+    ├── HashMap<K, V>
+    ├── LinkedHashMap<K, V>
+    └── TreeMap<K, V>
+
+// Queue
+Queue<E>
+    ├── PriorityQueue<E>
+    └── ArrayDeque<E>
+
+// Stack
+Deque<E>
+    └── ArrayDeque<E>
+
+12. Generic Patterns in Spring Framework
+
+Spring uses Generics extensively.
+
+Pattern 1 — Generic Repository
+
+// Spring Data JPA
+public interface JpaRepository<T, ID> extends Repository<T, ID> {
+    Optional<T> findById(ID id);
+    List<T> findAll();
+    T save(T entity);
+    void delete(T entity);
+    long count();
+}
+
+// Usage
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+}
+
+Pattern 2 — Generic RestTemplate
+
+RestTemplate template = new RestTemplate();
+
+// Without generic — returns Object, requires cast
+Object result = template.getForObject("http://api/user/1", Object.class);
+
+// With generic — type safe
+ResponseEntity<User> response = template.getForEntity("http://api/user/1", User.class);
+User user = response.getBody(); // No cast needed
+
+Pattern 3 — Generic ResponseEntity
+
+@GetMapping("/orders/{id}")
+public ResponseEntity<Order> getOrder(@PathVariable Long id) {
+    Order order = orderService.findById(id);
+    return ResponseEntity.ok(order);
+}
+
+@GetMapping("/orders")
+public ResponseEntity<List<Order>> getAllOrders() {
+    return ResponseEntity.ok(orderService.findAll());
+}
+
+Pattern 4 — TypeToken / ParameterizedTypeReference
+
+// Problem: restTemplate cannot infer List<Order> due to type erasure
+List<Order> orders = restTemplate.getForObject("/orders", List.class); // Raw!
+
+// Solution: ParameterizedTypeReference preserves generic type
+ParameterizedTypeReference<List<Order>> typeRef = new ParameterizedTypeReference<>(){};
+ResponseEntity<List<Order>> response = restTemplate.exchange(
+    "/orders", HttpMethod.GET, null, typeRef);
+List<Order> orders = response.getBody();
+
+13. Real-World Enterprise Examples
+
+Example 1 — Generic Result Wrapper (Netflix Pattern)
+
+public class ApiResponse<T> {
+    private final T data;
+    private final String status;
+    private final String message;
+    private final long timestamp;
+
+    private ApiResponse(T data, String status, String message) {
+        this.data = data;
+        this.status = status;
+        this.message = message;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>(data, "SUCCESS", null);
+    }
+
+    public static <T> ApiResponse<T> error(String message) {
+        return new ApiResponse<>(null, "ERROR", message);
+    }
+
+    // Getters...
+}
+
+@GetMapping("/orders/{id}")
+public ApiResponse<Order> getOrder(@PathVariable Long id) {
+    Order order = orderService.findById(id);
+    return ApiResponse.success(order);
+}
+
+@GetMapping("/orders")
+public ApiResponse<List<Order>> getAllOrders() {
+    return ApiResponse.success(orderService.findAll());
+}
+
+Example 2 — Generic Event System (Kafka Pattern)
+
+public class DomainEvent<T> {
+    private final String eventType;
+    private final T payload;
+    private final Instant occurredAt;
+
+    public DomainEvent(String eventType, T payload) {
+        this.eventType = eventType;
+        this.payload = payload;
+        this.occurredAt = Instant.now();
+    }
+
+    public T getPayload() { return payload; }
+}
+
+public class OrderPlacedEvent extends DomainEvent<Order> {
+    public OrderPlacedEvent(Order order) {
+        super("ORDER_PLACED", order);
+    }
+}
+
+public class PaymentProcessedEvent extends DomainEvent<PaymentResult> {
+    public PaymentProcessedEvent(PaymentResult result) {
+        super("PAYMENT_PROCESSED", result);
+    }
+}
+
+Example 3 — Generic Service Layer
+
+public interface CrudService<T, ID> {
+    T create(T entity);
+    Optional<T> findById(ID id);
+    List<T> findAll();
+    T update(ID id, T entity);
+    void delete(ID id);
+}
+
+public abstract class AbstractCrudService<T, ID, R extends JpaRepository<T, ID>>
+        implements CrudService<T, ID> {
+    protected final R repository;
+
+    protected AbstractCrudService(R repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public T create(T entity) { return repository.save(entity); }
+
+    @Override
+    public Optional<T> findById(ID id) { return repository.findById(id); }
+
+    @Override
+    public List<T> findAll() { return repository.findAll(); }
+
+    @Override
+    public void delete(ID id) { repository.deleteById(id); }
+}
+
+@Service
+public class UserService extends AbstractCrudService<User, Long, UserRepository> {
+    @Autowired
+    public UserService(UserRepository repository) {
+        super(repository);
+    }
+
+    @Override
+    public User update(Long id, User user) {
+        // Custom update logic
+        User existing = repository.findById(id).orElseThrow();
+        existing.setName(user.getName());
+        return repository.save(existing);
+    }
+}
+
+14. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain type erasure in Java Generics. What are its implications?"
+
+5 Crore Answer:
+
+Type erasure is the mechanism by which the Java compiler removes all generic type information from the compiled bytecode. It was a deliberate design decision to maintain backward compatibility with Java code written before generics were introduced in Java 5.
+
+The process works in two steps: First, the compiler performs type checking at source level — enforcing that only Strings go into a List<String>, for example. Second, during compilation, it erases type parameters — replacing T with Object for unbounded parameters or the upper bound class for bounded ones — and inserts explicit casts where values are retrieved.
+
+This means at runtime, List<String> and List<Integer> are identical — both are just List. The JVM has no knowledge of the generic type argument.
+
+This creates several important implications that engineers must understand.
+
+First, you cannot use instanceof with parameterized types — the check would always evaluate against the raw type List, so List<String> and List<Integer> are indistinguishable. The compiler prevents this.
+
+Second, you cannot create instances of type parameters. new T() is illegal because after erasure, T is Object — you'd be calling new Object(). The workaround is to pass a Class<T> reference and use reflection.
+
+Third, you cannot create generic arrays directly — new ArrayList<String>[10] is prohibited because array covariance combined with type erasure creates a hole in the type system.
+
+Fourth, you can't overload methods based solely on generic type — after erasure, void process(List<String>) and void process(List<Integer>) have identical signatures.
+
+Fifth — and most practically relevant — frameworks like Jackson, Spring's RestTemplate, and Hibernate's TypedQuery need to know generic types at runtime for deserialization. They work around type erasure using the supertype token pattern: creating an anonymous subclass like new TypeToken<List<Order>>(){} — the compiler preserves the generic type in the class definition's generic supertype, which is accessible via reflection even at runtime.
+
+Understanding type erasure is essential for designing type-safe generic APIs and debugging ClassCastException issues that appear at unexpected locations in the code.
+
+15. Follow-Up Interview Questions
+
+Q1. What is the difference between List<Object> and List<?>?
+
+List<Object>: A specific list that can contain any object. You can add any object to it.
+List<?>: An unknown-type list. You don't know what type it holds. Cannot add to it (except null). Used for read-only operations.
+
+List<Object> can receive List<Object> but NOT List<String> (generics are invariant).
+List<?> can receive List<String>, List<Integer>, List<Object> — any parameterized list.
+
+Q2. Why are Java generics invariant (unlike arrays)?
+
+Arrays are covariant: String[] is a subtype of Object[].
+
+Number[] numbers = new Integer[3]; // Legal
+numbers[0] = 1.5; // ArrayStoreException at RUNTIME — bad!
+
+If generics were covariant:
+
+List<Number> numbers = new ArrayList<Integer>(); // If this were legal
+numbers.add(1.5); // ClassCastException later — type safety violated
+
+Java made generics invariant to prevent this — type errors are caught at compile time, not runtime.
+
+Q3. What is a raw type and why is it dangerous?
+
+Raw type = using a generic class without type argument: List instead of List<String>.
+
+Dangerous because:
+
+All type safety is lost.
+Adding wrong types to raw collection — no compile error.
+ClassCastException at runtime when retrieving.
+Code that uses raw types generates "unchecked" warnings.
+
+Never use raw types in new code.
+
+Q4. What is the difference between <T extends Comparable<T>> and <T extends Comparable<? super T>>?
+
+<T extends Comparable<T>>: T must be comparable to itself.
+
+Works for: Integer (implements Comparable<Integer>).
+Fails for: Manager extends Employee where Employee implements Comparable<Employee>.
+Manager doesn't implement Comparable<Manager> — it uses Employee's Comparable.
+
+<T extends Comparable<? super T>>: T must be comparable to itself OR any supertype.
+
+Works for: Manager — because Employee implements Comparable<Employee>, and Employee is a super of Manager.
+
+This is why Collections.sort() uses <T extends Comparable<? super T>>.
+
+Q5. How does Jackson handle generic types for JSON deserialization given type erasure?
+
+Jackson uses TypeReference:
+
+List<Order> orders = objectMapper.readValue(json, new TypeReference<List<Order>>(){});
+
+new TypeReference<List<Order>>(){} creates an anonymous subclass.
+The Java spec preserves generic type information in supertype tokens.
+Jackson reads the generic signature from the anonymous class's supertype at runtime.
+This is the standard workaround for generic type erasure in deserialization.
+
+16. Complete Revision Notes
+
+Generics introduced in Java 5 (2004) — type-safe, reusable code without casting.
+Type parameters: T, E, K, V, N, R by convention.
+Generic classes: class Box<T> — parameterized by type T.
+Generic interfaces: interface Repository<T, ID> — Spring Data JPA pattern.
+Generic methods: <T> void method(T arg) — method's own type parameter.
+Bounded type parameters: <T extends Number> — T must be Number or subtype.
+Multiple bounds: <T extends Comparable<T> & Serializable>.
+Wildcards: ? represents unknown type.
+Unbounded wildcard: <?> — any type, read-only.
+Upper bounded wildcard: <? extends T> — T or subtypes — producer, read.
+Lower bounded wildcard: <? super T> — T or supertypes — consumer, write.
+PECS: Producer Extends, Consumer Super.
+Generics are invariant — List<String> is NOT a subtype of List<Object>.
+Arrays are covariant — String[] IS a subtype of Object[] (dangerous).
+Type erasure: compile-time check, runtime erasure to raw types.
+After erasure: T → Object (unbounded) or upper bound class.
+Cannot: instanceof with parameterized types, create generic arrays, new T(), overload on generic type only.
+Supertype token pattern: anonymous subclass preserves generic type for runtime reflection.
+Used by: TypeReference<T> (Jackson), ParameterizedTypeReference<T> (Spring).
+Spring Data JPA: JpaRepository<T, ID> — generics make it work for any entity/ID type.
+Raw types are dangerous — avoid in new code — use unchecked warnings as code smell.
+<T extends Comparable<? super T>> more flexible than <T extends Comparable<T>> — preferred in library code.

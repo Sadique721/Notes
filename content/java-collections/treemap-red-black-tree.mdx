@@ -1,0 +1,387 @@
+---
+title: "TreeMap and Red-Black Tree"
+slug: "treemap-red-black-tree"
+moduleSlug: "java-collections"
+order: 4
+summaryOneLiner: "TreeMap uses a Red-Black Tree internally to maintain sorted key order with O(log n) operations — understanding its self-balancing mechanism is critical for senior data structure interviews."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["hashmap-internals", "collection-hierarchy"]
+---
+
+Module 5 → Topic 4 → TreeMap and Red-Black Tree (Part 1)
+
+1. TreeMap — Introduction
+
+What is TreeMap?
+
+TreeMap<K, V> is a Map implementation that:
+
+Keeps all keys SORTED (by natural order or custom Comparator).
+Provides O(log n) time for all operations (get, put, remove, containsKey).
+Implements NavigableMap — additional navigation operations.
+Is NOT thread-safe.
+
+When to use TreeMap vs HashMap:
+
+HashMap: O(1) average. No ordering. Most common.
+TreeMap: O(log n). Sorted by key. Use when order matters.
+
+TreeMap use cases:
+
+Sorted leaderboard / rankings.
+Calendar/scheduling (sorted by date keys).
+Range queries (headMap, tailMap, subMap).
+First/last key lookups (firstKey, lastKey).
+Floor/ceiling/lower/higher key operations.
+
+Definition
+
+TreeMap<K,V> is a Red-Black tree based NavigableMap implementation that stores key-value pairs in sorted key order, providing O(log n) time complexity for all fundamental operations.
+
+2. Red-Black Tree — Core Data Structure
+
+What is a Red-Black Tree?
+
+A Binary Search Tree (BST) with self-balancing rules.
+
+Problem with plain BST:
+
+Worst case: Sorted insertions create a linear chain (degenerate tree).
+
+Insert 1, 2, 3, 4, 5 in order:
+1
+ \
+  2
+   \
+    3
+     \
+      4
+       \
+        5
+
+This is a linked list! get() is O(n), not O(log n).
+
+Red-Black Tree solution:
+
+Self-balancing.
+
+After every insert and delete, automatically rebalances.
+
+Always O(log n) — guaranteed.
+
+3. Red-Black Tree Properties
+
+A Red-Black Tree satisfies these 5 properties:
+
+Property 1 — Every node is RED or BLACK.
+
+Property 2 — Root is BLACK.
+
+Property 3 — NIL (leaf) nodes are BLACK.
+
+All NULL pointers treated as BLACK NIL nodes.
+
+Property 4 — If a node is RED, both children are BLACK.
+
+No two consecutive red nodes.
+RED-RED violation must be fixed.
+
+Property 5 — All paths from root to NIL have same number of BLACK nodes.
+
+"Black height" is uniform.
+
+These properties together ensure:
+
+Longest path from root to leaf: ≤ 2 × shortest path.
+Tree height: ≤ 2 log₂(n+1).
+All operations: O(log n) guaranteed.
+
+4. Red-Black Tree Node Structure (Java)
+
+// Entry class inside TreeMap
+static final class Entry<K,V> implements Map.Entry<K,V> {
+    K key;
+    V value;
+    Entry<K,V> left;    // Left child
+    Entry<K,V> right;   // Right child
+    Entry<K,V> parent;  // Parent (for upward traversal)
+    boolean color;      // true = BLACK, false = RED
+
+    Entry(K key, V value, Entry<K,V> parent) {
+        this.key = key;
+        this.value = value;
+        this.parent = parent;
+        this.color = BLACK;
+    }
+}
+
+static final boolean RED = false;
+static final boolean BLACK = true;
+
+5. Insertion and Rebalancing
+
+When inserting a new node:
+
+Step 1: Insert like normal BST (find position, create node).
+Step 2: Color new node RED.
+Step 3: Fix Red-Black violations (using rotations and recoloring).
+
+Violations after insert:
+
+If parent is BLACK: No violation. Done.
+If parent is RED: RED-RED violation!
+
+Case 1 — Uncle is RED (recolor):
+
+       B(G)             R(G)
+      / \              / \
+   R(P) R(U)  →    B(P) B(U)
+   /                /
+ R(N)             R(N)
+
+Recolor: Parent → BLACK, Uncle → BLACK, Grandparent → RED.
+Move problem up: Now G is RED — check G with G's parent.
+
+Case 2 — Uncle is BLACK, node is "outer" child (rotate):
+
+    B(G)              B(P)
+   /                 / \
+  R(P)      →    R(N)  R(G)
+ /
+R(N)
+
+Left rotation at G. Swap colors of P and G.
+
+Case 3 — Uncle is BLACK, node is "inner" child:
+
+    B(G)              B(G)
+   /                 /
+  R(P)      →    R(N)      → (then same as Case 2)
+   \             /
+    R(N)        R(P)
+
+Right rotation at P to convert to Case 2.
+
+6. Rotation Operations
+
+Left Rotation at X:
+
+       X                  Y
+      / \                / \
+     A    Y    →       X    C
+         / \          / \
+        B    C       A    B
+
+Node Y takes X's place. X becomes Y's left child.
+
+Right Rotation at Y:
+
+       Y                X
+      / \              / \
+     X   C    →      A    Y
+    / \                  / \
+   A   B                B    C
+
+Rotations maintain BST property (left < parent < right).
+Rotations are O(1) — just pointer changes.
+
+7. TreeMap Navigation Operations
+
+TreeMap implements NavigableMap:
+
+TreeMap<Integer, String> map = new TreeMap<>();
+map.put(10, "ten");
+map.put(20, "twenty");
+map.put(30, "thirty");
+map.put(40, "forty");
+map.put(50, "fifty");
+
+// First and Last
+map.firstKey();             // 10
+map.lastKey();              // 50
+map.firstEntry();           // Entry(10, "ten")
+map.lastEntry();            // Entry(50, "fifty")
+
+// Head and Tail
+map.headMap(30);            // {10="ten", 20="twenty"} (strictly < 30)
+map.headMap(30, true);      // {10="ten", 20="twenty", 30="thirty"} (inclusive)
+map.tailMap(30);            // {30="thirty", 40="forty", 50="fifty"} (>= 30)
+map.tailMap(30, false);     // {40="forty", 50="fifty"} (strictly > 30)
+
+// Subrange
+map.subMap(20, 40);         // {20="twenty", 30="thirty"} (20 <= k < 40)
+
+// Floor/Ceiling (nearest key)
+map.floorKey(25);           // 20 (greatest key <= 25)
+map.ceilingKey(25);         // 30 (smallest key >= 25)
+map.lowerKey(30);           // 20 (greatest key < 30 strictly)
+map.higherKey(30);          // 40 (smallest key > 30 strictly)
+
+// Descending
+map.descendingKeySet();     // [50, 40, 30, 20, 10]
+map.descendingMap();        // {50="fifty", 40="forty", ...}
+
+// Poll (remove and return)
+map.pollFirstEntry();       // Removes and returns Entry(10, "ten")
+map.pollLastEntry();        // Removes and returns Entry(50, "fifty")
+
+8. Comparator and Comparable
+
+TreeMap orders keys by:
+
+Natural order: Keys implement Comparable<K>.
+
+// Integer, String, Date, LocalDate all implement Comparable
+TreeMap<String, Integer> sortedByName = new TreeMap<>();
+
+Custom Comparator:
+
+// Sort users by age
+TreeMap<User, String> sortedByAge = new TreeMap<>(
+    Comparator.comparingInt(User::getAge)
+);
+
+// Sort strings by length, then alphabetically
+TreeMap<String, Integer> sortedByLength = new TreeMap<>(
+    Comparator.comparingInt(String::length).thenComparing(Comparator.naturalOrder())
+);
+
+Reverse order:
+
+TreeMap<Integer, String> descendingMap = new TreeMap<>(Comparator.reverseOrder());
+
+9. Real-World Enterprise Examples
+
+Example 1 — Leaderboard (Game/Trading)
+
+// Score leaderboard — sorted by score (descending)
+TreeMap<Integer, Set<Player>> leaderboard = new TreeMap<>(Comparator.reverseOrder());
+
+public void updateScore(Player player, int newScore) {
+    // Remove from old position
+    if (player.getCurrentScore() > 0) {
+        leaderboard.get(player.getCurrentScore()).remove(player);
+    }
+
+    // Add to new position
+    leaderboard.computeIfAbsent(newScore, k -> new TreeSet<>()).add(player);
+    player.setCurrentScore(newScore);
+}
+
+public List<Player> getTopN(int n) {
+    List<Player> result = new ArrayList<>();
+    for (Set<Player> players : leaderboard.values()) {
+        result.addAll(players);
+        if (result.size() >= n) break;
+    }
+    return result.subList(0, Math.min(n, result.size()));
+}
+
+Example 2 — Scheduling System
+
+// Task scheduler — sorted by execution time
+TreeMap<Instant, List<Task>> schedule = new TreeMap<>();
+
+public void scheduleTask(Task task, Instant executionTime) {
+    schedule.computeIfAbsent(executionTime, k -> new ArrayList<>()).add(task);
+}
+
+public List<Task> getOverdueTasks() {
+    // All tasks scheduled before now
+    return schedule.headMap(Instant.now()).values().stream()
+        .flatMap(List::stream)
+        .collect(Collectors.toList());
+}
+
+public Optional<Task> getNextTask() {
+    if (schedule.isEmpty()) return Optional.empty();
+    return Optional.of(schedule.firstEntry().getValue().get(0));
+}
+
+Example 3 — Stock Price History
+
+// Price at any timestamp
+TreeMap<Instant, BigDecimal> priceHistory = new TreeMap<>();
+
+public BigDecimal getPriceAt(Instant timestamp) {
+    // Get price at exact time OR nearest before that time
+    Map.Entry<Instant, BigDecimal> entry = priceHistory.floorEntry(timestamp);
+    if (entry == null) throw new IllegalStateException("No price history before " + timestamp);
+    return entry.getValue();
+}
+
+public SortedMap<Instant, BigDecimal> getPriceRange(Instant from, Instant to) {
+    return priceHistory.subMap(from, true, to, true);
+}
+
+Example 4 — IP Range Lookup
+
+// Map IP ranges to ISP names (approximation)
+TreeMap<Long, String> ipToIsp = new TreeMap<>();
+
+public String getIspForIp(long ipAddress) {
+    Map.Entry<Long, String> entry = ipToIsp.floorEntry(ipAddress);
+    return entry != null ? entry.getValue() : "Unknown";
+}
+
+10. TreeSet (Uses TreeMap Internally)
+
+TreeSet is just a wrapper around TreeMap:
+
+TreeSet<E> = TreeMap<E, Object> (same sentinel PRESENT value as HashSet)
+
+// All TreeSet operations are TreeMap key operations
+set.add("hello");      → map.put("hello", PRESENT);
+set.contains("hello"); → map.containsKey("hello");
+set.first();           → map.firstKey();
+set.headSet("m");      → map.headMap("m").keySet();
+
+11. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"What is a Red-Black Tree? Why does TreeMap use it? What are the complexity guarantees?"
+
+5 Crore Answer:
+
+A Red-Black Tree is a self-balancing Binary Search Tree that maintains a guaranteed O(log n) height through a set of structural invariants enforced via colorings and rotations.
+
+The BST property — left subtree keys < root < right subtree keys — ensures efficient search. But a plain BST can degenerate: inserting a sorted sequence creates a linked list with O(n) operations. Red-Black Trees prevent this through automatic rebalancing.
+
+The five invariants: every node is red or black; the root is black; all NULL sentinels are black; a red node's children must both be black (no consecutive reds); and every path from any node to its descendant NULL nodes has the same number of black nodes.
+
+These constraints together bound the tree height to 2 log₂(n+1). This means the longest possible path (alternating red-black) is at most twice the shortest (all black), keeping all operations — search, insert, delete — at O(log n) in all cases including worst case, unlike HashMap's O(n) worst case.
+
+TreeMap uses Red-Black Tree because it maintains sorted key order required by SortedMap and NavigableMap interfaces — operations like firstKey(), lastKey(), floorKey(), headMap(), and subMap() are efficient precisely because the tree is sorted.
+
+On insert: the new node is colored red, then violations are fixed by checking uncle color. If uncle is red: recolor (propagate upward). If uncle is black: rotate (one or two rotations, then recolor). At most 2 rotations per insert — O(log n) total.
+
+On delete: more complex, involving double-black fixup, but still O(log n).
+
+TreeMap is ideal for: sorted iteration, range queries (stock price between timestamps), scheduling (next task to execute), and floor/ceiling key lookups (IP range lookups, interpolation).
+
+For unsorted key-value storage with O(1) average access, HashMap is preferred.
+
+12. Complete Revision Notes
+
+TreeMap: sorted keys, O(log n) all ops. Uses Red-Black Tree internally.
+HashMap vs TreeMap: O(1) avg vs O(log n). No order vs sorted. Most tasks use HashMap.
+Red-Black Tree: self-balancing BST. 5 invariants guarantee O(log n) height.
+RB properties: nodes are red/black; root=black; null=black; red→both children black; all root-to-null paths have same black count.
+Height: ≤ 2 log₂(n+1) — much better than plain BST's O(n) worst case.
+Rotation: O(1) pointer relink. Maintains BST property. Fixes invariant violations.
+Insert: color new node RED, fix RED-RED violation via recolor/rotate. At most 2 rotations.
+Delete: more complex, involves double-black fixup.
+TreeMap navigation: firstKey/lastKey, headMap/tailMap/subMap, floorKey/ceilingKey/lowerKey/higherKey.
+Inclusive/exclusive: headMap(k) exclusive, headMap(k, true) inclusive.
+TreeSet: backed by TreeMap<E, Object>. Same singleton PRESENT value pattern as HashSet.
+Custom ordering: TreeMap(Comparator.comparingInt(User::getAge)) — comparator replaces Comparable.
+Null keys: NOT allowed in TreeMap (compareTo(null) throws NullPointerException).
+Null values: allowed (unlike ConcurrentHashMap).
+Not thread-safe: use Collections.synchronizedSortedMap() or ConcurrentSkipListMap.
+ConcurrentSkipListMap: concurrent sorted map alternative. O(log n) ops.
+Use cases: leaderboard (reverse sorted score), scheduler (sorted by time), price history (floor entry), IP lookup.
+SortedMap subview: headMap/tailMap/subMap return VIEWS — changes to view reflect in original.
+pollFirstEntry/pollLastEntry: atomic remove-and-return for processing sorted entries.
+Java 8+ EntrySet forEach: works fine on TreeMap — maintains sorted order during iteration.

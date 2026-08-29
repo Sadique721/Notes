@@ -1,0 +1,363 @@
+---
+title: "Class Loader"
+slug: "class-loader"
+moduleSlug: "jvm-internals"
+order: 4
+summaryOneLiner: "Java ClassLoader is the mechanism that loads .class files into the JVM — understanding the delegation hierarchy, custom loaders, and class isolation is essential for framework and library developers."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["memory-management"]
+---
+
+Module 7 → Topic 4 → Class Loader (Part 1)
+
+1. Class Loader — Introduction
+
+What is a Class Loader?
+
+Java classes are not all loaded when JVM starts.
+
+Classes are loaded on demand — when first referenced.
+
+ClassLoader is responsible for:
+
+Finding .class files (on classpath, in JARs, over network, etc.).
+Reading the bytecode.
+Parsing and verifying.
+Creating the java.lang.Class object in the Metaspace.
+Making the class available for use.
+
+Why ClassLoader Matters for Senior Engineers:
+
+Spring framework: ClassLoader isolation between modules.
+OSGI: Dynamic module loading/unloading.
+Hot deployment: Reloading classes without restarting JVM.
+Plugin systems: Loading third-party code safely.
+ClassCastException mysteries: Same class loaded by different ClassLoaders.
+Memory leaks: ClassLoader not garbage collected.
+
+2. ClassLoader Hierarchy
+
+Three built-in ClassLoaders:
+
+Bootstrap ClassLoader
+    │
+    └── Extension ClassLoader (Platform ClassLoader in Java 9+)
+            │
+            └── Application ClassLoader (System ClassLoader)
+                    │
+                    └── Custom ClassLoaders (if any)
+
+Bootstrap ClassLoader
+
+Written in C/C++ (not Java).
+
+Loads core JDK classes:
+
+java.lang.*, java.util.*, java.io.*, etc.
+From rt.jar (Java 8) or jmods/ (Java 9+).
+
+This ClassLoader has no parent.
+
+ClassLoader.getParent() returns null for classes loaded by Bootstrap.
+
+System.out.println(String.class.getClassLoader()); // null (Bootstrap)
+
+Extension / Platform ClassLoader (Java 9+)
+
+Java 9+: renamed Platform ClassLoader.
+
+Loads JDK extension modules (java.sql, java.xml, etc.).
+
+Java 9 module system reorganized loading.
+
+Application / System ClassLoader
+
+Loads application code.
+
+From classpath: -classpath or -cp option, CLASSPATH env.
+
+Custom ClassLoader
+
+Application-specific loading.
+
+Framework uses (Spring, Tomcat, OSGI).
+
+3. Parent Delegation Model
+
+The most critical concept of ClassLoader.
+
+When a ClassLoader is asked to load a class:
+
+1. Check if class already loaded (in this ClassLoader's cache).
+   If yes → return cached Class.
+
+2. Delegate to PARENT ClassLoader.
+   If parent finds it → return that Class.
+
+3. If parent returns null (didn't find it):
+   THIS ClassLoader tries to find and load the class.
+
+4. If not found → ClassNotFoundException.
+
+Delegation order (Application ClassLoader loading "com.example.OrderService"):
+
+Application CL: "Can you load com.example.OrderService?"
+    → First asks Parent: Extension CL
+    → Extension CL asks Parent: Bootstrap CL
+    → Bootstrap CL: "Not in rt.jar/jmods, can't load it" → returns null
+    → Extension CL: "Not in ext directory" → returns null
+    → Application CL: "Found in classpath!" → loads and returns Class
+
+Why parent delegation?
+
+Security: Core classes (java.lang.String) cannot be replaced by application.
+Avoid duplication: java.lang.String loaded once by Bootstrap, not by every ClassLoader.
+Consistency: All code using String gets same Class object.
+
+If no delegation:
+
+// Evil developer creates java.lang.String in their classpath
+// Without delegation, Application CL would load this "fake" String
+// Security disaster!
+
+4. Class Identity
+
+Two classes are the SAME if:
+1. Same fully qualified name.
+2. Loaded by SAME ClassLoader instance.
+
+This is crucial:
+
+// Same class name, different ClassLoaders
+Class<?> class1 = classLoader1.loadClass("com.example.OrderService");
+Class<?> class2 = classLoader2.loadClass("com.example.OrderService");
+
+class1 == class2; // FALSE! Different ClassLoader instances → different Class objects
+
+Object obj = class1.getDeclaredConstructor().newInstance();
+class2.isInstance(obj); // FALSE!
+
+// ClassCastException if you try:
+// SomeInterface service = (SomeInterface) obj; // ClassCastException!
+// Even if SomeInterface is the same class name — different ClassLoader!
+
+This is the root cause of many mysterious ClassCastException errors in frameworks.
+
+5. Custom ClassLoader — Implementation
+
+Extending ClassLoader:
+
+public class JarFileClassLoader extends ClassLoader {
+    private final Path jarPath;
+
+    public JarFileClassLoader(Path jarPath) {
+        super(ClassLoader.getSystemClassLoader()); // Parent = system CL
+        this.jarPath = jarPath;
+    }
+
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        String classFileName = name.replace('.', '/') + ".class";
+
+        try (JarFile jar = new JarFile(jarPath.toFile())) {
+            JarEntry entry = jar.getJarEntry(classFileName);
+            if (entry == null) throw new ClassNotFoundException(name);
+
+            InputStream is = jar.getInputStream(entry);
+            byte[] classData = is.readAllBytes();
+
+            return defineClass(name, classData, 0, classData.length);
+        } catch (IOException e) {
+            throw new ClassNotFoundException(name, e);
+        }
+    }
+}
+
+Usage:
+
+ClassLoader cl = new JarFileClassLoader(Paths.get("plugin.jar"));
+Class<?> pluginClass = cl.loadClass("com.plugin.MyPlugin");
+Plugin plugin = (Plugin) pluginClass.getDeclaredConstructor().newInstance();
+plugin.execute();
+
+6. Java 9 Module System and ClassLoader
+
+Java 9 introduced the module system (JPMS).
+
+Changes to ClassLoader:
+
+BootClassLoader: Loads bootstrap modules (java.base, java.lang, etc.).
+PlatformClassLoader: Loads platform modules (java.sql, java.xml, java.management, etc.).
+AppClassLoader: Loads application modules/classpath.
+
+Module visibility:
+
+// Module A can only access classes from modules listed in 'requires'
+module com.example.order {
+    requires java.sql;
+    requires spring.core;
+    exports com.example.order.api; // Only these packages accessible outside
+}
+
+Strong encapsulation:
+
+Without --add-opens, reflective access to JDK internal packages blocked.
+Spring Boot 3 adds necessary --add-opens for its reflection needs.
+
+7. ClassLoader in Spring Framework
+
+Spring has a complex ClassLoader setup:
+
+WebApplicationClassLoader (Tomcat):
+
+Each web application has its own ClassLoader.
+Isolates web apps from each other.
+Follows parent delegation for JDK classes, inverts for webapp classes.
+
+Spring Boot's Fat JAR ClassLoader:
+
+Spring Boot packs everything in one JAR (fat JAR / uber JAR).
+Custom LaunchedURLClassLoader loads nested JARs.
+
+Why nested JAR loading?
+
+Normal JarFile doesn't support "JAR inside JAR" loading.
+Spring Boot's BOOT-INF/lib/ contains dependencies as JARs.
+LaunchedURLClassLoader adds this capability.
+
+Spring Boot JAR structure:
+
+my-app.jar
+├── BOOT-INF/
+│   ├── classes/  ← Your compiled classes
+│   └── lib/      ← All dependencies as JARs (nested!)
+├── META-INF/
+│   └── MANIFEST.MF (Main-Class: org.springframework.boot.loader.JarLauncher)
+└── org/springframework/boot/loader/ ← Boot loader classes
+
+ClassLoader in Hot Reload (Spring DevTools):
+
+Spring Boot DevTools uses a custom RestartClassLoader.
+
+Your application classes loaded in RestartClassLoader.
+On file change: RestartClassLoader discarded, new one created.
+Only your classes reloaded — fast restart.
+Spring framework classes (in parent ClassLoader): not reloaded.
+
+8. ClassLoader Memory Leaks
+
+ClassLoader is GC-eligible only when all its loaded classes are unreachable.
+
+Classes reference their ClassLoader.
+ClassLoader holds references to all its loaded classes.
+
+If any thread, static field, or object holds reference to a class:
+
+That class's ClassLoader cannot be collected.
+All classes loaded by that ClassLoader cannot be collected.
+Metaspace leak!
+
+Common leaks:
+
+Thread-local without cleanup:
+
+ThreadLocal<UserSession> session = new ThreadLocal<>();
+// Set in thread pool thread:
+session.set(new UserSession());
+// Thread pool reuses thread — ThreadLocal persists!
+// UserSession's ClassLoader cannot be GC'd!
+
+Fix: session.remove() in finally block.
+
+Static fields in redeploy:
+
+// Static field in web app
+static final Map<String, Object> cache = new HashMap<>();
+// Web app redeployed: new ClassLoader created
+// Old ClassLoader still referenced by cache in old ClassLoader
+// Memory leak!
+
+JDBC driver registration:
+
+DriverManager.registerDriver(new OracleDriver()); // Registered globally!
+// On undeploy: OracleDriver's ClassLoader not released
+// Metaspace leak
+
+Fix: deregisterDriver() on shutdown.
+
+9. Real-World Enterprise Examples
+
+Example 1 — OSGI: Dynamic Plugin System
+
+// OSGi bundle (module) loading:
+Bundle bundle = framework.getBundleContext().installBundle("file:///plugins/payment-v2.jar");
+bundle.start();
+
+// Each bundle has its own ClassLoader
+// Version isolation: payment-v1 and payment-v2 can coexist!
+
+Example 2 — Tomcat: Multiple Web Apps
+
+// tomcat-catalina/
+// ├── webapps/
+// │   ├── app1.war → ClassLoader1 (com.example.app1.UserService)
+// │   └── app2.war → ClassLoader2 (com.example.app2.UserService)
+
+// App1's UserService ≠ App2's UserService even with same name
+// Complete class isolation between deployments
+
+Example 3 — Test Isolation
+
+// JUnit 5 test class loading:
+// Test ClassLoader loads test classes separately
+// Prevents test pollution between test suites
+// @DirtiesContext in Spring: creates new ApplicationContext → new ClassLoader scope
+
+10. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"How does Java's ClassLoader work? Explain the parent delegation model and its benefits."
+
+5 Crore Answer:
+
+Java's ClassLoader system is a hierarchical, lazy, delegation-based mechanism for loading class bytecodes into the JVM.
+
+There are three built-in ClassLoaders. The Bootstrap ClassLoader, implemented in native C++, loads core JDK classes from java.lang, java.util, and similar packages. It has no parent and returns null when queried. The Platform ClassLoader (Extension in Java 8) loads JDK extension modules. The Application ClassLoader loads application code from the classpath.
+
+The parent delegation model governs how class loading requests propagate. When a ClassLoader receives a request for a class, it first delegates to its parent. The parent delegates to its parent, recursively up to Bootstrap. If Bootstrap can load the class, it does. Otherwise, each ClassLoader in the chain tries to load it themselves.
+
+This model provides critical guarantees. Security: core JDK classes like java.lang.String can never be replaced by application code because Bootstrap loads them first — a malicious java.lang.String on the classpath would be silently ignored. Consistency: String is always the same Class object, loaded once, shared everywhere. Uniqueness: no duplicate class loading for classes on the parent's classpath.
+
+Class identity depends on both the class name and the ClassLoader instance. The same fully-qualified name loaded by two different ClassLoader instances produces two distinct, incompatible Class objects. Casting between them throws ClassCastException — the root cause of many mysterious framework errors, particularly with OSGI, web containers, and classloader-per-webapp isolation.
+
+Spring Boot uses a custom LaunchedURLClassLoader to handle nested JARs inside the fat JAR format — the standard JarFile doesn't support classloading from JARs inside JARs.
+
+ClassLoader memory leaks are a significant concern: a ClassLoader can only be GC'd when all classes it loaded become unreachable. A single ThreadLocal not cleared, or a static field in an old web app, can prevent the entire ClassLoader — and hundreds of loaded classes — from being collected, causing Metaspace exhaustion.
+
+In Java 9+, the module system layered on top of ClassLoaders adds strong encapsulation — module boundaries restrict reflective access, which required Spring Boot 3 to add explicit --add-opens directives.
+
+11. Complete Revision Notes
+
+ClassLoader: Finds, reads, verifies, and loads .class files into JVM Metaspace.
+Three built-in: Bootstrap (C++ native, core JDK), Platform (JDK extensions), Application (classpath).
+Classes loaded on demand — not all at startup.
+Parent delegation: delegate to parent first → Bootstrap tries → if fail, child tries.
+Benefits: security (no fake java.lang.String), consistency, no duplicates.
+Class identity = (name, ClassLoader instance). Different ClassLoaders → different Class objects.
+ClassCastException from ClassLoader mismatch — common in web containers, OSGI.
+Custom ClassLoader: extend ClassLoader, override findClass(), call defineClass().
+Java 9 modules: strong encapsulation, --add-opens needed for reflective access.
+Spring Boot fat JAR: LaunchedURLClassLoader loads nested JARs in BOOT-INF/lib/.
+Spring DevTools: RestartClassLoader for hot reload — only app classes reloaded.
+Tomcat: one ClassLoader per web app — isolation between deployments.
+OSGI: one ClassLoader per bundle — dynamic install/uninstall, version coexistence.
+ClassLoader memory leak: if any class remains reachable → entire ClassLoader stays in memory → Metaspace leak.
+Common leaks: ThreadLocal not removed, JDBC driver registration, static caches.
+ClassLoader GC: requires all classes and Class objects unreachable.
+loadClass() = check cache + delegate to parent + findClass().
+findClass() = find and read bytes + defineClass().
+defineClass() = parse bytecode, verify, create Class object in Metaspace.
+getResource() / getResourceAsStream(): also uses ClassLoader hierarchy.
+Thread.currentThread().getContextClassLoader(): used by Spring to find beans when ClassLoader isolation is complex.

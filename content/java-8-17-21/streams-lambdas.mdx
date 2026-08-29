@@ -1,0 +1,696 @@
+---
+title: "Streams and Lambdas"
+slug: "streams-lambdas"
+moduleSlug: "java-8-17-21"
+order: 1
+summaryOneLiner: "Java 8's Stream API and Lambda expressions transformed Java from verbose procedural code to elegant functional programming — mastering them is essential for every modern Java developer."
+estimatedReadMinutes: 45
+generated: false
+prerequisiteTopicSlugs: ["oop-principles", "generics", "collection-hierarchy"]
+---
+
+Module 6 → Topic 1 → Streams and Lambdas (Part 1)
+
+1. Streams and Lambdas — Introduction
+
+What problem did Lambdas solve?
+
+Before Java 8 — Verbose Anonymous Classes (pre-2014)
+
+Sorting a list required:
+
+List<String> names = Arrays.asList("Charlie", "Alice", "Bob");
+
+Collections.sort(names, new Comparator<String>() {
+    @Override
+    public int compare(String a, String b) {
+        return a.compareTo(b);
+    }
+});
+
+5 lines for something conceptually simple: sort alphabetically.
+
+After Java 8 — Lambdas:
+
+names.sort((a, b) -> a.compareTo(b));
+// Or even simpler:
+names.sort(String::compareTo);
+
+Same operation. One line. Much more readable.
+
+What problem did Streams solve?
+
+Processing collections of data before Streams:
+
+List<String> expensiveProductNames = new ArrayList<>();
+for (Product product : products) {
+    if (product.getPrice() > 1000) {
+        expensiveProductNames.add(product.getName().toUpperCase());
+    }
+}
+Collections.sort(expensiveProductNames);
+
+With Streams:
+
+List<String> expensiveProductNames = products.stream()
+    .filter(p -> p.getPrice() > 1000)
+    .map(p -> p.getName().toUpperCase())
+    .sorted()
+    .collect(Collectors.toList());
+
+Same result. Declarative style. Pipeline composition. Lazy evaluation. Parallelizable.
+
+2. Word-by-Word Analysis
+
+Word 1 → Lambda
+
+Lambda comes from Lambda Calculus (mathematics, 1930s, Alonzo Church).
+
+Lambda calculus = mathematical system for expressing functions.
+
+In Java: Lambda = anonymous function (function without a name).
+
+Syntax:
+
+(parameters) -> expression
+// or
+(parameters) -> { statements; }
+
+Word 2 → Functional Interface
+
+Interface with exactly ONE abstract method.
+
+Lambda provides the implementation of that one method.
+
+@FunctionalInterface
+public interface Comparator<T> {
+    int compare(T o1, T o2); // One abstract method
+}
+
+Word 3 → Stream
+
+A Stream is a sequence of elements supporting sequential and parallel aggregate operations.
+
+Stream is NOT a data structure.
+
+Stream does NOT store data.
+
+Stream processes data from a source (collection, array, I/O).
+
+3. Functional Interfaces — The Foundation of Lambdas
+
+Key Built-in Functional Interfaces (java.util.function):
+
+Function<T, R>
+
+Takes T, returns R.
+
+Function<String, Integer> length = String::length;
+Integer len = length.apply("Hello"); // 5
+
+In Streams: map() takes Function<T, R>.
+
+BiFunction<T, U, R>
+
+Takes T and U, returns R.
+
+BiFunction<String, Integer, String> repeat = (s, n) -> s.repeat(n);
+repeat.apply("Ha", 3); // "HaHaHa"
+
+Predicate<T>
+
+Takes T, returns boolean.
+
+Predicate<String> isLong = s -> s.length() > 5;
+isLong.test("Hello");     // false
+isLong.test("Beautiful"); // true
+
+In Streams: filter() takes Predicate<T>.
+
+Predicate composition:
+
+Predicate<Product> expensive = p -> p.getPrice() > 1000;
+Predicate<Product> inStock = p -> p.getStock() > 0;
+
+// AND
+Predicate<Product> available = expensive.and(inStock);
+
+// OR
+Predicate<Product> ofInterest = expensive.or(inStock);
+
+// NEGATE
+Predicate<Product> cheap = expensive.negate();
+
+Consumer<T>
+
+Takes T, returns nothing (void).
+
+Consumer<String> print = System.out::println;
+print.accept("Hello World"); // Prints it
+
+In Streams: forEach() takes Consumer<T>.
+
+BiConsumer<T, U>:
+
+BiConsumer<String, Integer> printKV = (k, v) -> System.out.println(k + "=" + v);
+map.forEach(printKV);
+
+Supplier<T>
+
+Takes nothing, returns T.
+
+Supplier<List<Order>> emptyList = ArrayList::new;
+List<Order> list = emptyList.get();
+
+In Streams: Collectors.toCollection() takes Supplier.
+
+UnaryOperator<T>
+
+Takes T, returns T. (Special case of Function<T,T>).
+
+UnaryOperator<String> upperCase = String::toUpperCase;
+"hello".transform(upperCase); // "HELLO"
+
+In Collections: List.replaceAll() takes UnaryOperator<E>.
+
+BinaryOperator<T>
+
+Takes T and T, returns T. (Special case of BiFunction<T,T,T>).
+
+BinaryOperator<Integer> add = Integer::sum;
+add.apply(3, 4); // 7
+
+In Streams: reduce() takes BinaryOperator<T>.
+
+4. Lambda Expressions — Syntax Deep Dive
+
+Full Syntax:
+
+(Type param1, Type param2) -> { return expression; }
+
+Abbreviated forms (type inference):
+
+// Types inferred from context
+(a, b) -> { return a + b; }
+
+// If single expression — return implicit, braces optional
+(a, b) -> a + b
+
+// If single parameter — parentheses optional
+a -> a * 2
+
+// If no parameters
+() -> System.out.println("Hello")
+
+// Method reference (shortest)
+System::out.println // Not valid syntax — see method references below
+String::length
+
+Lambda and Variable Capture
+
+Lambdas can capture variables from enclosing scope.
+
+Rule: Captured variables must be effectively final (Java 8+) or final.
+
+String prefix = "Hello, "; // Effectively final
+Function<String, String> greet = name -> prefix + name;
+greet.apply("Alice"); // "Hello, Alice"
+
+prefix = "Hi, "; // COMPILE ERROR — prefix no longer effectively final
+// Lambda that captures it would see changed value — not allowed
+
+Why this restriction?
+
+Thread safety.
+Predictability.
+Lambdas may execute asynchronously (parallel streams).
+
+5. Method References — Shorthand for Lambdas
+
+When lambda just calls an existing method, use Method Reference for brevity.
+
+Type 1 — Static Method Reference
+
+ClassName::staticMethodName
+
+// Lambda
+Function<String, Integer> parse = s -> Integer.parseInt(s);
+
+// Method reference
+Function<String, Integer> parse = Integer::parseInt;
+
+// Usage
+int num = parse.apply("42"); // 42
+
+Type 2 — Instance Method Reference (Bound)
+
+object::instanceMethodName
+
+String prefix = "Hello, ";
+
+// Lambda
+UnaryOperator<String> greet = name -> prefix.concat(name);
+
+// Method reference (bound — specific instance)
+UnaryOperator<String> greet = prefix::concat;
+
+Type 3 — Instance Method Reference (Unbound)
+
+ClassName::instanceMethodName
+
+// Lambda — first arg is the instance, remaining are params
+Function<String, String> upper = s -> s.toUpperCase();
+
+// Unbound — class name, method applied to parameter
+Function<String, String> upper = String::toUpperCase;
+
+// Useful in streams:
+names.stream()
+    .map(String::toUpperCase) // Calls toUpperCase() on each name
+    .collect(Collectors.toList());
+
+Type 4 — Constructor Reference
+
+ClassName::new
+
+Supplier<ArrayList<String>> listFactory = ArrayList::new;
+ArrayList<String> list = listFactory.get();
+
+// With parameter
+Function<String, StringBuilder> sbFactory = StringBuilder::new;
+StringBuilder sb = sbFactory.apply("initial");
+
+6. Stream API — Complete Guide
+
+What is a Stream?
+
+A pipeline of data operations.
+
+Source
+    │
+    ▼
+Intermediate Operations (lazy)
+    │
+    ▼
+Terminal Operation (triggers execution)
+    │
+    ▼
+Result
+
+Stream Creation:
+
+// From collection
+Stream<String> stream = names.stream();
+
+// From array
+Stream<Integer> stream = Arrays.stream(new Integer[]{1, 2, 3});
+
+// Directly
+Stream<String> stream = Stream.of("Alice", "Bob", "Charlie");
+
+// Infinite stream
+Stream<Integer> naturals = Stream.iterate(0, n -> n + 1);
+Stream<Double> randoms = Stream.generate(Math::random);
+
+// Range (IntStream)
+IntStream range = IntStream.range(0, 10); // 0..9
+IntStream rangeClosed = IntStream.rangeClosed(1, 10); // 1..10
+
+Primitive Streams (avoid boxing overhead):
+
+IntStream, LongStream, DoubleStream
+
+IntStream.of(1, 2, 3, 4, 5).sum(); // 15
+LongStream.range(0, 1_000_000).parallel().sum(); // Fast parallel sum
+
+7. Intermediate Operations (Lazy)
+
+These operations are NOT executed until a terminal operation is called.
+
+They build up a pipeline.
+
+filter(Predicate<T>)
+
+stream.filter(p -> p.getPrice() > 1000)
+
+map(Function<T, R>)
+
+stream.map(Product::getName)
+stream.map(String::length)
+stream.map(p -> new ProductDTO(p)) // Transform to DTO
+
+flatMap(Function<T, Stream<R>>)
+
+List<List<String>> nested = List.of(List.of("a","b"), List.of("c","d"));
+
+// Without flatMap: Stream<List<String>>
+nested.stream().map(List::stream); // Stream of Streams!
+
+// With flatMap: Stream<String>
+nested.stream().flatMap(List::stream); // Flattened to: a, b, c, d
+
+Real-world flatMap example:
+
+// Get all unique ingredients from all recipes
+List<String> allIngredients = recipes.stream()
+    .flatMap(recipe -> recipe.getIngredients().stream()) // Flatten ingredient lists
+    .distinct()
+    .sorted()
+    .collect(Collectors.toList());
+
+sorted() / sorted(Comparator)
+
+stream.sorted() // Natural order
+stream.sorted(Comparator.comparingDouble(Product::getPrice)) // By price asc
+stream.sorted(Comparator.comparingDouble(Product::getPrice).reversed()) // desc
+
+distinct()
+
+stream.distinct() // Based on equals()
+
+limit(long) / skip(long)
+
+stream.limit(10) // First 10 elements
+stream.skip(5)   // Skip first 5
+
+peek(Consumer<T>) — Debugging
+
+stream
+    .filter(p -> p.getPrice() > 1000)
+    .peek(p -> System.out.println("After filter: " + p)) // Debug without changing
+    .map(Product::getName)
+    .peek(name -> System.out.println("After map: " + name))
+    .collect(Collectors.toList())
+
+8. Terminal Operations (Triggers Execution)
+
+collect(Collector)
+
+Most versatile terminal operation.
+
+// To List
+List<String> names = stream.collect(Collectors.toList());
+List<String> names = stream.toList(); // Java 16+ unmodifiable
+
+// To Set
+Set<String> nameSet = stream.collect(Collectors.toSet());
+
+// To Map
+Map<Long, Product> byId = products.stream()
+    .collect(Collectors.toMap(Product::getId, p -> p));
+
+// Grouping
+Map<Category, List<Product>> byCategory = products.stream()
+    .collect(Collectors.groupingBy(Product::getCategory));
+
+// Counting
+Map<Category, Long> countByCategory = products.stream()
+    .collect(Collectors.groupingBy(Product::getCategory, Collectors.counting()));
+
+// Joining
+String csv = names.stream().collect(Collectors.joining(", "));
+String wrapped = names.stream().collect(Collectors.joining(", ", "[", "]")); // [Alice, Bob, Charlie]
+
+// Statistics
+IntSummaryStatistics stats = products.stream()
+    .mapToInt(p -> (int)p.getPrice())
+    .summaryStatistics();
+stats.getMin(); stats.getMax(); stats.getAverage(); stats.getSum();
+
+forEach(Consumer<T>)
+
+stream.forEach(System.out::println);
+stream.forEach(product -> productService.process(product));
+
+Note: forEach is unordered in parallel streams. Use forEachOrdered for ordered.
+
+count()
+
+long count = stream.filter(p -> p.getPrice() > 1000).count();
+
+findFirst() / findAny()
+
+Optional<Product> first = stream.filter(p -> p.getPrice() > 1000).findFirst();
+Optional<Product> any = stream.parallel().filter(p -> p.getPrice() > 1000).findAny(); // Faster in parallel
+
+anyMatch / allMatch / noneMatch
+
+boolean any = products.stream().anyMatch(p -> p.getPrice() > 10000);
+boolean all = products.stream().allMatch(p -> p.getPrice() > 0);
+boolean none = products.stream().noneMatch(p -> p.getStock() < 0);
+
+Short-circuit — stop as soon as result is determined.
+
+reduce(BinaryOperator<T>)
+
+// Sum
+Optional<Integer> sum = IntStream.of(1,2,3,4,5).boxed().reduce(Integer::sum);
+
+// With identity (initial value)
+int sum = IntStream.of(1,2,3,4,5).reduce(0, Integer::sum); // 15
+
+// General
+Optional<String> longest = names.stream()
+    .reduce((a, b) -> a.length() >= b.length() ? a : b);
+
+min / max
+
+Optional<Product> cheapest = products.stream()
+    .min(Comparator.comparingDouble(Product::getPrice));
+
+Optional<Product> mostExpensive = products.stream()
+    .max(Comparator.comparingDouble(Product::getPrice));
+
+9. Parallel Streams
+
+Streams can run in parallel with one word change.
+
+stream()         → sequential processing
+parallelStream() → parallel processing using ForkJoinPool.commonPool()
+
+List<String> result = products.parallelStream()
+    .filter(p -> p.getPrice() > 1000)
+    .map(Product::getName)
+    .collect(Collectors.toList());
+
+When to use parallel streams:
+
+Large datasets (100,000+ elements).
+CPU-intensive operations.
+Operations are stateless and independent.
+Order doesn't matter (or use forEachOrdered).
+
+When NOT to use parallel streams:
+
+Small collections (overhead of fork/join costs more than benefit).
+I/O-bound operations (blocking threads wastes thread pool).
+Order-dependent operations (parallel order is non-deterministic).
+Shared mutable state (race conditions).
+
+ForkJoinPool.commonPool():
+
+By default, parallel streams use common pool.
+Size = number of CPUs - 1.
+
+Custom pool for parallel streams:
+
+ForkJoinPool customPool = new ForkJoinPool(4);
+customPool.submit(() ->
+    products.parallelStream()
+        .filter(...)
+        .collect(Collectors.toList())
+).get();
+
+10. Stream Laziness — Critical Performance Concept
+
+Intermediate operations are LAZY.
+
+They don't execute until a terminal operation is called.
+
+List<String> longNames = names.stream()
+    .filter(n -> {
+        System.out.println("Filtering: " + n);
+        return n.length() > 4;
+    })
+    .map(n -> {
+        System.out.println("Mapping: " + n);
+        return n.toUpperCase();
+    })
+    .collect(Collectors.toList());
+
+// Output (lazy — processes one element completely before moving to next):
+// Filtering: Charlie
+// Mapping: Charlie
+// Filtering: Alice
+// (Alice filtered out — length not > 4)
+// Filtering: Bob
+// (Bob filtered out)
+
+NOT: all filtering first, then all mapping. One element at a time through the whole pipeline.
+
+Benefit of laziness:
+
+Short-circuit optimization:
+
+Optional<String> first = names.stream()
+    .filter(n -> n.length() > 4)
+    .findFirst(); // Stops after finding FIRST match — doesn't process rest
+
+11. Real-World Enterprise Examples
+
+Example 1 — E-Commerce: Order Analytics
+
+// Calculate total revenue by category for Q4
+Map<String, Double> revenueByCategory = orders.stream()
+    .filter(o -> o.getDate().isAfter(Q4_START))
+    .flatMap(o -> o.getItems().stream())
+    .collect(Collectors.groupingBy(
+        OrderItem::getCategory,
+        Collectors.summingDouble(OrderItem::getTotal)
+    ));
+
+// Top 10 products by sales volume
+List<String> topProducts = orders.stream()
+    .flatMap(o -> o.getItems().stream())
+    .collect(Collectors.groupingBy(OrderItem::getProductId, Collectors.counting()))
+    .entrySet().stream()
+    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+    .limit(10)
+    .map(Map.Entry::getKey)
+    .collect(Collectors.toList());
+
+Example 2 — Banking: Transaction Analysis
+
+// Find suspicious transactions (high amount, unusual time)
+List<Transaction> suspicious = transactions.stream()
+    .filter(t -> t.getAmount().compareTo(BigDecimal.valueOf(50000)) > 0)
+    .filter(t -> t.getHour() >= 2 && t.getHour() <= 5) // Late night
+    .filter(t -> !t.getAccount().isVerified())
+    .sorted(Comparator.comparing(Transaction::getAmount).reversed())
+    .collect(Collectors.toList());
+
+// Average transaction amount by type
+Map<TransactionType, Double> avgByType = transactions.stream()
+    .collect(Collectors.groupingBy(
+        Transaction::getType,
+        Collectors.averagingDouble(t -> t.getAmount().doubleValue())
+    ));
+
+Example 3 — FAANG: User Analytics (Netflix)
+
+// Users who watched > 10 hours of content in last week and are Premium
+List<User> activeUsers = users.parallelStream() // Parallel for 100M+ users
+    .filter(u -> u.isPremium())
+    .filter(u -> u.getWatchTimeLastWeek().toHours() > 10)
+    .collect(Collectors.toList());
+
+// Most watched genres for recommendation
+Map<String, Long> genreWatches = users.parallelStream()
+    .flatMap(u -> u.getWatchHistory().stream())
+    .collect(Collectors.groupingBy(Watch::getGenre, Collectors.counting()));
+
+12. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain how Stream lazy evaluation works and how it impacts performance."
+
+5 Crore Answer:
+
+Java Streams use a pull-based lazy evaluation model. Intermediate operations — filter, map, flatMap, sorted, etc. — are lazy: they simply register a transformation in a pipeline definition and do not execute. Only when a terminal operation — collect, findFirst, count, reduce, forEach — is invoked does the pipeline actually process data.
+
+The execution model processes elements one at a time through the complete pipeline, rather than processing all elements through each stage before moving to the next. When the stream processes an element, it runs it through all intermediate operations in sequence before moving to the next source element.
+
+This has critical performance implications. First, short-circuit operations: findFirst(), anyMatch(), and limit() can terminate the pipeline as soon as their condition is satisfied, without processing remaining elements. In a stream with 1 million elements, findFirst() may inspect just one.
+
+Second, unnecessary work elimination: if a map operation comes after a filter that rejects most elements, only the elements that pass the filter incur the map's cost. In sequential processing of all elements through filter first, then all through map, the cost is the same — but lazy evaluation naturally achieves this because rejected elements never reach the map stage.
+
+Third, fusion optimization: the JVM can fuse adjacent filter and map operations internally, avoiding creation of intermediate collections.
+
+The design is also why you cannot reuse a Stream — once the terminal operation is called and data has been processed, the stream is "consumed." This is consistent with viewing streams as one-time pipelines rather than reusable data structures.
+
+For parallel streams, laziness means the ForkJoinPool only divides actual work — elements that pass early filters — avoiding overhead of distributing all source elements and then filtering in each thread.
+
+13. Follow-Up Interview Questions
+
+Q1. What is the difference between map and flatMap?
+
+map: One-to-one transformation. Each input element produces exactly one output element.
+Stream<String> → map(String::length) → Stream<Integer>
+
+flatMap: One-to-many transformation (or flatten). Each input element produces a Stream of output elements. All resulting streams are flattened into one.
+Stream<List<String>> → flatMap(List::stream) → Stream<String>
+
+Use flatMap when: each element maps to a collection, and you want a flat result.
+
+Q2. When should you NOT use parallel streams?
+
+Small collections: Fork/join overhead exceeds benefit (generally < 10,000 elements).
+I/O-bound tasks: Blocking I/O wastes thread pool threads — use async/reactive instead.
+Ordered, stateful operations: limit() + skip() on parallel streams are complex and slow.
+Shared mutable state: Race conditions without synchronization → incorrect results.
+The common pool is shared: Heavy parallel stream use starves other tasks. Use custom ForkJoinPool.
+
+Q3. What is a Collector and how does it work?
+
+A Collector is an interface defining a mutable accumulation operation:
+
+public interface Collector<T, A, R> {
+    Supplier<A> supplier();          // Creates empty accumulator
+    BiConsumer<A, T> accumulator();  // Adds element to accumulator
+    BinaryOperator<A> combiner();    // Merges two accumulators (parallel)
+    Function<A, R> finisher();       // Converts accumulator to result
+    Set<Characteristics> characteristics();
+}
+
+Collectors.toList() equivalent:
+supplier: ArrayList::new
+accumulator: List::add
+combiner: (l1, l2) -> { l1.addAll(l2); return l1; }
+finisher: Function.identity()
+
+Q4. What is the difference between findFirst() and findAny()?
+
+findFirst(): Always returns first element in encounter order. Deterministic. Slower in parallel (must coordinate).
+findAny(): Returns any element — whichever thread finds first. Non-deterministic in parallel. Faster.
+
+In sequential streams, both behave the same (findAny also returns first).
+In parallel streams, use findAny() when order doesn't matter for better performance.
+
+Q5. Explain method reference types with examples.
+
+Static: Integer::parseInt → (s) -> Integer.parseInt(s)
+Bound instance: "prefix"::concat → (s) -> "prefix".concat(s) — specific instance
+Unbound instance: String::toUpperCase → (s) -> s.toUpperCase() — receiver is first arg
+Constructor: ArrayList::new → () -> new ArrayList<>()
+
+Q6. What happens if you call a terminal operation twice on the same Stream?
+
+IllegalStateException: "stream has already been operated upon or closed."
+
+Streams are single-use pipelines. To process again, create a new Stream from the source.
+
+This is intentional — streams don't store data, so once traversed, the source would need to be re-read.
+
+14. Complete Revision Notes
+
+Lambda = anonymous function — implements functional interface's single abstract method.
+Functional interface = interface with exactly one abstract method (@FunctionalInterface).
+Key interfaces: Function<T,R> (map), Predicate<T> (filter), Consumer<T> (forEach), Supplier<T>, BinaryOperator<T>.
+Lambda syntax: (params) -> expression or (params) -> { statements; }.
+Captured variables must be effectively final.
+Method references: ClassName::staticMethod, instance::method, ClassName::instanceMethod, ClassName::new.
+Stream = pipeline for processing sequences of elements. Doesn't store data.
+Stream pipeline: Source → Intermediate ops (lazy) → Terminal op (triggers execution).
+Intermediate: filter, map, flatMap, sorted, distinct, limit, skip, peek — all lazy.
+Terminal: collect, forEach, count, reduce, findFirst, findAny, anyMatch, allMatch, noneMatch, min, max.
+flatMap: flattens Stream<Stream<T>> to Stream<T> — each element maps to a stream.
+Collectors: toList, toSet, toMap, groupingBy, counting, joining, summingInt, averagingDouble.
+Parallel streams: parallelStream() — uses ForkJoinPool.commonPool() — good for CPU-bound, large data.
+Lazy evaluation: elements processed one at a time through entire pipeline.
+Short-circuit operations: findFirst, anyMatch, limit — stop early.
+Stream can only be consumed ONCE — terminal op throws IllegalStateException if called twice.
+Primitive streams: IntStream, LongStream, DoubleStream — avoid boxing overhead.
+Sorted is O(n log n) — avoid in critical hot paths without caching.
+Parallel streams for I/O: don't use — use async/reactive instead.
+groupingBy is the most powerful collector — creates Map<K, List<T>> by default, or Map<K, X> with downstream collector.

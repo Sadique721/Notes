@@ -1,0 +1,477 @@
+---
+title: "Garbage Collector"
+slug: "garbage-collector"
+moduleSlug: "jvm-internals"
+order: 2
+summaryOneLiner: "Java's Garbage Collector is a sophisticated runtime system — understanding GC algorithms, pause types, tuning, and choosing between G1, ZGC, and Shenandoah is essential for production Java engineering."
+estimatedReadMinutes: 45
+generated: false
+prerequisiteTopicSlugs: ["memory-management"]
+---
+
+![Keywords: GC, Heap, JVM, Allocation, Sweep | Hint: An automated vacuum sweeper cleaning memory grids inside the JVM heap layout.](/illustrations/topics/garbage_collector_hero.gif)
+
+Module 7 → Topic 2 → Garbage Collector (Part 1)
+
+1. Garbage Collector — Introduction
+
+What is Garbage Collection?
+
+GC = Automatic memory management.
+
+When a Java object is no longer reachable (no references to it from GC roots), the GC reclaims its memory.
+
+Developer does NOT call free() (unlike C/C++).
+
+GC is a background JVM subsystem.
+
+Why GC is Critical for Senior Engineers?
+
+GC pauses are a major source of production latency spikes.
+
+Without GC knowledge:
+
+Unexplained 2-second response time spikes.
+"Stop-the-world" pauses freezing all application threads.
+OOM errors with heap full despite trying to free memory.
+Inability to explain why 32 GB heap still gets OOM.
+Cannot tune JVM for performance requirements.
+
+2. GC Fundamentals — How GC Works
+
+Step 1 — Mark
+
+GC finds all LIVE objects.
+
+Starting from GC Roots (stack references, static variables, JNI refs).
+Traverses the object graph.
+Marks every reachable object as LIVE.
+
+Step 2 — Sweep (or Compact)
+
+Sweep: Reclaim memory of DEAD (unmarked) objects.
+
+Problem with sweep only: Memory fragmentation.
+
+After sweep:
+
+|LIVE|dead|LIVE|dead|LIVE|dead|dead|LIVE|
+
+Fragmented! Large object cannot be allocated even if total free memory is enough.
+
+Compact: Move all LIVE objects together.
+
+After compact:
+
+|LIVE|LIVE|LIVE|LIVE|                  |
+
+No fragmentation. Contiguous free space.
+
+Cost: Moving objects takes time. References must be updated.
+
+Copy: Copy LIVE objects to a new area, abandon old area.
+
+Used in Young Generation. Eden + Survivor.
+
+3. JVM GC Algorithms — All Major Types
+
+GC Algorithm      | When        | Focus      | Pauses
+──────────────────┼─────────────┼────────────┼──────────────
+Serial GC         | < Java 8    | Single CPU | Long STW
+Parallel GC       | Default 8   | Throughput | Long STW parallel
+CMS               | Deprecated  | Low pause  | Short pauses
+G1 GC             | Default 9+  | Balanced   | Predictable
+ZGC               | Java 15+    | Sub-ms     | Minimal
+Shenandoah        | OpenJDK     | Sub-ms     | Minimal
+
+4. Minor GC — Young Generation Collection
+
+Young Generation: Eden + Survivor S0 + Survivor S1.
+
+Trigger: Eden space full.
+
+Process:
+
+All application threads PAUSED (Stop-The-World).
+Mark all live objects in Young Gen (from GC Roots and Old Gen references).
+Copy live objects to empty Survivor space.
+Increment age of each copied object.
+Objects with age > MaxTenuringThreshold → promote to Old Gen.
+Clear Eden and previous Survivor space.
+Resume application threads.
+
+Duration: Typically 1-100ms. Fast because most objects are dead.
+
+Frequency: Every few seconds for typical applications.
+
+5. Major GC — Old Generation Collection
+
+Trigger: Old Gen almost full.
+
+Process depends on GC algorithm used.
+
+Stop-The-World (Parallel GC): All threads paused for entire collection.
+
+Concurrent (G1, ZGC): Most work done concurrently with application.
+
+Duration: 100ms to several seconds (without concurrent GC).
+
+Frequency: Minutes to hours.
+
+6. G1 GC (Garbage First) — Deep Dive
+
+Default since Java 9.
+
+Design Philosophy: Predictable pause times.
+
+Key Innovation: Region-based heap.
+
+G1 divides heap into equal-sized REGIONS (1MB-32MB).
+
+Regions are dynamically assigned as:
+
+Eden Region — new objects born here.
+Survivor Region — objects surviving Eden GC.
+Old Region — promoted objects.
+Humongous Region — objects > 50% of region size (large objects).
+
+G1 GC Phases:
+
+Phase 1 — Young GC:
+
+Select all Eden + Survivor regions.
+STW pause: Mark live objects, copy to new Survivor/Old regions.
+Similar to Minor GC in other collectors.
+
+Phase 2 — Concurrent Marking:
+
+Runs concurrently with application threads.
+Marks all live objects in Old regions.
+No pause. Application continues.
+
+Phases:
+a. Initial Mark (STW, brief — piggybacks on Young GC)
+b. Root Region Scan (concurrent)
+c. Concurrent Mark (concurrent)
+d. Remark (STW, brief — finalizes marking)
+e. Cleanup (STW for accounting, concurrent for free region reclaim)
+
+Phase 3 — Mixed GC:
+
+Selects Young regions + HIGHEST GARBAGE Old regions.
+"Garbage First" = prioritize regions with most garbage.
+Collections interleaved with application execution.
+Gradual old region reclamation.
+
+Phase 4 — Full GC (last resort):
+
+Falls back to parallel Full GC if concurrent marking can't keep up.
+Single-threaded mark-compact. Longest pause.
+
+G1 Tuning:
+
+-XX:+UseG1GC
+-XX:MaxGCPauseMillis=200     // Target max pause (soft goal, not guaranteed)
+-XX:G1HeapRegionSize=16m     // Region size (1-32MB, power of 2)
+-XX:G1NewSizePercent=5       // Min % of heap for Young Gen
+-XX:G1MaxNewSizePercent=60   // Max % for Young Gen
+-XX:InitiatingHeapOccupancyPercent=45 // Start concurrent marking at 45% heap full
+-XX:G1MixedGCCountTarget=8   // Target 8 mixed GCs per marking cycle
+
+7. ZGC — Zero Garbage Collector (Java 15+)
+
+Design Goal: Sub-millisecond pause times regardless of heap size.
+
+Key Innovation: Colored Pointers + Load Barriers.
+
+Traditional GC limitation:
+
+Moving objects requires pausing threads (can't update references while app runs).
+
+ZGC's Solution — Colored Pointers:
+
+Every 64-bit pointer has extra bits reserved for GC metadata.
+
+Bits 0-41: Memory address (42-bit addresses = 4TB addressable)
+Bit 42: marked0 flag
+Bit 43: marked1 flag
+Bit 44: remapped flag
+
+ZGC phases:
+
+All phases CONCURRENT — app threads continue.
+
+Phase 1 — Concurrent Mark:
+
+Traverses object graph concurrently.
+Colors pointers during traversal.
+
+Phase 2 — Concurrent Relocate:
+
+Identifies regions to compact.
+Copies live objects to new locations concurrently!
+
+Load Barrier: When app reads a pointer → barrier code checks if object was relocated:
+
+// Pseudo-code for load barrier
+Object loadObject(Address addr) {
+    Object obj = *addr; // Read pointer
+    if (obj.isBadColor()) { // Was object relocated?
+        obj = forwardingTable.lookup(obj); // Find new location
+        *addr = obj; // Update pointer (self-healing!)
+    }
+    return obj;
+}
+
+Phase 3 — Concurrent Remap:
+
+Updates remaining stale pointers.
+
+Result:
+
+STW pauses: Sub-millisecond (1-10ms) regardless of heap size.
+Works with 8GB to 16TB heaps.
+
+ZGC Tuning:
+
+-XX:+UseZGC
+-XX:ZCollectionInterval=5   // Force GC every 5 seconds
+-XX:ZUncommitDelay=300      // Keep freed memory 5 minutes before returning to OS
+
+ZGC Limitation:
+
+Higher CPU overhead (load barriers on every object read).
+Slightly lower throughput than G1 (but better latency).
+
+8. Shenandoah GC
+
+Open-source, maintained by Red Hat.
+
+Also concurrent, sub-millisecond pauses.
+
+Difference from ZGC:
+
+Uses forward pointers (extra word per object) vs colored pointers.
+Brooks Pointer: Each object has a forwarding pointer to its current location.
+
+-XX:+UseShenandoahGC
+
+9. Parallel GC — Throughput Focused
+
+Best raw throughput.
+
+Multiple GC threads for both Young and Old collection.
+
+Application pauses completely during GC.
+
+But: Maximizes overall throughput by doing GC fast in parallel.
+
+When to use: Batch processing, offline analytics, scientific computing — throughput > latency.
+
+-XX:+UseParallelGC
+-XX:ParallelGCThreads=8   // Number of GC threads
+
+10. GC Tuning Principles
+
+Principle 1 — Measure First
+
+Never tune blindly.
+
+Enable GC logging:
+
+-Xlog:gc*:file:gc.log:time,uptime,level:filecount=5,filesize=20m
+
+Use GCViewer or GCEasy to analyze GC logs.
+
+Identify:
+
+Total GC time percentage (should be < 5%).
+Max pause duration.
+Frequency of Major GCs.
+Allocation rate.
+
+Principle 2 — Heap Sizing
+
+Too small → frequent GC, high pause frequency.
+Too large → longer individual GC pauses (more to scan), higher RAM cost.
+
+Rule of thumb: Heap 3-4x the live data set size.
+
+If app uses 2GB live data → heap = 6-8GB.
+
+Principle 3 — Young vs Old Ratio
+
+Most apps: Young Gen should be ~1/3 to 1/4 of total heap.
+
+High allocation rate app → increase Young Gen.
+Low allocation rate app → smaller Young Gen.
+
+Principle 4 — Avoid Full GC
+
+Full GC = long pause.
+
+If Full GC happening frequently:
+
+Old Gen too small → increase heap.
+Memory leak → find and fix.
+Too many large objects → increase G1HeapRegionSize.
+
+11. GC-Friendly Coding Practices
+
+Practice 1 — Reduce Object Allocation
+
+// BAD — creates many temporary objects
+String result = "";
+for (String s : list) {
+    result += s; // Creates new String each iteration!
+}
+
+// GOOD — StringBuilder reuses buffer
+StringBuilder sb = new StringBuilder();
+for (String s : list) {
+    sb.append(s);
+}
+String result = sb.toString();
+
+Practice 2 — Prefer Primitives Over Boxed Types
+
+// BAD — boxing/unboxing overhead
+List<Integer> counts = new ArrayList<>(); // Each Integer is a heap object!
+
+// GOOD for performance-critical code
+int[] counts = new int[size]; // No boxing, no GC pressure
+
+// Or: Use primitive collections library (Eclipse Collections, Trove)
+IntList counts = IntArrayList.newListWith(1, 2, 3);
+
+Practice 3 — Object Pooling for Expensive Objects
+
+// Connection pool — reuse connections instead of create/destroy
+HikariDataSource pool = new HikariDataSource(config);
+// Pool manages creation, reuse, and lifecycle
+
+// Thread pool — reuse threads
+ExecutorService pool = Executors.newFixedThreadPool(20);
+
+Practice 4 — Weak and Soft References
+
+WeakReference: GC collects when no strong refs. Used in WeakHashMap.
+SoftReference: GC collects only when memory is tight. Used in memory-sensitive caches.
+
+Cache<Long, Product> cache = CacheBuilder.newBuilder()
+    .softValues() // Values held softly — evicted under memory pressure
+    .build();
+
+12. Reading GC Logs — Production Analysis
+
+GC log line (G1):
+
+[2024-01-15T10:30:01.234+0000][info][gc] GC(42) Pause Young (Normal) (G1 Evacuation Pause) 512M->256M(1024M) 45.321ms
+
+Decode:
+
+GC(42): 42nd GC event.
+Pause Young (Normal): Minor GC.
+G1 Evacuation Pause: G1's Young collection.
+512M→256M(1024M): Heap before → after (total heap size).
+45.321ms: Pause duration.
+
+Concerning patterns:
+
+Very frequent GCs (< 1 second intervals): Allocation rate too high, heap too small.
+Long pauses (> 500ms): GC algorithm not matching requirements.
+Frequent Full GC: Memory leak or heap too small.
+Pause duration growing over time: Memory leak (heap slowly filling).
+
+13. Real-World Examples
+
+Example 1 — Netflix: ZGC for Video Streaming
+
+Requirement: Response time < 100ms for 99th percentile.
+
+Problem with G1: Occasional 200-500ms pauses for mixed GC.
+
+Solution: ZGC.
+
+-XX:+UseZGC
+-Xms8g -Xmx8g
+-XX:ZCollectionInterval=30
+
+Result: P99 latency < 50ms. GC pauses < 5ms.
+
+Example 2 — Banking: G1 Tuning for Throughput + Latency
+
+-XX:+UseG1GC
+-Xms16g -Xmx16g
+-XX:MaxGCPauseMillis=100
+-XX:G1HeapRegionSize=16m
+-XX:InitiatingHeapOccupancyPercent=30  // Earlier concurrent marking
+-XX:G1MixedGCCountTarget=16           // More mixed GCs, smaller each
+-Xlog:gc*:file:/logs/gc.log:time,uptime:filecount=10,filesize=50m
+
+Result: Max pause 80ms, GC overhead 3%.
+
+Example 3 — E-Commerce: Diagnosing GC Issue
+
+Symptom: Every 10 minutes, 3-second pause causing timeout errors.
+
+Investigation: GC log shows Full GC every 10 minutes. Heap 95% full.
+
+Heap dump analysis: 2GB heap → 1.8GB is a static cache Map<Long, Product> with 2M entries.
+
+Fix: Replace with bounded Guava cache:
+
+@Bean
+public Cache<Long, Product> productCache() {
+    return CacheBuilder.newBuilder()
+        .maximumSize(50_000)         // Bounded
+        .expireAfterWrite(1, TimeUnit.HOURS)
+        .build();
+}
+
+Result: Heap usage stable at 40%, no Full GC.
+
+14. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Compare G1 GC and ZGC. When would you choose each?"
+
+5 Crore Answer:
+
+G1 GC and ZGC represent two different philosophies in Java garbage collection.
+
+G1 (Garbage First), the default since Java 9, divides the heap into equal-sized regions dynamically assigned as Eden, Survivor, or Old. It prioritizes regions with the most garbage — hence "Garbage First" — and performs most Old Generation collection concurrently with the application. G1's defining feature is configurable pause targets via MaxGCPauseMillis. It tries to meet this target but doesn't guarantee it — mixed GC pauses can occasionally exceed it. Typical pauses are 50-200ms. G1 is excellent for most general-purpose applications where heap sizes are 4-16GB and occasional pauses under 200ms are acceptable.
+
+ZGC, stable since Java 15, takes a fundamentally different approach. It stores GC metadata in the pointer itself using colored pointers — extra bits in the 64-bit address space. Load barriers — code executed on every object read — allow ZGC to relocate objects concurrently with the application. Self-healing pointers ensure stale references are transparently updated. The result is sub-millisecond pauses (typically 1-5ms) regardless of heap size, scaling from gigabytes to terabytes. The cost is higher CPU overhead from load barriers and somewhat lower raw throughput than G1.
+
+I'd choose G1 for: general-purpose applications, batch processing, microservices with moderate latency requirements, and when CPU resources are constrained.
+
+I'd choose ZGC for: latency-sensitive services like real-time APIs, trading systems, gaming backends, or video streaming where even a 200ms pause causes SLA violations. Also for very large heaps where G1's concurrent marking can't keep pace with allocation.
+
+Shenandoah is a similar concurrent collector from Red Hat — comparable to ZGC in goals but uses a different technique (Brooks forwarding pointer rather than colored pointers). Available in OpenJDK builds.
+
+In either case, the most important practice is measuring first: enable GC logging, analyze pause patterns, identify the bottleneck (pause duration vs frequency vs throughput), then tune.
+
+15. Complete Revision Notes
+
+GC = automatic memory reclamation of unreachable objects.
+GC steps: Mark (find live objects from GC roots), Sweep (reclaim dead), Compact (defragment), Copy (move to new area).
+Young Gen GC (Minor): Eden full → STW, copy live to Survivor, promote old → fast (1-100ms).
+Old Gen GC (Major): Old full → depends on GC algorithm → slower.
+Full GC: Mark-compact entire heap → longest pause.
+Generational hypothesis: most objects die young → collect Young Gen frequently.
+G1 GC: Region-based, concurrent marking, "Garbage First" (highest garbage regions), MaxGCPauseMillis target.
+G1 phases: Young GC (STW) → Concurrent Mark → Remark (STW) → Mixed GC → (Full GC fallback).
+ZGC: Colored pointers, load barriers, concurrent relocation, sub-ms pauses, scales to TB heaps.
+Shenandoah: Brooks forwarding pointers, concurrent GC, sub-ms pauses, Red Hat.
+Parallel GC: Multi-threaded STW — best throughput, not for latency.
+GC logging: -Xlog:gc*:file:gc.log:time,uptime:filecount=5,filesize=20m.
+GC tuning: measure first, then tune heap size, GC algorithm, region sizes.
+Target GC overhead < 5% of CPU time.
+Avoid Full GC: size heap correctly, fix memory leaks, bound caches.
+GC-friendly code: avoid temp object creation, prefer primitives, use StringBuilder, object pooling.
+Weak refs: collected when no strong refs (WeakHashMap, caches).
+Soft refs: collected under memory pressure (memory-sensitive caches).
+G1: choose for general purpose, moderate latency requirements.
+ZGC: choose for strict latency (< 10ms pauses), large heaps, real-time systems.

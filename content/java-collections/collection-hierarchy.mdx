@@ -1,0 +1,409 @@
+---
+title: "Collection Hierarchy"
+slug: "collection-hierarchy"
+moduleSlug: "java-collections"
+order: 1
+summaryOneLiner: "Java Collections Framework hierarchy — from Iterable to List, Set, Map, and Queue — forms the foundation of every data-handling task in enterprise Java development."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["oop-principles", "generics"]
+---
+
+Module 5 → Topic 1 → Collection Hierarchy (Part 1)
+
+1. Collection Hierarchy — Introduction
+
+Why Java Collections?
+
+Before Collections Framework (Java 1.1 and earlier):
+
+Arrays: Fixed size. Cannot grow. No utility methods.
+Vector: Synchronized (slow), legacy.
+Hashtable: Synchronized (slow), no null keys.
+
+Java 1.2 (1998) introduced the Collections Framework:
+
+Unified API.
+Resizable data structures.
+High performance implementations.
+Generic types (Java 5).
+
+Definition
+
+The Java Collections Framework (JCF) is a unified architecture for representing and manipulating groups of objects. It provides interfaces (contracts), implementations (concrete data structures), and algorithms (utility methods) for working with collections of objects.
+
+2. Complete Collections Hierarchy
+
+java.lang.Iterable<E>
+    │
+    └── java.util.Collection<E>
+            │
+            ├── java.util.List<E>
+            │   ├── ArrayList<E>     ← Dynamic array, O(1) access by index
+            │   ├── LinkedList<E>    ← Doubly-linked, O(1) head/tail insert
+            │   └── Vector<E>        ← Legacy, synchronized ArrayList
+            │       └── Stack<E>     ← Legacy LIFO stack (use Deque instead)
+            │
+            ├── java.util.Set<E>
+            │   ├── HashSet<E>       ← No order, O(1) add/remove/contains
+            │   ├── LinkedHashSet<E> ← Insertion order maintained
+            │   └── SortedSet<E>
+            │       └── NavigableSet<E>
+            │           └── TreeSet<E> ← Sorted (natural/comparator), O(log n)
+            │
+            └── java.util.Queue<E>
+                ├── PriorityQueue<E> ← Min-heap, priority ordering
+                └── java.util.Deque<E>
+                    ├── ArrayDeque<E> ← Resizable array, fast stack/queue
+                    └── LinkedList<E> ← Also implements Deque
+
+Separate Hierarchy — Map (NOT a Collection):
+
+java.util.Map<K,V>
+    ├── HashMap<K,V>         ← O(1) get/put, no order
+    ├── LinkedHashMap<K,V>   ← Insertion/access order
+    ├── SortedMap<K,V>
+    │   └── NavigableMap<K,V>
+    │       └── TreeMap<K,V> ← Sorted by key, O(log n)
+    ├── Hashtable<K,V>       ← Legacy, synchronized
+    │   └── Properties       ← String key/value pairs
+    └── java.util.concurrent.ConcurrentHashMap<K,V> ← Thread-safe, high perf
+
+3. Collection Interface — Core Methods
+
+public interface Collection<E> extends Iterable<E> {
+    int size();
+    boolean isEmpty();
+    boolean contains(Object o);         // Uses equals()
+    Iterator<E> iterator();
+    Object[] toArray();
+    <T> T[] toArray(T[] a);
+    boolean add(E e);
+    boolean remove(Object o);           // Uses equals()
+    boolean containsAll(Collection<?> c);
+    boolean addAll(Collection<? extends E> c);
+    boolean removeAll(Collection<?> c);
+    boolean retainAll(Collection<?> c); // Intersection
+    void clear();
+    boolean equals(Object o);
+    int hashCode();
+    // Java 8+:
+    default void forEach(Consumer<? super E> action);
+    default boolean removeIf(Predicate<? super E> filter);
+    default Spliterator<E> spliterator();
+    default Stream<E> stream();
+    default Stream<E> parallelStream();
+}
+
+4. List Interface — Ordered, Allows Duplicates
+
+public interface List<E> extends Collection<E> {
+    E get(int index);           // O(1) for ArrayList, O(n) for LinkedList
+    E set(int index, E element);
+    void add(int index, E element);
+    E remove(int index);
+    int indexOf(Object o);      // First occurrence
+    int lastIndexOf(Object o);  // Last occurrence
+    List<E> subList(int from, int to); // View (not copy!)
+    ListIterator<E> listIterator();
+    // Java 9+:
+    static <E> List<E> of(E... elements); // Immutable
+    // Java 10+:
+    static <E> List<E> copyOf(Collection<E> c); // Immutable copy
+}
+
+ArrayList vs LinkedList Decision:
+
+Use Case              | ArrayList | LinkedList
+──────────────────────┼───────────┼────────────────
+Random access [i]     | O(1) ✓✓   | O(n) ✗
+Add at end            | O(1) avg  | O(1) ✓✓
+Add at beginning/mid  | O(n) ✗    | O(1) ✓✓
+Remove from middle    | O(n) ✗    | O(1) (with iter) ✓
+Memory                | Compact   | Per-node overhead
+Cache friendliness    | Excellent | Poor (scattered)
+
+In practice: ArrayList wins in ~90% of use cases due to cache locality.
+
+5. Set Interface — Unordered, No Duplicates
+
+public interface Set<E> extends Collection<E> {
+    // Same methods as Collection — but add() returns false if element exists
+    // No get(int index) — unordered
+}
+
+HashSet Internals:
+
+Actually implemented as a HashMap<E, PRESENT>!
+
+Keys = the set elements.
+Values = a dummy static Object (PRESENT).
+
+HashSet<String> set = new HashSet<>();
+// Internally: HashMap<String, Object>
+// add("hello") → map.put("hello", PRESENT)
+// contains("hello") → map.containsKey("hello")
+
+Demonstrates how HashMap knowledge = HashSet knowledge!
+
+Set Operations:
+
+Set<String> s1 = new HashSet<>(List.of("a", "b", "c"));
+Set<String> s2 = new HashSet<>(List.of("b", "c", "d"));
+
+// Union (all elements of both)
+Set<String> union = new HashSet<>(s1);
+union.addAll(s2); // {a, b, c, d}
+
+// Intersection (common elements)
+Set<String> intersection = new HashSet<>(s1);
+intersection.retainAll(s2); // {b, c}
+
+// Difference (in s1 but not s2)
+Set<String> difference = new HashSet<>(s1);
+difference.removeAll(s2); // {a}
+
+SortedSet / NavigableSet (TreeSet):
+
+TreeSet<Integer> sorted = new TreeSet<>(List.of(5, 1, 3, 2, 4));
+System.out.println(sorted); // [1, 2, 3, 4, 5] — always sorted
+
+sorted.first();        // 1
+sorted.last();         // 5
+sorted.headSet(3);     // {1, 2} — elements < 3
+sorted.tailSet(3);     // {3, 4, 5} — elements >= 3
+sorted.subSet(2, 4);   // {2, 3} — elements >= 2 and < 4
+sorted.floor(3);       // 3 — greatest element <= 3
+sorted.ceiling(3);     // 3 — smallest element >= 3
+sorted.lower(3);       // 2 — greatest element < 3
+sorted.higher(3);      // 4 — smallest element > 3
+
+6. Map Interface — Key-Value Pairs
+
+public interface Map<K,V> {
+    V get(Object key);
+    V put(K key, V value);
+    V remove(Object key);
+    boolean containsKey(Object key);
+    boolean containsValue(Object value); // O(n)
+    int size();
+    Set<K> keySet();
+    Collection<V> values();
+    Set<Map.Entry<K,V>> entrySet();
+
+    // Java 8+:
+    V getOrDefault(Object key, V defaultValue);
+    void forEach(BiConsumer<? super K, ? super V> action);
+    V putIfAbsent(K key, V value);
+    V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFn);
+    V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> fn);
+    V compute(K key, BiFunction<? super K, ? super V, ? extends V> fn);
+    V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> fn);
+    boolean replace(K key, V oldValue, V newValue);
+}
+
+Java 8 Map Operations — Practical Examples:
+
+// computeIfAbsent — create if not exists (cache pattern)
+Map<String, List<Order>> ordersByUser = new HashMap<>();
+ordersByUser.computeIfAbsent(userId, k -> new ArrayList<>()).add(newOrder);
+
+// merge — count words
+Map<String, Integer> wordCount = new HashMap<>();
+for (String word : words) {
+    wordCount.merge(word, 1, Integer::sum);
+    // If word not in map: put(word, 1)
+    // If word in map: put(word, existing + 1)
+}
+
+// getOrDefault
+int count = wordCount.getOrDefault("hello", 0);
+
+7. Queue and Deque
+
+Queue: FIFO (First-In, First-Out)
+
+Interface methods:
+
+Method       | Exception (full/empty) | Returns null/false
+─────────────┼───────────────────────┼───────────────────
+add(e)       | IllegalStateException  | —
+offer(e)     | —                     | false if full
+remove()     | NoSuchElementException | —
+poll()       | —                     | null if empty
+element()    | NoSuchElementException | —
+peek()       | —                     | null if empty
+
+BlockingQueue (extends Queue):
+
+put(e)  → blocks until space available
+take()  → blocks until element available
+
+Used in thread-safe producer-consumer patterns.
+
+ExecutorService internally uses BlockingQueue.
+
+Deque: Double-Ended Queue (can add/remove from both ends)
+
+ArrayDeque as Stack:
+
+Deque<Integer> stack = new ArrayDeque<>();
+stack.push(1); // pushFirst
+stack.push(2);
+stack.push(3);
+stack.pop(); // 3 (LIFO)
+
+ArrayDeque as Queue:
+
+Deque<String> queue = new ArrayDeque<>();
+queue.offer("first");
+queue.offer("second");
+queue.poll(); // "first" (FIFO)
+
+Use ArrayDeque NOT Stack (legacy) and NOT LinkedList for stack/queue.
+
+PriorityQueue:
+
+// Min-heap by default
+PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+minHeap.offer(5);
+minHeap.offer(1);
+minHeap.offer(3);
+minHeap.poll(); // 1 — smallest element first
+
+// Max-heap
+PriorityQueue<Integer> maxHeap = new PriorityQueue<>(Comparator.reverseOrder());
+
+// Custom priority
+PriorityQueue<Task> taskQueue = new PriorityQueue<>(
+    Comparator.comparingInt(Task::getPriority)
+);
+
+8. Immutable Collections (Java 9+)
+
+List.of(1, 2, 3)           // Immutable, no null elements
+Set.of("a", "b")            // Immutable, no null, no duplicates
+Map.of("k1", "v1", "k2", "v2") // Immutable
+
+Java 10+:
+
+List.copyOf(mutableList)    // Immutable copy
+
+Properties:
+
+Null elements NOT allowed.
+Cannot modify (add/remove/set) → UnsupportedOperationException.
+Compact memory representation.
+
+vs Collections.unmodifiableList():
+
+Collections.unmodifiableList(list) — view of original list. Original can still be modified.
+List.of() — truly immutable, not backed by mutable collection.
+
+9. Thread-Safe Collections
+
+Collection           | Thread Safe | Performance | Notes
+─────────────────────┼─────────────┼─────────────┼────────────────────
+ArrayList            | No          | Best        | Use in single thread
+Vector               | Yes (sync)  | Poor        | Legacy, avoid
+synchronizedList()   | Yes (sync)  | Poor        | Wrapper, single lock
+CopyOnWriteArrayList | Yes         | Good reads  | Write creates new array
+HashSet              | No          | Best        | Use in single thread
+ConcurrentHashMap    | Yes         | Excellent   | Preferred concurrent map
+ConcurrentSkipListMap| Yes         | Good (sorted)| Concurrent sorted map
+LinkedBlockingQueue  | Yes         | Good        | Producer-consumer
+
+CopyOnWriteArrayList:
+
+Reads: No locking — extremely fast (no writers can interfere, immutable during read).
+Writes: Creates entirely new array copy → expensive.
+
+Use when: Many reads, very few writes. Like Spring's ApplicationListener list.
+
+10. Comparable vs Comparator
+
+For sorting (TreeSet, TreeMap, PriorityQueue, Collections.sort()):
+
+Comparable<T> — Natural ordering (class implements itself)
+
+public class Product implements Comparable<Product> {
+    private BigDecimal price;
+
+    @Override
+    public int compareTo(Product other) {
+        return this.price.compareTo(other.price); // Natural order by price
+    }
+}
+
+TreeSet<Product> sortedProducts = new TreeSet<>(); // Uses compareTo()
+
+Comparator<T> — External ordering (separate comparator object)
+
+Comparator<Product> byName = Comparator.comparing(Product::getName);
+Comparator<Product> byPrice = Comparator.comparingDouble(Product::getPrice);
+Comparator<Product> byPriceDesc = byPrice.reversed();
+Comparator<Product> byNameThenPrice = byName.thenComparing(byPrice);
+
+products.sort(byPriceDesc); // Sort by price descending
+TreeSet<Product> byNameSet = new TreeSet<>(byName); // TreeSet with custom order
+
+11. Collections Utility Class
+
+java.util.Collections provides algorithms:
+
+Collections.sort(list, comparator);
+Collections.binarySearch(sortedList, target);
+Collections.reverse(list);
+Collections.shuffle(list);
+Collections.min(collection);
+Collections.max(collection);
+Collections.frequency(collection, element);
+Collections.nCopies(3, "hello"); // ["hello", "hello", "hello"]
+Collections.singleton("one");    // Immutable single-element set
+Collections.emptyList();
+Collections.unmodifiableList(list);
+Collections.synchronizedList(list);
+Collections.disjoint(s1, s2);    // true if no common elements
+Collections.swap(list, i, j);
+Collections.fill(list, element);
+
+12. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Describe the Java Collections Framework. When would you choose ArrayList over LinkedList? When TreeMap over HashMap?"
+
+5 Crore Answer:
+
+The Java Collections Framework provides a unified interface hierarchy for data structures. The root is Iterable, extended by Collection, which branches into List (ordered, duplicates allowed), Set (unordered, unique), and Queue (FIFO/LIFO patterns). Map is separate — it's not a Collection — mapping unique keys to values.
+
+The ArrayList vs LinkedList decision is almost always ArrayList. ArrayList uses a contiguous array — random access is O(1), and CPU cache prefetching works excellently because elements are adjacent in memory. LinkedList uses doubly-linked nodes — random access is O(n) and cache performance is poor because nodes are scattered in heap.
+
+LinkedList's theoretical O(1) insert/delete at arbitrary position requires an iterator pointing there — and getting the iterator is O(n) traversal. So the only case where LinkedList wins is frequent insertions/deletions at both ends, where you maintain the iterator position and never need random access. ArrayDeque handles that case better anyway.
+
+HashMap vs TreeMap: HashMap gives O(1) average for get/put — perfect for pure key-value lookup. TreeMap gives O(log n) but maintains keys in sorted natural or custom order, enabling range queries like headMap(key), tailMap(key), floorKey(key), ceilingKey(key). Use TreeMap when you need ordered iteration, range scans, or nearest-key operations — like a leaderboard, time-series index, or frequency analysis.
+
+For thread safety: avoid synchronizedList or synchronized wrappers — they use coarse-grained locking. ConcurrentHashMap uses fine-grained per-bucket locking and CAS for high-throughput concurrent access. CopyOnWriteArrayList is optimal for event listener lists where reads vastly outnumber writes.
+
+13. Complete Revision Notes
+
+JCF introduced Java 1.2 — unified data structures.
+Iterable → Collection → List / Set / Queue. Map is separate.
+List: ordered, duplicates. ArrayList (dynamic array), LinkedList (doubly-linked).
+Set: unordered, unique. HashSet (O(1)), LinkedHashSet (insertion order), TreeSet (sorted, O(log n)).
+Map: K→V. HashMap (O(1)), LinkedHashMap (ordered), TreeMap (sorted keys, O(log n)).
+Queue: FIFO. LinkedBlockingQueue, ArrayDeque (best general queue), PriorityQueue (heap).
+Deque: double-ended queue. ArrayDeque beats Stack for LIFO, LinkedList for FIFO.
+ArrayList vs LinkedList: ArrayList wins 90% — better cache locality, O(1) random access.
+HashSet = HashMap<E, PRESENT> internally.
+TreeSet/TreeMap uses Red-Black Tree internally — O(log n), always sorted.
+PriorityQueue = min-heap. poll() always returns minimum.
+Comparable: natural ordering (class itself). Comparator: external/custom ordering.
+Immutable: List.of(), Set.of(), Map.of() — Java 9+. No nulls. Truly immutable.
+Collections.unmodifiableList(): view wrapper — original still mutable.
+Thread-safe: ConcurrentHashMap (excellent), CopyOnWriteArrayList (read-heavy).
+Vector/Hashtable: legacy, synchronized entire methods, avoid.
+computeIfAbsent, merge, getOrDefault — important Java 8 Map methods.
+Collections utility class: sort, binarySearch, reverse, shuffle, min, max.
+Java 16+: stream.toList() — immutable unmodifiable list from stream.
+For bounded FIFO queues: LinkedBlockingQueue (blocking producer-consumer pattern).

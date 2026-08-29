@@ -1,0 +1,383 @@
+---
+title: "Virtual Threads"
+slug: "virtual-threads"
+moduleSlug: "multithreading-concurrency"
+order: 3
+summaryOneLiner: "Java 21 Virtual Threads (Project Loom) revolutionize I/O-bound concurrency — enabling millions of lightweight threads without the complexity of reactive programming."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["thread-lifecycle", "thread-pools-executor"]
+---
+
+![Keywords: Virtual Threads, Loom, Concurrency, Platform Threads | Hint: Thousands of lightweight virtual threads mapping onto a platform thread trunk dynamically.](/illustrations/topics/virtual_threads_hero.gif)
+
+Module 8 → Topic 3 → Virtual Threads (Part 1)
+
+1. Virtual Threads — Introduction
+
+The Problem with Platform Threads
+
+Traditional Java threads = OS threads (also called platform threads).
+
+Each platform thread:
+
+Requires ~1MB stack memory (OS reserves for stack).
+Is an OS kernel-managed entity.
+Context switch (scheduler preemption): ~1-10 microseconds.
+
+Maximum practical threads per JVM: 10,000-30,000.
+
+The Web Server Problem:
+
+// Thread-per-request model:
+for each HTTP request:
+    thread handles request:
+        1. Receive request (fast)
+        2. Query database — blocks for 50ms (thread IDLE)
+        3. Call external API — blocks for 100ms (thread IDLE)
+        4. Send response (fast)
+    Total: 150ms mostly BLOCKED
+
+With 500 threads:
+
+Max concurrent requests = 500 (each tied to one thread).
+Threads spend 95%+ of time blocked in I/O.
+500 threads × 1MB = 500MB just for thread stacks.
+CPU doing nothing while threads wait for I/O.
+
+This is the C10K problem (10,000 concurrent connections).
+
+The Reactive Solution (Pre-Virtual Threads):
+
+Non-blocking I/O. Callbacks. Events.
+
+// Reactive style — complex
+return webClient.get()
+    .uri("/users/" + userId)
+    .retrieve()
+    .bodyToMono(User.class)
+    .flatMap(user ->
+        orderService.getOrdersMono(user.getId()))
+    .zipWith(walletService.getWalletMono(userId))
+    .map(tuple -> new Dashboard(tuple.getT1(), tuple.getT2()))
+    .onErrorReturn(new Dashboard.empty());
+
+Problem with reactive: Callback hell, stack trace difficulties, debugging complexity, mental model complexity.
+
+Virtual Threads — The Better Solution:
+
+// Same blocking style — simple!
+User user = httpClient.get("/users/" + userId);   // Looks blocking, isn't!
+List<Order> orders = orderService.getOrders(userId); // Same
+Dashboard dashboard = new Dashboard(user, orders);
+
+// But now handles MILLIONS of concurrent requests efficiently!
+
+2. What are Virtual Threads?
+
+Virtual Threads = JVM-managed lightweight threads.
+
+NOT OS threads.
+
+Managed entirely by the JVM.
+
+When a virtual thread blocks on I/O → it unmounts from the OS thread.
+The OS thread (carrier thread) becomes available for other virtual threads.
+
+The Key Insight:
+
+10 carrier threads (OS threads) can handle 1,000,000 virtual threads.
+
+Virtual threads share carrier threads.
+A virtual thread uses an OS thread only when it's actually computing.
+During blocking I/O: virtual thread unmounted, OS thread freed for other virtual threads.
+
+Java 21: Virtual Threads are stable (not preview).
+
+3. Virtual Thread Architecture
+
+JVM Thread Scheduler manages virtual threads:
+
+Virtual Thread (VT) pool
+    VT 1, VT 2, VT 3, ..., VT 1,000,000
+
+Carrier Thread pool (ForkJoinPool)
+    CT 1, CT 2, ..., CT (numCPUs)
+
+Mounting: A VT is mounted on a CT when it needs to run.
+Unmounting: A VT is unmounted from its CT when it blocks.
+
+State Machine:
+
+VT: RUNNABLE → Mounted on CT → RUNNING
+        ↓ (I/O block)
+VT: WAITING → Unmounted from CT → CT serves other VTs
+        ↓ (I/O completes)
+VT: RUNNABLE → Re-mounted on CT (possibly different CT) → RUNNING
+
+The OS thread is never blocked waiting for I/O.
+
+4. Creating Virtual Threads
+
+Method 1 — Thread.ofVirtual():
+
+Thread vt = Thread.ofVirtual()
+    .name("my-virtual-thread")
+    .start(() -> {
+        System.out.println("Running in virtual thread: "
+            + Thread.currentThread().isVirtual()); // true
+    });
+
+vt.join(); // Wait for completion
+
+Method 2 — Thread.startVirtualThread():
+
+Thread vt = Thread.startVirtualThread(() -> {
+    handleRequest(request);
+});
+
+Method 3 — Virtual Thread Per Task Executor:
+
+// Create one virtual thread per task — primary use case
+ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+
+try (var es = Executors.newVirtualThreadPerTaskExecutor()) {
+    for (int i = 0; i < 10_000; i++) {
+        es.submit(() -> processRequest(i)); // 10,000 concurrent virtual threads!
+    }
+} // Auto-closes and waits for completion
+
+// Alternative: try-with-resources (auto-shutdown)
+
+Method 4 — Spring Boot 3.2+ Integration:
+
+spring.threads.virtual.enabled=true
+
+Tomcat uses virtual thread per request.
+@Async methods use virtual threads.
+@Scheduled methods use virtual threads.
+
+5. Virtual Threads vs Platform Threads — Comparison
+
+Property           | Platform Thread        | Virtual Thread
+───────────────────┼────────────────────────┼────────────────────────
+Identity           | OS thread              | JVM thread
+Stack size         | ~1MB (fixed)           | Small, grows dynamically
+Creation cost      | ~50-100 microseconds   | ~1 microsecond
+Max count          | 10,000-30,000          | Millions
+Memory per thread  | ~1MB                   | ~few KB (initial stack)
+Context switch     | OS (expensive)         | JVM (cheaper)
+Blocking I/O       | Blocks OS thread       | Unmounts from carrier
+Scheduler          | OS                     | JVM (ForkJoinPool)
+Thread.sleep()     | Blocks OS thread       | Unmounts carrier thread
+synchronized       | Pins to carrier thread!| See note below
+
+CRITICAL NOTE — synchronized and Pinning:
+
+Virtual threads have a limitation with synchronized blocks.
+
+If a virtual thread enters a synchronized block → it PINS to its carrier thread.
+
+// PROBLEM: Virtual thread stays mounted during entire synchronized block
+synchronized (lock) {
+    Thread.sleep(1000); // Carrier thread BLOCKED for 1 second!
+    // Pinning — carrier thread not freed despite blocking
+}
+
+Fix: Use ReentrantLock instead of synchronized:
+
+// GOOD: Virtual thread unmounts during await
+ReentrantLock lock = new ReentrantLock();
+Condition condition = lock.newCondition();
+
+lock.lock();
+try {
+    condition.await(1, TimeUnit.SECONDS); // Virtual thread unmounts!
+} finally {
+    lock.unlock();
+}
+
+Spring Boot 3.2+ notes about pinning:
+
+Spring avoids synchronized in critical paths.
+Hibernate and JDBC drivers need updates to avoid pinning.
+
+6. Thread Locals with Virtual Threads
+
+ThreadLocal works with virtual threads but has implications:
+
+When creating millions of virtual threads, each with ThreadLocals:
+
+Memory can grow significantly.
+
+Each VT has its own ThreadLocal map.
+
+Solution — Scoped Values (Java 21):
+
+// ThreadLocal — mutable, inheritable, any thread
+ThreadLocal<String> user = new ThreadLocal<>();
+user.set("alice");
+
+// Scoped Value — immutable, structured, preferred for virtual threads
+ScopedValue<String> USER = ScopedValue.newInstance();
+
+ScopedValue.where(USER, "alice").run(() -> {
+    System.out.println(USER.get()); // "alice" — within scope
+});
+// Outside scope: USER.get() throws NoSuchElementException
+
+Scoped values:
+
+Immutable — cannot be changed within scope.
+Efficient — single assignment, no inheritance complexity.
+Automatically cleaned up when scope exits.
+Better for virtual threads — no memory accumulation.
+
+7. When to Use Virtual Threads
+
+PERFECT for Virtual Threads — I/O Bound:
+
+HTTP requests to external services.
+Database queries.
+File I/O.
+Message queue consumption.
+Any blocking I/O.
+
+// 10,000 concurrent HTTP calls — no problem!
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    List<Future<Product>> futures = productIds.stream()
+        .map(id -> executor.submit(() -> catalogService.getProduct(id)))
+        .toList();
+
+    List<Product> products = futures.stream()
+        .map(f -> f.get())
+        .toList();
+}
+
+NOT good for Virtual Threads — CPU Bound:
+
+Computation-intensive tasks.
+Image processing.
+Machine learning inference.
+Mathematical calculations.
+
+For CPU-bound: Use thread pool with core-count threads. Virtual threads don't help.
+
+8. Virtual Threads and Reactive Programming
+
+Virtual threads don't replace reactive in all cases:
+
+Reactive still useful for:
+
+Backpressure control.
+Stream processing.
+Event-driven architectures.
+When reactive operations are naturally composable.
+
+Virtual threads replace reactive for:
+
+Simple request-response.
+Sequential I/O operations.
+When readability > maximum throughput at extreme scale.
+
+9. Spring Boot Virtual Thread Integration
+
+Spring Boot 3.2+ with Java 21:
+
+# application.properties
+spring.threads.virtual.enabled=true
+
+Effect:
+
+Tomcat uses VirtualThreadPerTaskExecutor for each request.
+@Async uses virtual threads.
+@Scheduled uses virtual threads.
+
+Before virtual threads — Spring WebFlux (reactive):
+
+@GetMapping("/dashboard/{userId}")
+public Mono<Dashboard> getDashboard(@PathVariable Long userId) {
+    return Mono.zip(
+        userService.getUserMono(userId),
+        orderService.getOrdersMono(userId)
+    ).map(t -> new Dashboard(t.getT1(), t.getT2()));
+}
+
+With virtual threads — Spring MVC (blocking style):
+
+@GetMapping("/dashboard/{userId}")
+public Dashboard getDashboard(@PathVariable Long userId) {
+    User user = userService.getUser(userId);       // Blocking — fine!
+    List<Order> orders = orderService.getOrders(userId); // Blocking — fine!
+    return new Dashboard(user, orders);
+}
+
+Same throughput, much simpler code!
+
+10. Real-World Performance Impact
+
+Netflix Experiment (2023):
+
+Traditional thread pool: 1000 threads, 50ms average response time.
+Max throughput: ~20,000 requests/sec.
+Virtual threads: Same 50ms work, millions of virtual threads.
+Max throughput: ~200,000 requests/sec (10x).
+Memory usage: Similar or less.
+
+Database Connection Pool with Virtual Threads:
+
+Connection pools must be sized correctly.
+
+// Even with 1,000,000 virtual threads, only 50 DB connections
+HikariDataSource ds = new HikariDataSource();
+ds.setMaximumPoolSize(50); // Not 1,000,000!
+
+When VT needs DB: get connection from pool. If no connections: VT blocks (unmounts carrier).
+Connection available: VT remounts and proceeds.
+Connection pool, not thread pool, is the resource limit for DB-heavy workloads.
+
+11. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"What are Virtual Threads in Java 21? How do they differ from platform threads? What are the limitations?"
+
+5 Crore Answer:
+
+Virtual Threads, stable in Java 21 from Project Loom, represent a fundamental shift in Java's concurrency model — from OS thread-per-request to JVM-managed lightweight threads.
+
+Platform threads map 1:1 to OS threads. Creating one involves OS kernel calls, allocates ~1MB stack memory, and requires OS scheduler involvement. Practical limits are 10,000-30,000 per JVM. I/O-bound workloads — the vast majority of modern microservice operations — leave threads blocked waiting for network or disk for most of their lifetime, wasting the OS thread.
+
+Virtual threads are managed entirely by the JVM. They're created cheaply — microseconds, kilobytes of initial stack that grows dynamically. When a virtual thread blocks on I/O, it's unmounted from its carrier thread (an OS thread from a ForkJoinPool sized to CPU count). The carrier thread is immediately available for other virtual threads. When I/O completes, the virtual thread remounts on any available carrier. This allows millions of virtual threads to share a handful of carrier threads, with OS threads only consumed during actual computation.
+
+The critical limitation is synchronized block pinning. If a virtual thread enters a synchronized block, it pins to its carrier thread for the duration — the carrier cannot serve other virtual threads even if the virtual thread is blocked within the synchronized block. The fix is to use ReentrantLock with Condition.await() instead of synchronized/wait() — ReentrantLock uses park() which the JVM has specifically instrumented to unmount virtual threads.
+
+For thread-local state, Scoped Values (also Java 21) are preferred over ThreadLocal for virtual threads — they're immutable within their scope, structurally defined, efficiently stored, and automatically cleaned up.
+
+Virtual threads are ideal for I/O-bound workloads — HTTP calls, database queries, file I/O — where the traditional alternative was reactive/async programming with callbacks and monads. Virtual threads enable the thread-per-request model at scale with simple, synchronous, readable code. They don't help CPU-bound work — for computation, use a bounded thread pool sized to CPU count.
+
+Spring Boot 3.2+ with spring.threads.virtual.enabled=true automatically uses virtual threads for Tomcat request handling, @Async, and @Scheduled — allowing existing blocking Spring MVC code to scale like reactive without a rewrite.
+
+12. Complete Revision Notes
+
+Virtual threads: JVM-managed lightweight threads. Java 21 stable (Project Loom).
+Platform thread: OS thread, ~1MB stack, max 10K-30K. OS kernel managed.
+Virtual thread: JVM managed, ~KB initial stack, millions possible.
+Carrier threads: OS threads that run virtual threads. Sized to CPU count (ForkJoinPool).
+Mounting: VT running → mounted on carrier CT.
+Unmounting: VT blocks on I/O → unmounts from CT → CT serves other VTs.
+VT creation: Thread.ofVirtual(), Thread.startVirtualThread(), Executors.newVirtualThreadPerTaskExecutor().
+Thread.currentThread().isVirtual(): Check if running in virtual thread.
+CRITICAL: synchronized blocks PIN virtual threads to carrier. Use ReentrantLock/Condition instead.
+Scoped Values (Java 21): immutable, scoped alternative to ThreadLocal for virtual threads.
+Spring Boot 3.2+: spring.threads.virtual.enabled=true — auto-enables for Tomcat, @Async, @Scheduled.
+Best for: I/O-bound (HTTP, DB, files). NOT for CPU-bound (use bounded pool).
+Connection pool sizing: not thread count — number of DB connections, not virtual threads.
+vs Reactive: Virtual threads = simpler blocking code. Reactive = backpressure, streaming.
+Context switch: OS switches (expensive) vs JVM scheduling (cheaper).
+Memory: 1M virtual threads vs 1000 platform threads — similar total memory or less!
+Thread.sleep() in VT: unmounts carrier. Thread.sleep() in PT: blocks OS thread.
+JDK instrumented: sleep, blocking I/O, ReentrantLock, Semaphore → VT unmounts.
+NOT instrumented: synchronized (legacy) → VT pinned.
+Monitor pinning: -Djdk.tracePinnedThreads=full to detect.
+Project Loom: umbrella project for virtual threads + structured concurrency + scoped values.

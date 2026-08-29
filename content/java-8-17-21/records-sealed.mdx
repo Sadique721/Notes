@@ -1,0 +1,389 @@
+---
+title: "Records and Sealed Classes"
+slug: "records-sealed"
+moduleSlug: "java-8-17-21"
+order: 3
+summaryOneLiner: "Java Records (Java 16) and Sealed Classes (Java 17) bring algebraic data types and immutability-by-default to Java — essential for modern domain modeling and pattern matching."
+estimatedReadMinutes: 35
+generated: false
+prerequisiteTopicSlugs: ["oop-principles", "generics"]
+---
+
+Module 6 → Topic 3 → Records and Sealed Classes (Part 1)
+
+1. Records — Introduction
+
+The Problem with Plain Data Classes
+
+Before Records, creating a simple data holder required enormous boilerplate:
+
+public class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int x() { return x; }
+    public int y() { return y; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Point)) return false;
+        Point p = (Point) o;
+        return x == p.x && y == p.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
+    public String toString() {
+        return "Point[x=" + x + ", y=" + y + "]";
+    }
+}
+
+7 lines of actual content. 30+ lines of boilerplate.
+
+With Records (Java 16):
+
+public record Point(int x, int y) { }
+
+One line. Compiler generates everything automatically!
+
+2. What Records Generate Automatically
+
+// Compact form — one line
+public record Point(int x, int y) { }
+
+Compiler generates:
+
+// 1. Private final fields
+private final int x;
+private final int y;
+
+// 2. Canonical constructor
+public Point(int x, int y) {
+    this.x = x;
+    this.y = y;
+}
+
+// 3. Accessor methods (no "get" prefix!)
+public int x() { return x; }
+public int y() { return y; }
+
+// 4. equals() — structural equality (both fields)
+@Override
+public boolean equals(Object o) { /* compares x and y */ }
+
+// 5. hashCode() — based on fields
+@Override
+public int hashCode() { /* based on x and y */ }
+
+// 6. toString()
+@Override
+public String toString() { return "Point[x=" + x + ", y=" + y + "]"; }
+
+3. Records — Key Properties
+
+Immutable: All fields are final. Cannot modify after creation.
+Shallow immutability: If field is mutable object (List), the list can still be modified.
+
+Records extend java.lang.Record (implicitly).
+Cannot extend other classes.
+Can implement interfaces.
+Cannot be abstract.
+
+4. Record Customization
+
+Compact Canonical Constructor (Validation):
+
+public record Range(int min, int max) {
+    // Compact canonical constructor — fields already assigned by compiler
+    Range {
+        if (min > max) {
+            throw new IllegalArgumentException(
+                "min (%d) must be <= max (%d)".formatted(min, max));
+        }
+        // Can transform values:
+        // max = Math.max(min, max); // Reassign before field is set
+    }
+}
+
+Custom Methods:
+
+public record Money(BigDecimal amount, Currency currency) {
+    // Static factory
+    public static Money of(double amount, String currencyCode) {
+        return new Money(BigDecimal.valueOf(amount), Currency.getInstance(currencyCode));
+    }
+
+    // Instance method
+    public Money add(Money other) {
+        if (!this.currency.equals(other.currency))
+            throw new IllegalArgumentException("Currency mismatch");
+        return new Money(this.amount.add(other.amount), this.currency);
+    }
+
+    public boolean isPositive() {
+        return amount.compareTo(BigDecimal.ZERO) > 0;
+    }
+}
+
+Generic Records:
+
+public record Pair<A, B>(A first, B second) {
+    public Pair<B, A> swap() {
+        return new Pair<>(second, first);
+    }
+}
+
+Pair<String, Integer> p = new Pair<>("Hello", 42);
+Pair<Integer, String> swapped = p.swap(); // Pair[first=42, second=Hello]
+
+5. Records in Enterprise Use Cases
+
+Use Case 1 — DTOs (Data Transfer Objects)
+
+// API Request DTO
+public record CreateOrderRequest(
+    Long productId,
+    int quantity,
+    String shippingAddress,
+    PaymentMethod paymentMethod
+) {
+    // Validation in compact constructor
+    CreateOrderRequest {
+        Objects.requireNonNull(productId, "productId required");
+        if (quantity <= 0) throw new IllegalArgumentException("quantity must be positive");
+        Objects.requireNonNull(shippingAddress, "address required");
+    }
+}
+
+// API Response DTO
+public record OrderResponse(
+    Long orderId,
+    String status,
+    BigDecimal totalAmount,
+    Instant createdAt
+) {}
+
+Use Case 2 — Value Objects in DDD
+
+// Domain Value Objects — immutable, equality by value
+public record Email(String value) {
+    Email {
+        if (!value.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}")) {
+            throw new IllegalArgumentException("Invalid email: " + value);
+        }
+    }
+}
+
+public record OrderId(UUID value) {
+    public static OrderId generate() {
+        return new OrderId(UUID.randomUUID());
+    }
+}
+
+public record Money(BigDecimal amount, Currency currency) {
+    public static Money inRupees(BigDecimal amount) {
+        return new Money(amount, Currency.getInstance("INR"));
+    }
+}
+
+Use Case 3 — Projection in Spring Data JPA
+
+// Interface projection (before)
+public interface UserSummary {
+    Long getId();
+    String getName();
+    String getEmail();
+}
+
+// Record projection (Java 16+)
+public record UserSummary(Long id, String name, String email) {}
+
+// Spring Data:
+public interface UserRepository extends JpaRepository<User, Long> {
+    List<UserSummary> findByActiveTrue(); // Spring maps to record constructor
+}
+
+6. Sealed Classes — Introduction
+
+What problem do Sealed Classes solve?
+
+Before sealed classes:
+
+interface Shape { }
+class Circle implements Shape { }
+class Rectangle implements Shape { }
+// Anyone can implement Shape!
+class Triangle implements Shape { }
+class Hexagon implements Shape { }
+// And more... unknown to author
+
+For exhaustive pattern matching: how do you know you've handled all cases?
+
+With Sealed Classes (Java 17):
+
+public sealed interface Shape permits Circle, Rectangle, Triangle { }
+
+// Only these three can implement Shape — SEALED!
+public record Circle(double radius) implements Shape { }
+public record Rectangle(double width, double height) implements Shape { }
+public record Triangle(double base, double height) implements Shape { }
+
+Now compiler knows ALL possible subtypes.
+
+7. Sealed Classes — Syntax and Rules
+
+sealed interface or sealed class with permits clause:
+
+public sealed class Vehicle
+    permits Car, Truck, Motorcycle { }
+
+// Each permitted subclass must be:
+// 1. final — no further subclassing
+public final class Car extends Vehicle { }
+
+// 2. sealed — restricts its own subclasses
+public sealed class Truck extends Vehicle permits LightTruck, HeavyTruck { }
+public final class LightTruck extends Truck { }
+public final class HeavyTruck extends Truck { }
+
+// 3. non-sealed — opens back up to any subclassing
+public non-sealed class Motorcycle extends Vehicle { }
+public class SportBike extends Motorcycle { } // Allowed!
+
+8. Sealed Classes with Pattern Matching — The Power Combination
+
+Java 21's Pattern Matching for switch:
+
+// exhaustive switch — compiler warns if a case is missing!
+double area(Shape shape) {
+    return switch (shape) {
+        case Circle c -> Math.PI * c.radius() * c.radius();
+        case Rectangle r -> r.width() * r.height();
+        case Triangle t -> 0.5 * t.base() * t.height();
+        // NO default needed — sealed interface, all cases covered
+        // Compiler ENFORCES exhaustiveness
+    };
+}
+
+// If you add a new type to permits without updating the switch:
+// COMPILE ERROR: The sealed class is missing a case for Pentagon
+// Compiler catches missing cases at compile time!
+
+This is algebraic data types — common in Haskell, Scala, Rust.
+
+9. Real-World Enterprise Examples
+
+Example 1 — Payment Result (Domain Modeling)
+
+public sealed interface PaymentResult
+    permits PaymentResult.Success, PaymentResult.Declined, PaymentResult.Error {
+
+    record Success(String transactionId, BigDecimal amount) implements PaymentResult {}
+    record Declined(String reason, String errorCode) implements PaymentResult {}
+    record Error(String message, Exception cause) implements PaymentResult {}
+}
+
+// Usage with pattern matching:
+String getMessage(PaymentResult result) {
+    return switch (result) {
+        case PaymentResult.Success s ->
+            "Payment successful! Transaction: " + s.transactionId();
+        case PaymentResult.Declined d ->
+            "Payment declined: " + d.reason() + " (Code: " + d.errorCode() + ")";
+        case PaymentResult.Error e ->
+            "System error: " + e.message();
+    };
+}
+
+Example 2 — HTTP Response Modeling
+
+public sealed interface ApiResponse<T>
+    permits ApiResponse.Ok, ApiResponse.NotFound, ApiResponse.Error {
+
+    record Ok<T>(T data) implements ApiResponse<T> {}
+    record NotFound<T>(String resourceId) implements ApiResponse<T> {}
+    record Error<T>(String message, int statusCode) implements ApiResponse<T> {}
+}
+
+ApiResponse<User> response = userService.getUser(id);
+int httpStatus = switch (response) {
+    case ApiResponse.Ok<?> ok -> 200;
+    case ApiResponse.NotFound<?> nf -> 404;
+    case ApiResponse.Error<?> err -> err.statusCode();
+};
+
+Example 3 — Event System
+
+public sealed interface DomainEvent
+    permits OrderPlaced, OrderCancelled, PaymentReceived, ItemShipped {
+    Instant occurredAt();
+}
+
+public record OrderPlaced(Long orderId, Long userId, Instant occurredAt) implements DomainEvent {}
+public record OrderCancelled(Long orderId, String reason, Instant occurredAt) implements DomainEvent {}
+public record PaymentReceived(Long orderId, BigDecimal amount, Instant occurredAt) implements DomainEvent {}
+public record ItemShipped(Long orderId, String trackingNumber, Instant occurredAt) implements DomainEvent {}
+
+// Event handler — exhaustive by compiler:
+void handleEvent(DomainEvent event) {
+    switch (event) {
+        case OrderPlaced e -> orderService.processNewOrder(e.orderId());
+        case OrderCancelled e -> orderService.cancelOrder(e.orderId(), e.reason());
+        case PaymentReceived e -> paymentService.recordPayment(e.orderId(), e.amount());
+        case ItemShipped e -> notificationService.sendShippingUpdate(e.orderId(), e.trackingNumber());
+    }
+}
+
+10. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain Records and Sealed Classes in Java. When would you use them?"
+
+5 Crore Answer:
+
+Records, introduced in Java 16 as a final language feature, address Java's long-standing boilerplate problem for plain data classes. A record declaration is nominal — it declares the essential elements (the components) and the compiler derives the standard plumbing: canonical constructor, field accessors with the same name as components (not getX() but x()), equals and hashCode based on all components, and toString.
+
+Records are immutable by design — all components are implicitly final. They extend java.lang.Record and cannot extend other classes, but can implement interfaces. This makes them ideal for DTOs, API request/response objects, value objects in DDD, and projection types in Spring Data JPA queries. They're also directly constructable by Jackson with @JsonCreator or with @JsonDeserialize(using=YourRecord.class).
+
+Sealed classes and interfaces, stable in Java 17, restrict which classes can extend or implement them. The permits clause enumerates all allowed subtypes. Each permitted subtype must be either final, sealed itself, or explicitly non-sealed. The key power is that the JVM knows the complete set of subtypes at compile time.
+
+Combined with Java 21's pattern matching for switch expressions, sealed classes enable exhaustive pattern matching — the compiler verifies that all permitted subtypes are handled and reports a compile error if any are missing. This is the Java equivalent of algebraic data types (sum types) from functional languages like Haskell or Rust enums.
+
+The most powerful enterprise pattern: model domain outcomes as sealed hierarchies of records. A PaymentResult sealed interface with Success, Declined, and Error record subtypes makes it impossible to forget handling the Declined case — the compiler enforces it. Adding a new outcome type is automatically detected as a breaking change anywhere a switch doesn't handle it.
+
+I use Records for: DTOs, API request/response, value objects, Map tuple keys, small immutable bundles of data. I use Sealed classes for: discriminated unions of outcomes (Result types), domain events with exhaustive handling, hierarchical type constraints.
+
+11. Complete Revision Notes
+
+Records: introduced Java 16 as stable feature. Compact data classes.
+Record components → compiler generates: constructor, accessors (no get prefix), equals/hashCode/toString.
+Accessors: x() not getX(). Important for Jackson — configure DeserializationFeature or use @JsonProperty.
+Immutable: all fields final. Cannot modify after construction.
+Compact canonical constructor: validate/transform before fields are set.
+Records can: implement interfaces, have static fields/methods, have custom instance methods.
+Records cannot: extend classes (implicitly extends Record), be abstract, be modified after construction.
+Generic records: record Pair<A, B>(A first, B second) — supported.
+Records in Spring: excellent for DTOs, @ConfigurationProperties, JPA projections.
+Jackson and Records: supported from Jackson 2.12+.
+Sealed classes: Java 17. permits clause limits subtypes.
+Sealed subtypes must be: final, sealed, or non-sealed.
+Sealed purpose: restrict inheritance, enable exhaustive pattern matching.
+Pattern matching for switch + sealed: exhaustive — compiler warns on missing cases.
+Java 21: Pattern matching for switch is stable.
+Algebraic data types: sum types (sealed/enum) + product types (records/class).
+PaymentResult pattern: sealed interface + record subtypes = type-safe outcome modeling.
+Jackson record support: constructor-based deserialization (no setters needed).
+Spring Data projections with records: supported in Spring Data JPA 3.x.
+non-sealed: permits subtypes to be freely extended again — "opens" the hierarchy.
+Guarded patterns (Java 21): case Circle c when c.radius() > 10 → in switch.

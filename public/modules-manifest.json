@@ -1,0 +1,5396 @@
+{
+  "spring-framework-fundamentals": {
+    "slug": "spring-framework-fundamentals",
+    "title": "Spring Framework Fundamentals",
+    "topics": [
+      {
+        "slug": "what-is-spring",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "What is Spring?",
+        "order": 1,
+        "summaryOneLiner": "A deep dive into the core concepts, history, philosophy, and architecture of the Spring Framework.",
+        "estimatedReadMinutes": 45,
+        "generated": false,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [],
+        "diagramCount": 0,
+        "qaCount": 0,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "problems-before-spring",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Problems before Spring",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Problems before Spring.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Problems before Spring",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "ioc-container",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "IoC Container & Dependency Injection",
+        "order": 2,
+        "summaryOneLiner": "Understand Inversion of Control and how the container manages bean creation and injection.",
+        "estimatedReadMinutes": 12,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "what-is-spring"
+        ],
+        "keyTerms": [
+          "IoC Container & Dependency Injection",
+          "IOC",
+          "CONTAINER",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "why-spring-framework",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Why Spring Framework?",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Why Spring Framework?.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Why Spring Framework?",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "spring-architecture",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Spring Architecture",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Spring Architecture.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Spring Architecture",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "bean-lifecycle",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Spring Bean Lifecycle",
+        "order": 4,
+        "summaryOneLiner": "The 21-step journey of a Spring Bean from instantiation to destruction.",
+        "estimatedReadMinutes": 15,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "spring-beans"
+        ],
+        "keyTerms": [
+          "Spring Bean Lifecycle",
+          "BEAN",
+          "LIFECYCLE",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "spring-modules",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Spring Modules",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Spring Modules.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Spring Modules",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "component-scanning",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Component Scanning & Filter Types",
+        "order": 5,
+        "summaryOneLiner": "How Component Scan scans packages and filters custom qualifiers.",
+        "estimatedReadMinutes": 10,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "spring-beans"
+        ],
+        "keyTerms": [
+          "Component Scanning & Filter Types",
+          "COMPONENT",
+          "SCANNING",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "ioc",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "IOC (Inversion of Control)",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for IOC (Inversion of Control).",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "IOC (Inversion of Control)",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "reflection-in-spring",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Reflection in Spring Container",
+        "order": 6,
+        "summaryOneLiner": "How Spring uses Java Reflection API to instantiate beans and inject dependencies.",
+        "estimatedReadMinutes": 12,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "spring-beans"
+        ],
+        "keyTerms": [
+          "Reflection in Spring Container",
+          "REFLECTION",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "container-internal-working",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Spring Container Internal Working",
+        "order": 7,
+        "summaryOneLiner": "LLD of BeanFactory, ApplicationContext, and state registers.",
+        "estimatedReadMinutes": 15,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "bean-lifecycle"
+        ],
+        "keyTerms": [
+          "Spring Container Internal Working",
+          "CONTAINER",
+          "INTERNAL",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "bean-factory",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "BeanFactory Internals",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for BeanFactory Internals.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "BeanFactory Internals",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "application-context",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "ApplicationContext Features",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for ApplicationContext Features.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "ApplicationContext Features",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "dependency-injection",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Dependency Injection",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Dependency Injection.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Dependency Injection",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "constructor-injection",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Constructor Injection",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Constructor Injection.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Constructor Injection",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "setter-injection",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Setter Injection",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Setter Injection.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Setter Injection",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "field-injection",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Field Injection limitations",
+        "order": 13,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Field Injection limitations.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Field Injection limitations",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "bean",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Spring Beans and lifecycle",
+        "order": 14,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Spring Beans and lifecycle.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Spring Beans and lifecycle",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "bean-scope",
+        "moduleSlug": "spring-framework-fundamentals",
+        "title": "Bean Scopes configuration",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Bean Scopes configuration.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Bean Scopes configuration",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "spring-boot": {
+    "slug": "spring-boot",
+    "title": "Spring Boot",
+    "topics": [
+      {
+        "slug": "what-is-spring-boot",
+        "moduleSlug": "spring-boot",
+        "title": "What is Spring Boot?",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for What is Spring Boot?.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "What is Spring Boot?",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "difference-spring-springboot",
+        "moduleSlug": "spring-boot",
+        "title": "Difference Between Spring and Spring Boot",
+        "order": 1,
+        "summaryOneLiner": "A feature-by-feature comparison of traditional Spring Framework versus Spring Boot's rapid bootstrapping.",
+        "estimatedReadMinutes": 20,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "what-is-spring"
+        ],
+        "keyTerms": [],
+        "diagramCount": 0,
+        "qaCount": 0,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "springboot-startup-flow",
+        "moduleSlug": "spring-boot",
+        "title": "Spring Boot Startup Flow & Auto Configuration",
+        "order": 2,
+        "summaryOneLiner": "Step-by-step breakdown of SpringApplication.run() and how auto-configuration activates.",
+        "estimatedReadMinutes": 18,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "difference-spring-springboot"
+        ],
+        "keyTerms": [
+          "Spring Boot Startup Flow & Auto Configuration",
+          "SPRINGBOOT",
+          "STARTUP",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "why-springboot",
+        "moduleSlug": "spring-boot",
+        "title": "Why Spring Boot?",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Why Spring Boot?.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Why Spring Boot?",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "embedded-tomcat",
+        "moduleSlug": "spring-boot",
+        "title": "Embedded Tomcat Server Integration",
+        "order": 3,
+        "summaryOneLiner": "How Boot boots Tomcat inside the JVM process and routes HTTP requests.",
+        "estimatedReadMinutes": 8,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "springboot-startup-flow"
+        ],
+        "keyTerms": [
+          "Embedded Tomcat Server Integration",
+          "EMBEDDED",
+          "TOMCAT",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "springboot-architecture",
+        "moduleSlug": "spring-boot",
+        "title": "Spring Boot Architecture",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Spring Boot Architecture.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Spring Boot Architecture",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "springboot-actuator",
+        "moduleSlug": "spring-boot",
+        "title": "Spring Boot Actuator Monitoring",
+        "order": 4,
+        "summaryOneLiner": "Production-ready monitoring, metrics, health checks, and thread dumps.",
+        "estimatedReadMinutes": 10,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "springboot-startup-flow"
+        ],
+        "keyTerms": [
+          "Spring Boot Actuator Monitoring",
+          "SPRINGBOOT",
+          "ACTUATOR",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "starter-dependencies",
+        "moduleSlug": "spring-boot",
+        "title": "Starter Dependencies and Classpath Management",
+        "order": 5,
+        "summaryOneLiner": "How starter POMs simplify dependency management and resolve transitive conflicts.",
+        "estimatedReadMinutes": 8,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "springboot-startup-flow"
+        ],
+        "keyTerms": [
+          "Starter Dependencies and Classpath Management",
+          "STARTER",
+          "DEPENDENCIES",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "springboot-application-annotation",
+        "moduleSlug": "spring-boot",
+        "title": "@SpringBootApplication metadata",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @SpringBootApplication metadata.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@SpringBootApplication metadata",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "auto-configuration",
+        "moduleSlug": "spring-boot",
+        "title": "Auto Configuration mechanism",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Auto Configuration mechanism.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Auto Configuration mechanism",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "profiles",
+        "moduleSlug": "spring-boot",
+        "title": "Spring Boot Profiles",
+        "order": 7,
+        "summaryOneLiner": "Segregating configuration environments using active profile triggers.",
+        "estimatedReadMinutes": 8,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "application-properties-yaml"
+        ],
+        "keyTerms": [
+          "Spring Boot Profiles",
+          "PROFILES",
+          "CORE",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "spring-initializr",
+        "moduleSlug": "spring-boot",
+        "title": "Spring Initializr utility",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Spring Initializr utility.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Spring Initializr utility",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "application-properties",
+        "moduleSlug": "spring-boot",
+        "title": "application.properties configurations",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for application.properties configurations.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "application.properties configurations",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "application-yaml",
+        "moduleSlug": "spring-boot",
+        "title": "application.yml vs properties",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for application.yml vs properties.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "application.yml vs properties",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "commandline-runner",
+        "moduleSlug": "spring-boot",
+        "title": "CommandLineRunner implementation",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for CommandLineRunner implementation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "CommandLineRunner implementation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "application-runner",
+        "moduleSlug": "spring-boot",
+        "title": "ApplicationRunner logic",
+        "order": 16,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for ApplicationRunner logic.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "ApplicationRunner logic",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "production-ready-features",
+        "moduleSlug": "spring-boot",
+        "title": "Production Ready Features",
+        "order": 17,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Production Ready Features.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Production Ready Features",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "spring-boot-annotations": {
+    "slug": "spring-boot-annotations",
+    "title": "Spring Boot Annotations",
+    "topics": [
+      {
+        "slug": "component-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Component Annotation",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Component Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Component Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "service-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Service Annotation",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Service Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Service Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "repository-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Repository Annotation",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Repository Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Repository Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "controller-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Controller Annotation",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Controller Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Controller Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "restcontroller-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@RestController Annotation",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @RestController Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@RestController Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "autowired-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Autowired Annotation",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Autowired Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Autowired Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "configuration-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Configuration Annotation",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Configuration Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Configuration Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "bean-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Bean Annotation",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Bean Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Bean Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "primary-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Primary Annotation",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Primary Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Primary Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "qualifier-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Qualifier Annotation",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Qualifier Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Qualifier Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "value-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@Value Annotation",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @Value Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@Value Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "propertysource-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@PropertySource Annotation",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @PropertySource Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@PropertySource Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "componentscan-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@ComponentScan Annotation",
+        "order": 13,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @ComponentScan Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@ComponentScan Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "requestmapping-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@RequestMapping Annotation",
+        "order": 14,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @RequestMapping Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@RequestMapping Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "getmapping-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@GetMapping Annotation",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @GetMapping Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@GetMapping Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "postmapping-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@PostMapping Annotation",
+        "order": 16,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @PostMapping Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@PostMapping Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "putmapping-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@PutMapping Annotation",
+        "order": 17,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @PutMapping Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@PutMapping Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "deletemapping-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@DeleteMapping Annotation",
+        "order": 18,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @DeleteMapping Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@DeleteMapping Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "pathvariable-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@PathVariable Annotation",
+        "order": 19,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @PathVariable Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@PathVariable Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "requestparam-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@RequestParam Annotation",
+        "order": 20,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @RequestParam Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@RequestParam Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "requestbody-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@RequestBody Annotation",
+        "order": 21,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @RequestBody Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@RequestBody Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "responsebody-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@ResponseBody Annotation",
+        "order": 22,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @ResponseBody Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@ResponseBody Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "responsestatus-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@ResponseStatus Annotation",
+        "order": 23,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @ResponseStatus Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@ResponseStatus Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "exceptionhandler-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@ExceptionHandler Annotation",
+        "order": 24,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @ExceptionHandler Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@ExceptionHandler Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "controlleradvice-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@ControllerAdvice Annotation",
+        "order": 25,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @ControllerAdvice Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@ControllerAdvice Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "restcontrolleradvice-annotation",
+        "moduleSlug": "spring-boot-annotations",
+        "title": "@RestControllerAdvice Annotation",
+        "order": 26,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for @RestControllerAdvice Annotation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "@RestControllerAdvice Annotation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "microservices": {
+    "slug": "microservices",
+    "title": "Microservices",
+    "topics": [
+      {
+        "slug": "what-are-microservices",
+        "moduleSlug": "microservices",
+        "title": "What are Microservices?",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for What are Microservices?.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "What are Microservices?",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "why-microservices",
+        "moduleSlug": "microservices",
+        "title": "Why Microservices?",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Why Microservices?.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Why Microservices?",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "api-gateway",
+        "moduleSlug": "microservices",
+        "title": "API Gateway, Load Balancing & JWT",
+        "order": 2,
+        "summaryOneLiner": "Routing, security, load balancing, and rate limiting with Spring Cloud Gateway.",
+        "estimatedReadMinutes": 15,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "architecture-overview"
+        ],
+        "keyTerms": [
+          "API Gateway, Load Balancing & JWT",
+          "API",
+          "GATEWAY",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "monolith-vs-microservices",
+        "moduleSlug": "microservices",
+        "title": "Monolith vs Microservices",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Monolith vs Microservices.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Monolith vs Microservices",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "service-discovery",
+        "moduleSlug": "microservices",
+        "title": "Service Discovery with Eureka",
+        "order": 4,
+        "summaryOneLiner": "Dynamic routing, heartbeats, registry self-preservation, and service lookup.",
+        "estimatedReadMinutes": 10,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "api-gateway"
+        ],
+        "keyTerms": [
+          "Service Discovery with Eureka",
+          "SERVICE",
+          "DISCOVERY",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "eureka",
+        "moduleSlug": "microservices",
+        "title": "Eureka Service Registry",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Eureka Service Registry.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Eureka Service Registry",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "circuit-breaker",
+        "moduleSlug": "microservices",
+        "title": "Resilience & Circuit Breaker",
+        "order": 5,
+        "summaryOneLiner": "Fault tolerance, fallbacks, and self-healing systems using Resilience4j.",
+        "estimatedReadMinutes": 12,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "api-gateway"
+        ],
+        "keyTerms": [
+          "Resilience & Circuit Breaker",
+          "CIRCUIT",
+          "BREAKER",
+          "Bootstrap Initialization",
+          "Context Scanning",
+          "Execution Engine Lifecycle",
+          "Restaurant Kitchen",
+          "Amazon",
+          "Netflix",
+          "Question",
+          "Answer"
+        ],
+        "diagramCount": 0,
+        "qaCount": 18,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "load-balancer",
+        "moduleSlug": "microservices",
+        "title": "Load Balancer routing",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Load Balancer routing.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Load Balancer routing",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "configuration-server",
+        "moduleSlug": "microservices",
+        "title": "Configuration Server configuration",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Configuration Server configuration.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Configuration Server configuration",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "inter-service-communication",
+        "moduleSlug": "microservices",
+        "title": "Inter-Service Communication channels",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Inter-Service Communication channels.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Inter-Service Communication channels",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "feign-client",
+        "moduleSlug": "microservices",
+        "title": "Feign Client integration",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Feign Client integration.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Feign Client integration",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "rest-template",
+        "moduleSlug": "microservices",
+        "title": "RestTemplate blocking communication",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for RestTemplate blocking communication.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "RestTemplate blocking communication",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "web-client",
+        "moduleSlug": "microservices",
+        "title": "WebClient reactive requests",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for WebClient reactive requests.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "WebClient reactive requests",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "kafka",
+        "moduleSlug": "microservices",
+        "title": "Kafka Event Streaming & Partitions Rebalance",
+        "order": 13,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Kafka Event Streaming & Partitions Rebalance.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Kafka Event Streaming & Partitions Rebalance",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "rabbit-mq",
+        "moduleSlug": "microservices",
+        "title": "RabbitMQ message queues",
+        "order": 14,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for RabbitMQ message queues.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "RabbitMQ message queues",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "docker",
+        "moduleSlug": "microservices",
+        "title": "Docker containerization",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Docker containerization.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Docker containerization",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "kubernetes",
+        "moduleSlug": "microservices",
+        "title": "Kubernetes orchestration",
+        "order": 16,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Kubernetes orchestration.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Kubernetes orchestration",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "distributed-transactions",
+        "moduleSlug": "microservices",
+        "title": "Distributed Transactions coordination",
+        "order": 18,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Distributed Transactions coordination.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Distributed Transactions coordination",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "saga-pattern",
+        "moduleSlug": "microservices",
+        "title": "Saga Pattern workflow",
+        "order": 19,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Saga Pattern workflow.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Saga Pattern workflow",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "logging",
+        "moduleSlug": "microservices",
+        "title": "Centralized Logging",
+        "order": 20,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Centralized Logging.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Centralized Logging",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "monitoring",
+        "moduleSlug": "microservices",
+        "title": "Microservices Monitoring metrics",
+        "order": 21,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Microservices Monitoring metrics.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Microservices Monitoring metrics",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "distributed-tracing",
+        "moduleSlug": "microservices",
+        "title": "Distributed Tracing tracer",
+        "order": 22,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Distributed Tracing tracer.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Distributed Tracing tracer",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "deployment",
+        "moduleSlug": "microservices",
+        "title": "Deployment strategies",
+        "order": 23,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Deployment strategies.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Deployment strategies",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "scaling",
+        "moduleSlug": "microservices",
+        "title": "Horizontal Scaling mechanics",
+        "order": 24,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Horizontal Scaling mechanics.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Horizontal Scaling mechanics",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "ci-cd",
+        "moduleSlug": "microservices",
+        "title": "CI/CD Deployment pipelines",
+        "order": 25,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for CI/CD Deployment pipelines.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "CI/CD Deployment pipelines",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "java-collections": {
+    "slug": "java-collections",
+    "title": "Java Collections",
+    "topics": [
+      {
+        "slug": "list",
+        "moduleSlug": "java-collections",
+        "title": "List Interface specification",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for List Interface specification.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "List Interface specification",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "set",
+        "moduleSlug": "java-collections",
+        "title": "Set Interface unique storage",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Set Interface unique storage.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Set Interface unique storage",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "queue",
+        "moduleSlug": "java-collections",
+        "title": "Queue Interface ordering",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Queue Interface ordering.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Queue Interface ordering",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "map",
+        "moduleSlug": "java-collections",
+        "title": "Map Interface key-value mapping",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Map Interface key-value mapping.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Map Interface key-value mapping",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "array-list",
+        "moduleSlug": "java-collections",
+        "title": "ArrayList structural storage",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for ArrayList structural storage.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "ArrayList structural storage",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "linked-list",
+        "moduleSlug": "java-collections",
+        "title": "LinkedList Internals & Deque API",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for LinkedList Internals & Deque API.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "LinkedList Internals & Deque API",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "vector",
+        "moduleSlug": "java-collections",
+        "title": "Vector legacy thread-safe list",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Vector legacy thread-safe list.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Vector legacy thread-safe list",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "stack",
+        "moduleSlug": "java-collections",
+        "title": "Stack structural legacy utility",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Stack structural legacy utility.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Stack structural legacy utility",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "hash-set",
+        "moduleSlug": "java-collections",
+        "title": "HashSet structural storage",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for HashSet structural storage.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "HashSet structural storage",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "linked-hash-set",
+        "moduleSlug": "java-collections",
+        "title": "LinkedHashSet elements sequencing",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for LinkedHashSet elements sequencing.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "LinkedHashSet elements sequencing",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "tree-set",
+        "moduleSlug": "java-collections",
+        "title": "TreeSet sorted collections",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for TreeSet sorted collections.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "TreeSet sorted collections",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "priority-queue",
+        "moduleSlug": "java-collections",
+        "title": "PriorityQueue heap element order",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for PriorityQueue heap element order.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "PriorityQueue heap element order",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "hash-map",
+        "moduleSlug": "java-collections",
+        "title": "HashMap Internals: Buckets & PUT Operation",
+        "order": 13,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for HashMap Internals: Buckets & PUT Operation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "HashMap Internals: Buckets & PUT Operation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "linked-hash-map",
+        "moduleSlug": "java-collections",
+        "title": "LinkedHashMap element sequences",
+        "order": 14,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for LinkedHashMap element sequences.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "LinkedHashMap element sequences",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "tree-map",
+        "moduleSlug": "java-collections",
+        "title": "TreeMap & Red-Black Tree Internals",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for TreeMap & Red-Black Tree Internals.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "TreeMap & Red-Black Tree Internals",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "hash-table",
+        "moduleSlug": "java-collections",
+        "title": "Hashtable legacy map structure",
+        "order": 16,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Hashtable legacy map structure.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Hashtable legacy map structure",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "concurrent-hash-map",
+        "moduleSlug": "java-collections",
+        "title": "ConcurrentHashMap Internals",
+        "order": 17,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for ConcurrentHashMap Internals.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "ConcurrentHashMap Internals",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "fail-fast",
+        "moduleSlug": "java-collections",
+        "title": "Fail Fast iterators",
+        "order": 18,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Fail Fast iterators.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Fail Fast iterators",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "fail-safe",
+        "moduleSlug": "java-collections",
+        "title": "Fail Safe modern iterators",
+        "order": 19,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Fail Safe modern iterators.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Fail Safe modern iterators",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "comparable",
+        "moduleSlug": "java-collections",
+        "title": "Comparable natural ordering",
+        "order": 20,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Comparable natural ordering.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Comparable natural ordering",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "comparator",
+        "moduleSlug": "java-collections",
+        "title": "Comparator custom sort patterns",
+        "order": 21,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Comparator custom sort patterns.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Comparator custom sort patterns",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "hash-collision",
+        "moduleSlug": "java-collections",
+        "title": "Hash Collision resolutions",
+        "order": 22,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Hash Collision resolutions.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Hash Collision resolutions",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "load-factor",
+        "moduleSlug": "java-collections",
+        "title": "Load Factor trigger rehashing",
+        "order": 23,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Load Factor trigger rehashing.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Load Factor trigger rehashing",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "rehashing",
+        "moduleSlug": "java-collections",
+        "title": "Rehashing array resize",
+        "order": 24,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Rehashing array resize.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Rehashing array resize",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "collections-internal-working",
+        "moduleSlug": "java-collections",
+        "title": "Collection Hierarchy & List, Set, Queue Interfaces",
+        "order": 25,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Collection Hierarchy & List, Set, Queue Interfaces.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Collection Hierarchy & List, Set, Queue Interfaces",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "time-complexity",
+        "moduleSlug": "java-collections",
+        "title": "Collections Big-O Time Complexity",
+        "order": 26,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Collections Big-O Time Complexity.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Collections Big-O Time Complexity",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "java-8-17-21": {
+    "slug": "java-8-17-21",
+    "title": "Java 8 17 21",
+    "topics": [
+      {
+        "slug": "lambda",
+        "moduleSlug": "java-8-17-21",
+        "title": "Lambda Expressions logic",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Lambda Expressions logic.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Lambda Expressions logic",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "stream-api",
+        "moduleSlug": "java-8-17-21",
+        "title": "Stream API pipeline queries",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Stream API pipeline queries.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Stream API pipeline queries",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "optional",
+        "moduleSlug": "java-8-17-21",
+        "title": "Optional",
+        "order": 2,
+        "summaryOneLiner": "Java Optional is a container for values that may or may not be present — using it correctly eliminates NullPointerException at API boundaries and enables functional null-safe pipelines.",
+        "estimatedReadMinutes": 35,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "streams-lambdas"
+        ],
+        "keyTerms": [],
+        "diagramCount": 0,
+        "qaCount": 5,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "functional-interface",
+        "moduleSlug": "java-8-17-21",
+        "title": "Functional Interface concepts",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Functional Interface concepts.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Functional Interface concepts",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "method-reference",
+        "moduleSlug": "java-8-17-21",
+        "title": "Method References short syntax",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Method References short syntax.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Method References short syntax",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "pattern-matching",
+        "moduleSlug": "java-8-17-21",
+        "title": "Pattern Matching",
+        "order": 4,
+        "summaryOneLiner": "Java Pattern Matching — instanceof patterns (Java 16), switch expressions (Java 14), switch pattern matching (Java 21) — eliminates verbose type checks and enables elegant data-shape driven code.",
+        "estimatedReadMinutes": 35,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "records-sealed",
+          "generics"
+        ],
+        "keyTerms": [],
+        "diagramCount": 0,
+        "qaCount": 0,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "date-time-api",
+        "moduleSlug": "java-8-17-21",
+        "title": "Modern Date Time API",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Modern Date Time API.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Modern Date Time API",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "parallel-streams",
+        "moduleSlug": "java-8-17-21",
+        "title": "Parallel Streams processing",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Parallel Streams processing.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Parallel Streams processing",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "java-17-features",
+        "moduleSlug": "java-8-17-21",
+        "title": "Modern Java Features: Records & Sealed Classes",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Modern Java Features: Records & Sealed Classes.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Modern Java Features: Records & Sealed Classes",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "java-21-features",
+        "moduleSlug": "java-8-17-21",
+        "title": "Pattern Matching in Modern Java",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Pattern Matching in Modern Java.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Pattern Matching in Modern Java",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "sequenced-collections",
+        "moduleSlug": "java-8-17-21",
+        "title": "Sequenced Collections API",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Sequenced Collections API.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Sequenced Collections API",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "multithreading-concurrency": {
+    "slug": "multithreading-concurrency",
+    "title": "Multithreading Concurrency",
+    "topics": [
+      {
+        "slug": "process",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "OS Process memory spaces",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for OS Process memory spaces.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "OS Process memory spaces",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "thread",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Thread Lifecycle & Synchronization",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Thread Lifecycle & Synchronization.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Thread Lifecycle & Synchronization",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "virtual-threads",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Virtual Threads",
+        "order": 3,
+        "summaryOneLiner": "Java 21 Virtual Threads (Project Loom) revolutionize I/O-bound concurrency — enabling millions of lightweight threads without the complexity of reactive programming.",
+        "estimatedReadMinutes": 40,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "thread-lifecycle",
+          "thread-pools-executor"
+        ],
+        "keyTerms": [],
+        "diagramCount": 0,
+        "qaCount": 0,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "runnable",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Runnable task interface",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Runnable task interface.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Runnable task interface",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "callable",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Callable task outputs",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Callable task outputs.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Callable task outputs",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "executor-framework",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Executor Framework scheduling",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Executor Framework scheduling.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Executor Framework scheduling",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "thread-pool",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Thread Pools & ThreadPoolExecutor",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Thread Pools & ThreadPoolExecutor.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Thread Pools & ThreadPoolExecutor",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "synchronization",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Thread Synchronization locks",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Thread Synchronization locks.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Thread Synchronization locks",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "race-condition",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Race Condition thread race",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Race Condition thread race.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Race Condition thread race",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "deadlock",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Deadlock detection thread lock",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Deadlock detection thread lock.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Deadlock detection thread lock",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "future",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Future task placeholder",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Future task placeholder.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Future task placeholder",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "completable-future",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "AbstractQueuedSynchronizer (AQS)",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for AbstractQueuedSynchronizer (AQS).",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "AbstractQueuedSynchronizer (AQS)",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "virtual-threads-concurrency",
+        "moduleSlug": "multithreading-concurrency",
+        "title": "Virtual Threads concurrency benefits",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Virtual Threads concurrency benefits.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Virtual Threads concurrency benefits",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "sql-database": {
+    "slug": "sql-database",
+    "title": "Sql Database",
+    "topics": [
+      {
+        "slug": "sql-introduction",
+        "moduleSlug": "sql-database",
+        "title": "SQL Introduction",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for SQL Introduction.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "SQL Introduction",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "select",
+        "moduleSlug": "sql-database",
+        "title": "SELECT query operation",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for SELECT query operation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "SELECT query operation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "insert",
+        "moduleSlug": "sql-database",
+        "title": "INSERT insert rows",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for INSERT insert rows.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "INSERT insert rows",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "update",
+        "moduleSlug": "sql-database",
+        "title": "UPDATE query updates",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for UPDATE query updates.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "UPDATE query updates",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "delete",
+        "moduleSlug": "sql-database",
+        "title": "DELETE query rows removal",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for DELETE query rows removal.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "DELETE query rows removal",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "create",
+        "moduleSlug": "sql-database",
+        "title": "CREATE database tables",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for CREATE database tables.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "CREATE database tables",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "alter",
+        "moduleSlug": "sql-database",
+        "title": "ALTER query columns structural updates",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for ALTER query columns structural updates.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "ALTER query columns structural updates",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "drop",
+        "moduleSlug": "sql-database",
+        "title": "DROP schema tables deletion",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for DROP schema tables deletion.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "DROP schema tables deletion",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "truncate",
+        "moduleSlug": "sql-database",
+        "title": "TRUNCATE clear data rows fast",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for TRUNCATE clear data rows fast.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "TRUNCATE clear data rows fast",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "primary-key",
+        "moduleSlug": "sql-database",
+        "title": "Primary Key indexing unique key",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Primary Key indexing unique key.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Primary Key indexing unique key",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "foreign-key",
+        "moduleSlug": "sql-database",
+        "title": "Foreign Key table structural links",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Foreign Key table structural links.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Foreign Key table structural links",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "constraints",
+        "moduleSlug": "sql-database",
+        "title": "SQL Constraints validation",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for SQL Constraints validation.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "SQL Constraints validation",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "index",
+        "moduleSlug": "sql-database",
+        "title": "Indexing & B-Tree Internals",
+        "order": 13,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Indexing & B-Tree Internals.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Indexing & B-Tree Internals",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "clustered-index",
+        "moduleSlug": "sql-database",
+        "title": "Clustered Index rows structure",
+        "order": 14,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Clustered Index rows structure.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Clustered Index rows structure",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "non-clustered-index",
+        "moduleSlug": "sql-database",
+        "title": "Non Clustered Index B-tree pointers",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Non Clustered Index B-tree pointers.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Non Clustered Index B-tree pointers",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "join",
+        "moduleSlug": "sql-database",
+        "title": "SQL Queries, Joins & Subqueries",
+        "order": 16,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for SQL Queries, Joins & Subqueries.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "SQL Queries, Joins & Subqueries",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "group-by",
+        "moduleSlug": "sql-database",
+        "title": "GROUP BY sql aggregations",
+        "order": 17,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for GROUP BY sql aggregations.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "GROUP BY sql aggregations",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "having",
+        "moduleSlug": "sql-database",
+        "title": "HAVING sql selection parameters",
+        "order": 18,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for HAVING sql selection parameters.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "HAVING sql selection parameters",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "order-by",
+        "moduleSlug": "sql-database",
+        "title": "ORDER BY sql row order",
+        "order": 19,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for ORDER BY sql row order.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "ORDER BY sql row order",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "limit",
+        "moduleSlug": "sql-database",
+        "title": "LIMIT query results sizing",
+        "order": 20,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for LIMIT query results sizing.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "LIMIT query results sizing",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "acid",
+        "moduleSlug": "sql-database",
+        "title": "Transactions & ACID Isolation Levels",
+        "order": 21,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Transactions & ACID Isolation Levels.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Transactions & ACID Isolation Levels",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "normalization",
+        "moduleSlug": "sql-database",
+        "title": "Normalization structural data formats",
+        "order": 22,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Normalization structural data formats.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Normalization structural data formats",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "views",
+        "moduleSlug": "sql-database",
+        "title": "Views database virtual queries",
+        "order": 23,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Views database virtual queries.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Views database virtual queries",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "stored-procedures",
+        "moduleSlug": "sql-database",
+        "title": "Stored Procedures complex query scripts",
+        "order": 24,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Stored Procedures complex query scripts.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Stored Procedures complex query scripts",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "jvm-internals": {
+    "slug": "jvm-internals",
+    "title": "Jvm Internals",
+    "topics": [
+      {
+        "slug": "jvm-architecture",
+        "moduleSlug": "jvm-internals",
+        "title": "JVM Architecture Overview",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for JVM Architecture Overview.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "JVM Architecture Overview",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "execution-engine",
+        "moduleSlug": "jvm-internals",
+        "title": "Execution Engine execution processing",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Execution Engine execution processing.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Execution Engine execution processing",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "jit-compiler",
+        "moduleSlug": "jvm-internals",
+        "title": "JIT Compiler",
+        "order": 3,
+        "summaryOneLiner": "The JIT Compiler transforms Java bytecode into highly optimized native machine code at runtime — understanding its tiers, optimizations, and deoptimization explains Java's competitive performance.",
+        "estimatedReadMinutes": 40,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "memory-management",
+          "class-loader"
+        ],
+        "keyTerms": [],
+        "diagramCount": 0,
+        "qaCount": 5,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "class-loader",
+        "moduleSlug": "jvm-internals",
+        "title": "Class Loader",
+        "order": 4,
+        "summaryOneLiner": "Java ClassLoader is the mechanism that loads .class files into the JVM — understanding the delegation hierarchy, custom loaders, and class isolation is essential for framework and library developers.",
+        "estimatedReadMinutes": 40,
+        "generated": false,
+        "prerequisiteTopicSlugs": [
+          "memory-management"
+        ],
+        "keyTerms": [],
+        "diagramCount": 0,
+        "qaCount": 0,
+        "partCount": 1,
+        "quality": {
+          "completeness": 100,
+          "technicalDepth": 100,
+          "visualCoverage": 100,
+          "interviewCoverage": 100,
+          "revisionCoverage": 100,
+          "status": "published"
+        }
+      },
+      {
+        "slug": "memory-areas",
+        "moduleSlug": "jvm-internals",
+        "title": "JVM Memory Management: Heap & Stack",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for JVM Memory Management: Heap & Stack.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "JVM Memory Management: Heap & Stack",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "heap",
+        "moduleSlug": "jvm-internals",
+        "title": "JVM Heap Memory segment",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for JVM Heap Memory segment.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "JVM Heap Memory segment",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "jvm-stack",
+        "moduleSlug": "jvm-internals",
+        "title": "JVM Stack Memory frames",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for JVM Stack Memory frames.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "JVM Stack Memory frames",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "metaspace",
+        "moduleSlug": "jvm-internals",
+        "title": "Metaspace JVM class info metadata",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Metaspace JVM class info metadata.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Metaspace JVM class info metadata",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "pc-register",
+        "moduleSlug": "jvm-internals",
+        "title": "PC Registers tracking execution pointer",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for PC Registers tracking execution pointer.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "PC Registers tracking execution pointer",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "native-method-stack",
+        "moduleSlug": "jvm-internals",
+        "title": "Native Method Stacks processing native code",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Native Method Stacks processing native code.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Native Method Stacks processing native code",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "garbage-collection",
+        "moduleSlug": "jvm-internals",
+        "title": "Garbage Collectors: G1, ZGC & Generational GC",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Garbage Collectors: G1, ZGC & Generational GC.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Garbage Collectors: G1, ZGC & Generational GC",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "minor-gc",
+        "moduleSlug": "jvm-internals",
+        "title": "Minor GC fast young generation sweeps",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Minor GC fast young generation sweeps.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Minor GC fast young generation sweeps",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "major-gc",
+        "moduleSlug": "jvm-internals",
+        "title": "Major GC full old generation pauses",
+        "order": 13,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Major GC full old generation pauses.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Major GC full old generation pauses",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "g1-gc",
+        "moduleSlug": "jvm-internals",
+        "title": "G1 GC garbage collectors",
+        "order": 14,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for G1 GC garbage collectors.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "G1 GC garbage collectors",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "zgc",
+        "moduleSlug": "jvm-internals",
+        "title": "ZGC ultra-low latency collector",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for ZGC ultra-low latency collector.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "ZGC ultra-low latency collector",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "shenandoah",
+        "moduleSlug": "jvm-internals",
+        "title": "Shenandoah concurrent collection GC",
+        "order": 16,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Shenandoah concurrent collection GC.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Shenandoah concurrent collection GC",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  },
+  "core-java": {
+    "slug": "core-java",
+    "title": "Core Java",
+    "topics": [
+      {
+        "slug": "jdk",
+        "moduleSlug": "core-java",
+        "title": "JDK Development Kit components",
+        "order": 1,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for JDK Development Kit components.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "JDK Development Kit components",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "jre",
+        "moduleSlug": "core-java",
+        "title": "JRE Runtime Environment execution dependencies",
+        "order": 2,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for JRE Runtime Environment execution dependencies.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "JRE Runtime Environment execution dependencies",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "jvm-core",
+        "moduleSlug": "core-java",
+        "title": "JVM Core runtime processors",
+        "order": 3,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for JVM Core runtime processors.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "JVM Core runtime processors",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "string",
+        "moduleSlug": "core-java",
+        "title": "Java String Pool immutability internals",
+        "order": 4,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Java String Pool immutability internals.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Java String Pool immutability internals",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "string-builder",
+        "moduleSlug": "core-java",
+        "title": "StringBuilder string editing buffers",
+        "order": 5,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for StringBuilder string editing buffers.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "StringBuilder string editing buffers",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "string-buffer",
+        "moduleSlug": "core-java",
+        "title": "StringBuffer string thread-safe updates",
+        "order": 6,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for StringBuffer string thread-safe updates.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "StringBuffer string thread-safe updates",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "equals-method",
+        "moduleSlug": "core-java",
+        "title": "equals() object identity parameters",
+        "order": 7,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for equals() object identity parameters.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "equals() object identity parameters",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "double-equal",
+        "moduleSlug": "core-java",
+        "title": "== vs equals() structural value checks",
+        "order": 8,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for == vs equals() structural value checks.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "== vs equals() structural value checks",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "hashcode-method",
+        "moduleSlug": "core-java",
+        "title": "hashCode() bucket distribution indices",
+        "order": 9,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for hashCode() bucket distribution indices.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "hashCode() bucket distribution indices",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "exception",
+        "moduleSlug": "core-java",
+        "title": "Exception Handling Internals",
+        "order": 10,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Exception Handling Internals.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Exception Handling Internals",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "checked-exception",
+        "moduleSlug": "core-java",
+        "title": "Checked Exceptions compile time checks",
+        "order": 11,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Checked Exceptions compile time checks.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Checked Exceptions compile time checks",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "unchecked-exception",
+        "moduleSlug": "core-java",
+        "title": "Unchecked Exceptions runtime fail checks",
+        "order": 12,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Unchecked Exceptions runtime fail checks.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Unchecked Exceptions runtime fail checks",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "serialization",
+        "moduleSlug": "core-java",
+        "title": "Java Generics and Type Erasure",
+        "order": 13,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for Java Generics and Type Erasure.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "Java Generics and Type Erasure",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "transient",
+        "moduleSlug": "core-java",
+        "title": "transient variables exclusion serialization",
+        "order": 14,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for transient variables exclusion serialization.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "transient variables exclusion serialization",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "volatile",
+        "moduleSlug": "core-java",
+        "title": "volatile keyword main memory sync variables",
+        "order": 15,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for volatile keyword main memory sync variables.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "volatile keyword main memory sync variables",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "final",
+        "moduleSlug": "core-java",
+        "title": "final variables classes inheritance checks",
+        "order": 16,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for final variables classes inheritance checks.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "final variables classes inheritance checks",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      },
+      {
+        "slug": "static",
+        "moduleSlug": "core-java",
+        "title": "static variable logic parameters class levels",
+        "order": 17,
+        "summaryOneLiner": "Detailed 69-point syllabus explainer guide for static variable logic parameters class levels.",
+        "estimatedReadMinutes": 25,
+        "generated": true,
+        "prerequisiteTopicSlugs": [],
+        "keyTerms": [
+          "static variable logic parameters class levels",
+          "Architecture",
+          "FAANG Level",
+          "JVM Internals"
+        ],
+        "diagramCount": 0,
+        "qaCount": 3,
+        "partCount": 1,
+        "quality": {
+          "completeness": 40,
+          "technicalDepth": 35,
+          "visualCoverage": 20,
+          "interviewCoverage": 40,
+          "revisionCoverage": 30,
+          "status": "generated"
+        }
+      }
+    ]
+  }
+}

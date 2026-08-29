@@ -1,0 +1,476 @@
+---
+title: "JIT Compiler"
+slug: "jit-compiler"
+moduleSlug: "jvm-internals"
+order: 3
+summaryOneLiner: "The JIT Compiler transforms Java bytecode into highly optimized native machine code at runtime — understanding its tiers, optimizations, and deoptimization explains Java's competitive performance."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["memory-management", "class-loader"]
+---
+
+Module 7 → Topic 3 → JIT Compiler (Part 1)
+
+1. JIT Compiler — Introduction
+
+Why Java Became Fast Despite Being Interpreted
+
+Early Java (1995):
+
+Java → bytecode (JVM instruction set).
+JVM interprets bytecode → executes on CPU.
+Each bytecode instruction → multiple CPU instructions to interpret and execute.
+Result: 10-100x slower than C/C++.
+
+Common belief in 1990s: Java will always be slow.
+
+JIT Compiler changed everything.
+
+What is JIT?
+
+JIT = Just-In-Time Compiler.
+
+Compiles bytecode → native machine code AT RUNTIME, just before execution.
+
+Not ahead-of-time (like C/C++).
+Not pure interpretation.
+Compilation happens during program execution.
+
+Result: After JIT compilation, Java code runs as native machine code.
+
+Modern Java performance: Comparable to or exceeding C++ in many benchmarks.
+
+2. Java Execution Pipeline
+
+Source Code (.java)
+    │
+    ▼
+javac (ahead-of-time compiler)
+    │
+    ▼
+Bytecode (.class)
+    │
+    ▼
+JVM
+    │
+    ├── Interpreter (initially runs bytecode)
+    │
+    └── JIT Compiler (compiles hot code to native)
+            │
+            ▼
+        Native Machine Code (runs directly on CPU)
+
+The key: JVM starts interpreting immediately. Hot code (frequently called) is compiled to native. Subsequent calls use compiled native code.
+
+3. Tiered Compilation (Java 8+)
+
+Modern JVM uses multiple compilation tiers.
+
+Why tiers?
+
+JIT compilation takes time and CPU.
+Cannot compile everything (startup too slow).
+Some code runs once (not worth compiling).
+Most benefits come from compiling frequently called code.
+
+Tier 0 — Interpreter
+
+Interprets bytecode directly.
+
+Collects method call count and profiling info.
+
+Every method starts here.
+
+Tier 1 — C1 (Client Compiler) — Simple Compilation
+
+Fast compilation.
+
+Limited optimizations.
+
+For code called a few times.
+
+C1 variants:
+
+Tier 1: No profiling (fastest compile)
+Tier 2: Limited profiling
+Tier 3: Full profiling instrumentation
+
+Tier 4 — C2 (Server Compiler) — Aggressive Compilation
+
+Slow compilation (milliseconds vs microseconds).
+
+Extensive optimizations.
+
+For very hot code (called thousands of times).
+
+Uses profiling data collected in tiers 1-3.
+
+Default JVM Strategy (Java 8+):
+
+Method called 0 times → Tier 0 (interpreter).
+Called few times → Tier 3 (C1 with profiling).
+Called many times (> 10,000) → Tier 4 (C2 with full optimization).
+
+Thresholds:
+
+-XX:TieredStopAtLevel=4 (default — use all tiers)
+-XX:CompileThreshold=10000 (calls before C2 compilation)
+
+4. JIT Optimizations — The Core Value
+
+JIT performs optimizations C compiler cannot:
+
+Reason: JIT has runtime profiling data. C compiler cannot know which path is taken at runtime.
+
+Optimization 1 — Inlining
+
+Most impactful optimization.
+
+Instead of calling a method → inline its body directly.
+
+// Source code
+public int processOrder(Order order) {
+    return validate(order) ? calculate(order) : -1;
+}
+
+private boolean validate(Order order) {
+    return order != null && order.getAmount() > 0;
+}
+
+// After inlining by JIT:
+public int processOrder(Order order) {
+    // validate() body inlined:
+    boolean valid = order != null && order.getAmount() > 0;
+    return valid ? calculate(order) : -1;
+}
+
+Benefits:
+No method call overhead (stack frame creation, branch).
+Enables further optimizations on inlined code.
+
+Depth: JIT inlines chains of methods up to a configured depth.
+
+Inlining Limit:
+
+-XX:MaxInlineSize=35      // Max bytecodes for simple inlining
+-XX:FreqInlineSize=325    // Max bytecodes for hot method inlining
+
+Optimization 2 — Dead Code Elimination
+
+Unreachable code removed:
+
+// After branch profiling, JIT sees condition is always true:
+if (userType == "PREMIUM") {  // Always true in production
+    applyDiscount();
+} else {
+    // This branch never taken → JIT removes it
+    // Reduces code size, improves cache usage
+}
+
+JIT can eliminate code that profiling shows is never executed.
+
+Optimization 3 — Loop Unrolling
+
+// Original loop
+for (int i = 0; i < 4; i++) {
+    sum += array[i];
+}
+
+// After unrolling:
+sum += array[0];
+sum += array[1];
+sum += array[2];
+sum += array[3];
+
+Benefits:
+
+No loop counter check overhead.
+Enables vectorization (SIMD).
+
+Optimization 4 — Escape Analysis + Stack Allocation
+
+If JIT determines an object doesn't escape the method:
+
+Allocate on stack instead of heap.
+No GC pressure.
+
+@Service
+public class OrderService {
+    public OrderResult processOrder(OrderRequest request) {
+        // OrderContext is local — used only in this method
+        OrderContext ctx = new OrderContext(request); // Could be stack-allocated!
+        ctx.validate();
+        ctx.calculate();
+        return ctx.buildResult();
+    }
+}
+
+Escape analysis eliminates heap allocation if ctx doesn't escape.
+
+Enable (default):
+
+-XX:+DoEscapeAnalysis
+-XX:+EliminateAllocations
+
+Optimization 5 — Lock Elision
+
+If JIT determines a lock is never contended (single-threaded access):
+
+Lock eliminated entirely.
+
+public String toString() {
+    StringBuffer sb = new StringBuffer(); // synchronized internally!
+    sb.append("User[");
+    sb.append(id);
+    sb.append("]");
+    return sb.toString();
+    // JIT sees sb doesn't escape → all synchronization eliminated!
+}
+
+This is why StringBuilder vs StringBuffer performance argument is less important with JIT.
+
+Optimization 6 — Loop Vectorization (SIMD)
+
+JIT can generate SIMD instructions (AVX2, SSE4) for array processing.
+
+double[] a = new double[1000];
+double[] b = new double[1000];
+double[] c = new double[1000];
+
+for (int i = 0; i < 1000; i++) {
+    c[i] = a[i] + b[i]; // JIT can vectorize — process 4 doubles at once using AVX
+}
+
+8x speedup for supported operations.
+
+Optimization 7 — Speculative Optimizations + Deoptimization
+
+JIT makes optimistic assumptions based on profiling:
+
+Profile shows: 99.9% of calls have User type, not AdminUser (subtype).
+
+JIT speculates: Assume type is always User. Compile fast code assuming no subtype.
+
+If AdminUser appears:
+
+Deoptimization: JIT discards optimized code, falls back to interpreter.
+Recompilation: Later recompiles with correct type information.
+
+5. Deoptimization — When JIT Goes Wrong
+
+Deoptimization = JIT's compiled code becomes invalid, falls back to interpreter.
+
+Causes:
+
+Loaded class that invalidates assumption (subclass appeared).
+Changed reflection result.
+Debugger attached (changes assumptions).
+ClassLoading invalidation.
+
+Process:
+
+Compiled method's code patched to call deoptimization handler.
+Execution frame reconstructed in interpreter.
+Execution continues in interpreter.
+Eventually recompiles with corrected assumptions.
+
+Monitoring deoptimization:
+
+-XX:+PrintDeoptimization
+
+Many deoptimizations = performance problem. Investigate why.
+
+6. Code Cache
+
+JIT-compiled code is stored in Code Cache (native memory).
+
+If Code Cache fills up → JIT compilation stops → performance drops.
+
+Code Cache size:
+
+-XX:ReservedCodeCacheSize=512m  // Total code cache size (default 240m for Java 8+)
+
+Monitor:
+
+-XX:+PrintCodeCache
+
+When Code Cache full:
+
+"CodeCache is full. Compiler has been disabled."
+JVM falls back to interpretation.
+Performance drops dramatically.
+
+Fix: Increase ReservedCodeCacheSize.
+
+7. PrintCompilation — Seeing JIT at Work
+
+-XX:+PrintCompilation
+
+Output:
+
+    150   1       3       java.lang.String::charAt (29 bytes)
+    151   2       4       java.lang.String::indexOf (70 bytes)
+    152   3       3       com.example.OrderService::processOrder (105 bytes)
+    153   4       n       java.lang.System::arraycopy (native)
+
+Format: timestamp id tier classname::method (size)
+
+Tier 3 = C1 with profiling.
+Tier 4 = C2 fully optimized.
+n = native method, no compilation needed.
+
+Decompiled methods:
+
+    155   3       DEOPT   com.example.OrderService::processOrder
+
+8. GraalVM — Advanced AOT Compilation
+
+GraalVM: Alternative JVM with:
+
+Improved JIT compiler (GraalVM JIT replaces C2).
+AOT compilation → native executable.
+Polyglot (run Python, JS, Ruby on GraalVM).
+
+GraalVM JIT:
+
+Written in Java (self-compiling!).
+More sophisticated optimizations.
+Typically 5-15% faster than C2 for long-running workloads.
+
+Native Image:
+
+Spring Boot AOT + GraalVM native-image:
+
+Compile Spring Boot to native executable.
+Startup: 50ms vs 5 seconds.
+Memory: 50MB vs 300MB.
+
+Cost: Closed-world assumption — all classes must be known at build time. Reflection requires configuration.
+
+9. Real-World Performance Impact
+
+Example 1 — JIT Warmup Effect
+
+Benchmark a Spring REST API:
+
+First 1000 requests: 50ms average (JIT warming up).
+Requests 1001-10000: 10ms average (C1 compiled).
+Requests > 10000: 2ms average (C2 fully optimized).
+
+This is why: Lambda/serverless cold starts are slow — no JIT warmup.
+This is why: JVM apps benefit from traffic ramping, not cold start.
+
+Example 2 — Netflix: GraalVM Native for Lambda
+
+Netflix uses AWS Lambda for burst-capacity functions.
+
+Problem: JVM cold start = 10 seconds. Lambda timeout issues.
+Solution: GraalVM native → cold start = 0.1 seconds.
+
+Example 3 — FAANG: JIT Tuning for Trading System
+
+// Critical hot path — trade execution
+for (long i = 0; i < 1_000_000_000L; i++) {
+    executeTrade(trades[i % BUFFER_SIZE]);
+}
+
+JIT will:
+
+Inline executeTrade() aggressively.
+Unroll inner loops.
+Vectorize array access.
+Allocate local objects on stack (escape analysis).
+Eliminate dead branches.
+
+Result: 10x performance improvement over interpreter.
+
+10. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"How does the JIT compiler work? What optimizations does it perform?"
+
+5 Crore Answer:
+
+The JIT (Just-In-Time) compiler is the engine behind Java's competitive performance. Rather than interpreting bytecode instruction-by-instruction or compiling everything ahead-of-time, it uses profiling-guided adaptive compilation.
+
+Modern JVM uses tiered compilation. Initially, all code runs in the Tier 0 interpreter, which collects profiling data — method call counts, type profiles, branch statistics. Code called a few times is compiled by C1 (the Client compiler, Tier 1-3) with lightweight optimizations and continued profiling. Frequently called hot methods — exceeding 10,000 invocations by default — are compiled by C2 (the Server compiler, Tier 4) with aggressive optimizations using the accumulated profiling data.
+
+C2's most impactful optimization is method inlining — embedding the called method's body directly at the call site, eliminating the method call overhead and enabling further optimizations on the combined code. JIT inlines chains of calls up to configured depth.
+
+Dead code elimination removes branches that profiling shows are never taken. Escape analysis determines if an object's lifetime is bounded to a single method — if so, it's allocated on the stack (no heap allocation, no GC pressure, immediate deallocation on method return). Lock elision eliminates synchronization on objects that don't escape the creating thread.
+
+JIT also performs speculative optimizations: if profiling shows 99.9% of calls use a base class (not subclasses), it generates optimized monomorphic code. If a subclass appears later, deoptimization kicks in — compiled code is discarded, execution falls back to the interpreter, and eventually recompilation with corrected assumptions happens.
+
+JIT-compiled code is stored in Code Cache (native memory). If Code Cache fills, JIT stops compiling, which causes performance degradation — monitor and size appropriately.
+
+GraalVM offers an enhanced JIT written in Java itself, with more sophisticated optimizations, and AOT compilation via Native Image — trading JIT's peak performance for deterministic, instant startup.
+
+11. Follow-Up Interview Questions
+
+Q1. What is the difference between C1 and C2 compilers?
+
+C1 (Client compiler): Fast compilation, limited optimizations. Good for code called a moderate number of times. Collects profiling data.
+
+C2 (Server compiler): Slow compilation, aggressive optimizations (inlining, escape analysis, loop unrolling, vectorization). Best for hot code called thousands of times. Uses C1's profiling data.
+
+In tiered compilation: C1 first, C2 when proven hot.
+
+Q2. What is deoptimization?
+
+JIT's speculative compiled code becomes invalid — typically because an assumption (monomorphic type, never-null value) was violated.
+
+JVM discards compiled code, reconstructs interpreter frame, continues in interpreter. Later recompiles with corrected assumptions.
+
+Frequent deoptimization is a performance red flag.
+
+Q3. What is On-Stack Replacement (OSR)?
+
+If a long-running loop is being interpreted and becomes "hot" while still executing, JIT can replace the currently-running interpreted version with compiled code without waiting for the next method call.
+
+The JVM transfers execution from interpreter stack frame to compiled native frame mid-execution.
+
+Q4. How does escape analysis improve performance?
+
+If an object doesn't escape (not returned, not stored in fields, not passed to non-inlined methods):
+
+Stack allocation: No heap allocation, no GC pressure.
+Scalar replacement: Object broken into individual primitive fields on stack.
+Lock elision: Synchronized methods on non-escaping objects are unlocked.
+
+Significant GC pressure reduction for temporary/local objects.
+
+Q5. What is inlining and why is it the most important JIT optimization?
+
+Inlining replaces a method call with the body of the called method.
+
+Benefits:
+1. Eliminates method call overhead (stack frame, virtual dispatch).
+2. Enables all other optimizations to work across the combined code.
+3. Makes constant propagation, dead code elimination, escape analysis more effective.
+
+Without inlining, small methods would be expensive. Java's design (many small, well-named methods) becomes efficient through inlining.
+
+12. Complete Revision Notes
+
+JIT = Just-In-Time compiler. Bytecode → native machine code at runtime.
+Java performance evolution: interpreter (slow) → JIT (competitive with C++).
+Tiered compilation: Tier 0 (interpret) → Tier 1-3 (C1) → Tier 4 (C2).
+C1: Fast compile, limited opts, collects profiling data.
+C2: Slow compile, aggressive opts, uses profiling. For hot code (>10K calls).
+Profiling data: branch statistics, type profiles, method call counts — drives optimizations.
+Inlining: Most impactful optimization. Method body embedded at call site.
+Dead code elimination: Removes never-taken branches based on profiling.
+Escape analysis: Objects local to method → stack allocation, no GC, lock elision.
+Lock elision: Synchronization eliminated if object doesn't escape thread.
+Loop unrolling: Reduce loop overhead, enable vectorization.
+Vectorization (SIMD): Process multiple data elements per instruction.
+Speculative optimization + deoptimization: Assumes monomorphic type, deoptimizes if violated.
+Code Cache: Native memory for compiled code. If full → JIT stops → performance drops.
+-XX:ReservedCodeCacheSize=512m to increase code cache.
+-XX:+PrintCompilation to see JIT decisions.
+-XX:+DoEscapeAnalysis -XX:+EliminateAllocations: enable escape analysis (default on).
+JIT warmup: First N requests slow, then fast as code compiles. Relevant for cold starts.
+GraalVM JIT: Java-written compiler, more optimizations than C2.
+GraalVM Native Image: AOT compilation → instant startup, lower memory, closed-world assumption.
+On-Stack Replacement (OSR): Replace interpreting loop with compiled version mid-execution.

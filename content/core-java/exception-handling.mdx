@@ -1,0 +1,751 @@
+---
+title: "Exception Handling"
+slug: "exception-handling"
+moduleSlug: "core-java"
+order: 2
+summaryOneLiner: "Java's Exception Handling mechanism — from Checked vs Unchecked, to try-with-resources, custom exceptions, and enterprise-grade global error handling patterns."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["oop-principles"]
+---
+
+![Keywords: Exceptions, Try-Catch, Centralized Handling, Robustness | Hint: A protective firewall blocking malicious exception packets while keeping the core application thread stable.](/illustrations/topics/exception_handling_hero.gif)
+
+Module 4 → Topic 2 → Exception Handling (Part 1)
+
+1. Exception Handling — Introduction
+
+First understand the words.
+
+Exception = An unexpected event during program execution that disrupts the normal flow.
+
+Handling = Dealing with it gracefully.
+
+Before Exception Handling — C Language Era (1972-1995)
+
+In C:
+
+No built-in exception mechanism.
+
+Error handling was manual:
+
+int result = openFile("data.txt");
+if (result == -1) {
+    printf("Error opening file\n");
+    return -1;
+}
+
+Problems:
+
+Every function returned error codes.
+Caller must check every return value.
+Easy to forget to check.
+Error propagation through many layers = many if-checks.
+Business logic mixed with error handling.
+No standard error format.
+
+Java Solution — Exception Objects
+
+Java introduced Exceptions as Objects.
+
+When something goes wrong:
+
+JVM (or developer) creates an Exception object.
+Throws it.
+Stack unwinds until caught.
+Handler code runs.
+Normal flow resumes after handler.
+
+Definition
+
+An Exception in Java is an object that represents an error or abnormal condition that arises during program execution. The Exception Handling mechanism allows programs to define how to respond to these conditions in a structured, hierarchical, and reusable way.
+
+2. Java Exception Hierarchy
+
+java.lang.Throwable (root of all exceptions)
+│
+├── java.lang.Error (serious JVM-level problems — don't handle)
+│   ├── OutOfMemoryError
+│   ├── StackOverflowError
+│   ├── VirtualMachineError
+│   └── AssertionError
+│
+└── java.lang.Exception (recoverable problems)
+    │
+    ├── java.lang.RuntimeException (Unchecked)
+    │   ├── NullPointerException
+    │   ├── ArrayIndexOutOfBoundsException
+    │   ├── ClassCastException
+    │   ├── NumberFormatException
+    │   ├── IllegalArgumentException
+    │   ├── IllegalStateException
+    │   └── UnsupportedOperationException
+    │
+    ├── IOException (Checked)
+    │   ├── FileNotFoundException
+    │   └── SocketException
+    │
+    ├── SQLException (Checked)
+    ├── ParseException (Checked)
+    └── ClassNotFoundException (Checked)
+
+3. Checked vs Unchecked Exceptions
+
+This is the most important distinction.
+
+Checked Exceptions
+
+The compiler CHECKS that they are handled.
+Must either catch or declare with throws.
+Represent RECOVERABLE external conditions.
+
+Examples:
+
+IOException — file not found, network down.
+SQLException — database error.
+ClassNotFoundException — class not on classpath.
+
+// CHECKED — compiler forces handling
+public void readFile(String path) throws IOException { // Must declare!
+    FileReader reader = new FileReader(path); // throws FileNotFoundException (checked)
+}
+
+// Caller must handle:
+try {
+    readFile("data.txt");
+} catch (IOException e) {
+    System.out.println("File not found: " + e.getMessage());
+}
+
+Unchecked Exceptions (RuntimeException)
+
+Compiler does NOT check.
+Not required to catch or declare.
+Represent PROGRAMMING ERRORS.
+
+Examples:
+
+NullPointerException — null pointer dereference.
+ArrayIndexOutOfBoundsException — array index > length.
+ClassCastException — invalid cast.
+IllegalArgumentException — invalid argument passed.
+
+// UNCHECKED — no compiler enforcement
+String name = null;
+int length = name.length(); // NullPointerException — unchecked, compiler doesn't warn
+
+Errors
+
+Represent serious JVM-level problems.
+Application cannot usually recover.
+NEVER catch Error.
+
+try {
+    // DON'T DO THIS
+    something();
+} catch (OutOfMemoryError e) {
+    // JVM is out of memory — you can't recover here meaningfully
+}
+
+4. Checked vs Unchecked — The Great Debate
+
+The Checked Exception Controversy
+
+Checked exceptions were Java's original design.
+
+The idea: Force developers to handle expected errors.
+
+Problem in practice:
+
+// API design forces callers to handle every exception
+public void saveUser(User user)
+    throws DatabaseException, ValidationException, DuplicateUserException,
+           AuditException, EmailNotificationException { }
+
+// Caller now drowns in exceptions
+try {
+    saveUser(user);
+} catch (DatabaseException e) { ... }
+  catch (ValidationException e) { ... }
+  catch (DuplicateUserException e) { ... }
+  catch (AuditException e) { ... }
+  catch (EmailNotificationException e) { ... }
+
+Modern Java and Spring prefer Unchecked:
+
+Spring translates almost all checked exceptions to unchecked.
+
+DataAccessException (unchecked) wraps all SQL exceptions.
+
+Google and many FAANG codebases prefer unchecked.
+
+Rationale:
+
+Most exceptions propagate up to a global handler anyway.
+Checked exceptions make APIs brittle — adding new checked exception breaks all callers.
+Unchecked exceptions still document via Javadoc.
+
+5. Try-Catch-Finally Block
+
+Basic Structure
+
+try {
+    // Code that might throw exception
+    riskyOperation();
+} catch (SpecificException e) {
+    // Handle specific exception
+    log.error("Specific error: " + e.getMessage());
+} catch (AnotherException e) {
+    // Handle another type
+} catch (Exception e) {
+    // Catch all remaining (catch more specific first!)
+    log.error("Unexpected error", e);
+} finally {
+    // ALWAYS runs — whether exception or not
+    // Used for cleanup (closing connections)
+    cleanupResources();
+}
+
+Rules for catch ordering:
+
+More specific → Less specific.
+
+// BAD — Exception is parent, catches everything before specific types
+try { ... }
+catch (Exception e) { ... }        // Catches everything!
+catch (IOException e) { ... }     // UNREACHABLE — compile error
+
+// GOOD
+try { ... }
+catch (IOException e) { ... }     // Specific first
+catch (Exception e) { ... }       // General last
+
+finally Block
+
+Always executes.
+Even if exception thrown.
+Even if return statement in try.
+
+try {
+    return "success"; // return executes, but finally runs BEFORE returning
+} finally {
+    System.out.println("Finally runs before return"); // Runs!
+}
+
+Use for resource cleanup (but prefer try-with-resources).
+
+6. Multi-Catch (Java 7+)
+
+// Verbose — before Java 7
+try { ... }
+catch (IOException e) { log.error(e); }
+catch (SQLException e) { log.error(e); }
+
+// Concise — Java 7+ multi-catch
+try { ... }
+catch (IOException | SQLException e) { // Both handled same way
+    log.error("Database or IO error", e);
+}
+
+Note: Multi-catch variable is implicitly final.
+
+7. Try-With-Resources (Java 7+) — Critical
+
+The most important exception handling improvement.
+
+Problem before try-with-resources:
+
+Connection conn = null;
+PreparedStatement stmt = null;
+ResultSet rs = null;
+
+try {
+    conn = dataSource.getConnection();
+    stmt = conn.prepareStatement(sql);
+    rs = stmt.executeQuery();
+    // ... process results
+} catch (SQLException e) {
+    log.error("Query failed", e);
+} finally {
+    // Manual cleanup — error-prone!
+    try { if (rs != null) rs.close(); } catch (SQLException ignored) {}
+    try { if (stmt != null) stmt.close(); } catch (SQLException ignored) {}
+    try { if (conn != null) conn.close(); } catch (SQLException ignored) {}
+}
+
+With try-with-resources (Java 7+):
+
+try (Connection conn = dataSource.getConnection();
+     PreparedStatement stmt = conn.prepareStatement(sql);
+     ResultSet rs = stmt.executeQuery()) {
+
+    // ... process results
+
+} catch (SQLException e) {
+    log.error("Query failed", e);
+}
+// All resources automatically closed in reverse order!
+
+Requirements for try-with-resources:
+
+Resource must implement AutoCloseable or Closeable interface.
+
+public interface AutoCloseable {
+    void close() throws Exception;
+}
+
+Common resources that are AutoCloseable:
+
+Connection, PreparedStatement, ResultSet
+InputStream, OutputStream, Reader, Writer
+Scanner
+HttpClient
+
+Suppressed Exceptions
+
+If exception thrown in try block AND exception thrown in close():
+
+Close exception is "suppressed" — attached to primary exception.
+
+Access via:
+
+} catch (Exception e) {
+    Throwable[] suppressed = e.getSuppressed();
+}
+
+8. Exception Propagation
+
+Exceptions propagate up the call stack until handled.
+
+void method1() {
+    method2(); // Exception from method2 propagates here
+}
+
+void method2() {
+    method3(); // Exception from method3 propagates here
+}
+
+void method3() {
+    throw new RuntimeException("Something failed"); // Originates here
+}
+
+// Call stack during exception:
+// method3() throws → unwinds to method2() → no handler → unwinds to method1() → no handler → main() → no handler → JVM prints stack trace
+
+Checked exception propagation requires declaration:
+
+void method1() throws IOException { // Must declare!
+    method2();
+}
+
+void method2() throws IOException { // Must declare!
+    method3();
+}
+
+void method3() throws IOException { // Must declare!
+    throw new IOException("File not found");
+}
+
+9. Custom Exceptions — Enterprise Pattern
+
+Create domain-specific exceptions for cleaner error handling.
+
+Custom Unchecked Exception:
+
+public class OrderNotFoundException extends RuntimeException {
+    private final String orderId;
+
+    public OrderNotFoundException(String orderId) {
+        super("Order not found: " + orderId);
+        this.orderId = orderId;
+    }
+
+    public OrderNotFoundException(String orderId, Throwable cause) {
+        super("Order not found: " + orderId, cause);
+        this.orderId = orderId;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+}
+
+Custom Checked Exception:
+
+public class InsufficientFundsException extends Exception {
+    private final BigDecimal available;
+    private final BigDecimal requested;
+
+    public InsufficientFundsException(BigDecimal available, BigDecimal requested) {
+        super(String.format("Insufficient funds. Available: %.2f, Requested: %.2f",
+            available, requested));
+        this.available = available;
+        this.requested = requested;
+    }
+
+    // Getters...
+}
+
+Exception Hierarchy in an Enterprise System:
+
+// Base application exception
+public class ApplicationException extends RuntimeException {
+    private final String errorCode;
+    private final String errorMessage;
+
+    public ApplicationException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+        this.errorMessage = message;
+    }
+}
+
+// Domain exceptions
+public class OrderException extends ApplicationException {
+    public OrderException(String errorCode, String message) {
+        super(errorCode, message);
+    }
+}
+
+public class PaymentException extends ApplicationException {
+    public PaymentException(String errorCode, String message) {
+        super(errorCode, message);
+    }
+}
+
+// Specific exceptions
+public class OrderNotFoundException extends OrderException {
+    public OrderNotFoundException(String orderId) {
+        super("ORDER_NOT_FOUND", "Order not found: " + orderId);
+    }
+}
+
+public class PaymentDeclinedException extends PaymentException {
+    private final String reason;
+
+    public PaymentDeclinedException(String reason) {
+        super("PAYMENT_DECLINED", "Payment declined: " + reason);
+        this.reason = reason;
+    }
+}
+
+10. Spring Exception Handling
+
+Spring provides powerful global exception handling.
+
+@ExceptionHandler — Method Level
+
+@Controller
+public class OrderController {
+    @GetMapping("/orders/{id}")
+    public Order getOrder(@PathVariable String id) {
+        return orderService.findById(id);
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleOrderNotFound(OrderNotFoundException e) {
+        return new ErrorResponse("ORDER_NOT_FOUND", e.getMessage());
+    }
+}
+
+@ControllerAdvice — Global Level (Recommended)
+
+@ControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleOrderNotFound(OrderNotFoundException e) {
+        log.warn("Order not found: {}", e.getMessage());
+        return new ErrorResponse("ORDER_NOT_FOUND", e.getMessage());
+    }
+
+    @ExceptionHandler(PaymentDeclinedException.class)
+    @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
+    public ErrorResponse handlePaymentDeclined(PaymentDeclinedException e) {
+        log.error("Payment declined: {}", e.getMessage());
+        return new ErrorResponse("PAYMENT_DECLINED", e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationError(MethodArgumentNotValidException e) {
+        List<String> errors = e.getBindingResult().getFieldErrors()
+            .stream()
+            .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+            .collect(Collectors.toList());
+        return new ErrorResponse("VALIDATION_FAILED", "Input validation failed", errors);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleUnexpected(Exception e) {
+        log.error("Unexpected error", e);
+        return new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred");
+    }
+}
+
+Standard Error Response DTO:
+
+public record ErrorResponse(
+    String code,
+    String message,
+    List<String> details,
+    Instant timestamp
+) {
+    public ErrorResponse(String code, String message) {
+        this(code, message, List.of(), Instant.now());
+    }
+}
+
+11. DataAccessException — Spring's Exception Translation
+
+Spring's JdbcTemplate and Spring Data translate all technology-specific exceptions to Spring's DataAccessException hierarchy.
+
+Why?
+
+Without translation:
+
+void saveUser(User user) throws SQLException { } // Locked to JDBC
+
+With translation:
+
+void saveUser(User user) { } // No checked exception — unchecked DataAccessException
+// If using JPA, same exception. If using JDBC, same exception. Consistent!
+
+DataAccessException hierarchy:
+
+DataAccessException (unchecked, abstract root)
+├── DataIntegrityViolationException (constraint violation, duplicate key)
+├── EmptyResultDataAccessException (expected result but got none)
+├── IncorrectResultSizeDataAccessException (expected 1, got N)
+├── CannotAcquireLockException (row lock timeout)
+├── QueryTimeoutException (query execution timeout)
+└── TransientDataAccessException (transient — retry possible)
+
+12. Best Practices — Exception Handling
+
+Best Practice 1 — Be Specific When Catching
+
+// BAD
+} catch (Exception e) { } // Catches everything — dangerous
+
+// GOOD
+} catch (OrderNotFoundException e) { ... } // Specific
+} catch (PaymentDeclinedException e) { ... } // Specific
+
+Best Practice 2 — Never Swallow Exceptions
+
+// TERRIBLE PRACTICE — silent failure
+try {
+    processOrder(order);
+} catch (Exception e) {
+    // Empty! Exception swallowed silently
+    // Bug becomes invisible
+}
+
+// MINIMUM — at least log it
+} catch (Exception e) {
+    log.error("Failed to process order: {}", order.getId(), e);
+    throw e; // Re-throw or throw wrapped exception
+}
+
+Best Practice 3 — Use Exception Chaining
+
+When rethrowing, preserve original cause:
+
+// BAD — original cause lost
+} catch (SQLException e) {
+    throw new DataProcessingException("DB error"); // Where did the SQLException go?
+}
+
+// GOOD — original cause preserved
+} catch (SQLException e) {
+    throw new DataProcessingException("DB error", e); // e is the cause
+}
+
+// Now stack trace shows both: DataProcessingException AND its cause (SQLException)
+
+Best Practice 4 — Exception Logging
+
+Log at the RIGHT place.
+
+Common mistake — logging at every layer:
+
+// Service layer
+} catch (Exception e) {
+    log.error("Error in service", e); // Logged here
+    throw e;
+}
+
+// Controller layer
+} catch (Exception e) {
+    log.error("Error in controller", e); // Logged again — duplicate!
+    return ErrorResponse.error(e.getMessage());
+}
+
+GOOD practice: Log once, at the boundary (global exception handler or the layer that actually handles it).
+
+Best Practice 5 — Use try-with-resources for all AutoCloseable resources
+
+Never use finally for resource cleanup when try-with-resources is available.
+
+Best Practice 6 — Document custom exceptions
+
+/**
+ * Thrown when an order is not found in the system.
+ *
+ * @see OrderService#findById(String)
+ */
+public class OrderNotFoundException extends RuntimeException { }
+
+13. Real-World Examples
+
+Example 1 — Amazon Order System
+
+@Service
+@Slf4j
+public class OrderService {
+
+    public Order getOrder(String orderId) {
+        return orderRepository.findById(orderId)
+            .orElseThrow(() -> new OrderNotFoundException(orderId));
+    }
+
+    public void cancelOrder(String orderId, String reason) {
+        Order order = getOrder(orderId); // May throw OrderNotFoundException
+
+        if (!order.isCancellable()) {
+            throw new OrderCancellationException(
+                orderId, "Order cannot be cancelled in status: " + order.getStatus());
+        }
+
+        try {
+            order.cancel(reason);
+            orderRepository.save(order);
+            refundService.processRefund(order);
+        } catch (PaymentException e) {
+            // Refund failed — order is cancelled but refund pending
+            log.error("Refund failed for cancelled order: {}", orderId, e);
+            alertingService.sendRefundFailureAlert(orderId, e.getMessage());
+            throw new OrderCancellationException(orderId, "Cancelled but refund failed: " + e.getMessage(), e);
+        }
+    }
+}
+
+Example 2 — Banking: Transaction Exception Handling
+
+@Service
+@Slf4j
+public class TransactionService {
+
+    @Transactional(rollbackFor = Exception.class)
+    public TransactionResult transfer(String fromAccount, String toAccount, BigDecimal amount) {
+        Account from = accountRepository.findByNumber(fromAccount)
+            .orElseThrow(() -> new AccountNotFoundException(fromAccount));
+        Account to = accountRepository.findByNumber(toAccount)
+            .orElseThrow(() -> new AccountNotFoundException(toAccount));
+
+        if (from.getBalance().compareTo(amount) < 0) {
+            throw new InsufficientFundsException(from.getBalance(), amount);
+        }
+
+        from.debit(amount);
+        to.credit(amount);
+
+        accountRepository.save(from);
+        accountRepository.save(to);
+
+        TransactionRecord record = TransactionRecord.of(from, to, amount);
+        transactionRepository.save(record);
+
+        return TransactionResult.success(record.getId());
+        // If any exception: @Transactional rolls back all changes
+    }
+}
+
+14. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain Java's exception hierarchy and how you handle exceptions in enterprise Spring applications."
+
+5 Crore Answer:
+
+Java's exception mechanism is built on the Throwable hierarchy. At the top is Throwable, with two branches: Error for unrecoverable JVM-level problems like OutOfMemoryError, and Exception for application-level issues.
+
+The critical design distinction is between Checked and Unchecked exceptions. Checked exceptions — those extending Exception directly — require compile-time handling or declaration. They model expected, recoverable external conditions like IO failures. Unchecked exceptions — extending RuntimeException — model programming errors like null dereferences or invalid arguments.
+
+In modern enterprise development, the prevailing approach is to use unchecked exceptions. Spring itself translates all checked database exceptions to its DataAccessException hierarchy — unchecked, with a rich subtype tree that lets callers be as specific or general as needed. This prevents API brittleness where adding a new checked exception forces changes throughout the call chain.
+
+For enterprise Spring REST APIs, I follow a layered exception handling strategy. Domain services throw specific custom exceptions — OrderNotFoundException, InsufficientFundsException — which extend RuntimeException. These propagate naturally up to the web layer.
+
+A global @ControllerAdvice with @ExceptionHandler methods handles all exceptions in one place — mapping each exception type to the appropriate HTTP status code and a standardized ErrorResponse DTO containing an error code, human-readable message, and timestamp. This ensures consistent error responses across all endpoints.
+
+For resource management, Java 7's try-with-resources is mandatory — it ensures AutoCloseable resources are closed in reverse order, even if exceptions occur during close, with suppressed exceptions attached to the primary exception rather than swallowed.
+
+Exception chaining is critical for production debugging — always pass the original cause when wrapping exceptions so the full causal chain appears in stack traces.
+
+Logging should happen once at the boundary — typically in the global exception handler — not at every layer, to prevent duplicate log entries.
+
+15. Follow-Up Interview Questions
+
+Q1. What is the difference between throw and throws?
+
+throw: Statement to actually throw an exception object.
+throw new OrderNotFoundException("ORD-123");
+
+throws: Declaration in method signature that this method MAY throw these checked exceptions.
+public void processOrder() throws OrderException, PaymentException {}
+
+Q2. What is exception chaining?
+
+Preserving the original exception as the "cause" when wrapping in a new exception.
+throw new ServiceException("Processing failed", originalException);
+originalException is accessible via getCause().
+Essential for production debugging — complete causal chain visible in stack trace.
+
+Q3. Can you catch multiple exceptions in one catch block?
+
+Yes, Java 7+ multi-catch:
+catch (IOException | SQLException e) { log.error(e); }
+The variable e is implicitly final.
+
+Q4. What happens if exception thrown in finally block?
+
+It REPLACES the original exception! The original exception is lost.
+This is why you should never throw from finally blocks.
+Use try-with-resources instead, which uses suppressed exceptions to preserve the original.
+
+Q5. What is ControllerAdvice vs ExceptionHandler?
+
+@ExceptionHandler on a controller method: handles exceptions only from that specific controller.
+@ControllerAdvice: global handler — handles exceptions from ALL controllers. Preferred for enterprise applications.
+
+16. Complete Revision Notes
+
+Exception = unexpected event disrupting normal program flow.
+Throwable hierarchy: Throwable → Error | Exception.
+Error: JVM-level, don't catch (OutOfMemoryError, StackOverflowError).
+Exception: recoverable — checked (IOException, SQLException) and unchecked (RuntimeException).
+Checked: compiler enforces handling or declaration. Model expected external failures.
+Unchecked (RuntimeException): compiler doesn't enforce. Model programming errors.
+Modern practice: prefer unchecked exceptions for cleaner APIs.
+Spring translates all checked DB exceptions to DataAccessException (unchecked).
+try-catch-finally: finally always executes, even with return statement.
+Multi-catch: catch (IOException | SQLException e) — Java 7+.
+try-with-resources: automatically closes AutoCloseable resources in reverse order — Java 7+.
+Suppressed exceptions: close() exceptions attached to primary exception in try-with-resources.
+Exception propagation: unwinds call stack until handler found or JVM prints trace.
+Custom exceptions: extend RuntimeException for unchecked, Exception for checked.
+Exception hierarchy: ApplicationException → DomainException → SpecificException.
+Always preserve cause: throw new MyException("msg", originalException).
+Never swallow exceptions — at minimum log them.
+@ControllerAdvice + @ExceptionHandler: global exception handling for all REST controllers.
+@Repository: Spring translates all persistence exceptions to DataAccessException.
+Log once at boundary — not at every layer.
+Catch specific exceptions before general ones.
+throw = throws exception instance. throws = method signature declaration.
+Throwing from finally replaces original exception — avoid!

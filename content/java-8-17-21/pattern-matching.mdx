@@ -1,0 +1,345 @@
+---
+title: "Pattern Matching"
+slug: "pattern-matching"
+moduleSlug: "java-8-17-21"
+order: 4
+summaryOneLiner: "Java Pattern Matching — instanceof patterns (Java 16), switch expressions (Java 14), switch pattern matching (Java 21) — eliminates verbose type checks and enables elegant data-shape driven code."
+estimatedReadMinutes: 35
+generated: false
+prerequisiteTopicSlugs: ["records-sealed", "generics"]
+---
+
+Module 6 → Topic 4 → Pattern Matching (Part 1)
+
+1. Pattern Matching — Introduction
+
+What is Pattern Matching?
+
+Pattern matching = Testing a value against a pattern AND binding the value to a variable if it matches.
+
+Pattern = a shape/type/condition to test.
+
+Before Pattern Matching in Java:
+
+// Old Java — verbose, repetitive, error-prone
+if (shape instanceof Circle) {
+    Circle circle = (Circle) shape; // Redundant cast!
+    double area = Math.PI * circle.getRadius() * circle.getRadius();
+}
+
+After Pattern Matching:
+
+// Java 16+ — concise, safe
+if (shape instanceof Circle circle) { // Test AND bind in one step
+    double area = Math.PI * circle.radius() * circle.radius();
+    // No cast needed! circle is already Circle type
+}
+
+2. Pattern Matching for instanceof (Java 16)
+
+Syntax:
+
+expr instanceof Type variableName
+
+"expr is an instance of Type AND bind it to variableName"
+
+Example:
+
+Object obj = getObject();
+
+// Old way
+if (obj instanceof String) {
+    String s = (String) obj; // Redundant cast
+    System.out.println(s.length());
+}
+
+// New way (Java 16+)
+if (obj instanceof String s) {
+    System.out.println(s.length()); // s is already String — no cast!
+}
+
+Scope Rules:
+
+The bound variable is in scope only where it's known to be true.
+
+if (obj instanceof String s) {
+    // s is in scope HERE — obj is String
+    System.out.println(s.length());
+}
+// s is NOT in scope here
+
+Pattern with negation:
+
+if (!(obj instanceof String s)) {
+    // s is NOT in scope here (condition might be false)
+    throw new IllegalArgumentException("Expected String");
+}
+// s IS in scope here (negation means we know obj is String)
+System.out.println(s.length());
+
+Combining with &&:
+
+if (obj instanceof String s && s.length() > 5) {
+    // Both: obj is String AND length > 5
+    System.out.println("Long string: " + s);
+}
+
+3. Switch Expressions (Java 14) — Foundation
+
+Switch expressions return a value. Much cleaner than switch statements.
+
+// Old switch statement — verbose, fall-through, no value
+int result;
+switch (day) {
+    case MONDAY:
+    case TUESDAY:
+    case WEDNESDAY:
+    case THURSDAY:
+    case FRIDAY:
+        result = 8;
+        break;
+    case SATURDAY:
+    case SUNDAY:
+        result = 0;
+        break;
+    default:
+        throw new IllegalStateException();
+}
+
+// Switch expression — concise, no fall-through, returns value
+int result = switch (day) {
+    case MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY -> 8;
+    case SATURDAY, SUNDAY -> 0;
+};
+
+Arrow form: case X -> expression (no fall-through, returns value).
+
+Colon form (for complex blocks):
+
+int result = switch (day) {
+    case MONDAY, TUESDAY -> {
+        log.info("Weekday: " + day);
+        yield 8; // yield returns value from block
+    }
+    case SATURDAY, SUNDAY -> 0;
+};
+
+yield: Returns value from a switch block. (Like break but with value.)
+
+4. Pattern Matching for Switch (Java 21)
+
+The biggest language feature.
+
+Combines: switch expression + type patterns + guarded patterns + sealed class exhaustiveness.
+
+Syntax:
+
+result = switch (shape) {
+    case Circle c -> Math.PI * c.radius() * c.radius();
+    case Rectangle r -> r.width() * r.height();
+    case null -> 0; // explicit null handling
+    default -> throw new IllegalArgumentException("Unknown: " + shape);
+};
+
+Type patterns in switch:
+
+Object obj = getValue();
+
+String description = switch (obj) {
+    case Integer i -> "Integer: " + i;
+    case String s -> "String: " + s;
+    case List<?> l -> "List of " + l.size() + " elements";
+    case null -> "null value";
+    default -> "Unknown type: " + obj.getClass().getSimpleName();
+};
+
+Guarded Patterns — when clause:
+
+String classify(Object obj) {
+    return switch (obj) {
+        case Integer i when i < 0  -> "negative integer";
+        case Integer i when i == 0 -> "zero";
+        case Integer i             -> "positive integer";  // fallthrough from above guards
+        case String s when s.isEmpty() -> "empty string";
+        case String s              -> "string: " + s;
+        default -> "other";
+    };
+}
+
+Sealed classes — exhaustive switch:
+
+sealed interface Shape permits Circle, Rectangle, Triangle {}
+
+// Compiler knows all cases — no default needed
+double area(Shape shape) {
+    return switch (shape) {
+        case Circle c    -> Math.PI * c.radius() * c.radius();
+        case Rectangle r -> r.width() * r.height();
+        case Triangle t  -> 0.5 * t.base() * t.height();
+        // No default — compiler verifies exhaustiveness
+    };
+}
+
+5. Deconstruction Patterns (Java 21)
+
+Record patterns — destructure record components directly in pattern:
+
+record Point(int x, int y) {}
+record Line(Point start, Point end) {}
+
+Object obj = new Line(new Point(1, 2), new Point(3, 4));
+
+// Old way
+if (obj instanceof Line line) {
+    Point start = line.start();
+    Point end = line.end();
+    System.out.println("Start: " + start.x() + "," + start.y());
+}
+
+// Record pattern — destructure directly
+if (obj instanceof Line(Point start, Point end)) {
+    System.out.println("Start: " + start.x() + "," + start.y());
+}
+
+// Nested patterns — destructure nested records
+if (obj instanceof Line(Point(int x1, int y1), Point(int x2, int y2))) {
+    System.out.println("From (" + x1 + "," + y1 + ") to (" + x2 + "," + y2 + ")");
+}
+
+// In switch:
+double length(Object obj) {
+    return switch (obj) {
+        case Line(Point(int x1, int y1), Point(int x2, int y2)) ->
+            Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+        case Point(int x, int y) ->
+            Math.sqrt(x*x + y*y);
+        default -> throw new IllegalArgumentException();
+    };
+}
+
+6. Real-World Enterprise Examples
+
+Example 1 — Payment Processing (Sealed + Pattern Matching)
+
+sealed interface PaymentEvent
+    permits PaymentEvent.Initiated, PaymentEvent.Completed, PaymentEvent.Failed, PaymentEvent.Refunded {
+
+    record Initiated(String orderId, BigDecimal amount, String currency) implements PaymentEvent {}
+    record Completed(String orderId, String transactionId, Instant completedAt) implements PaymentEvent {}
+    record Failed(String orderId, String errorCode, String message) implements PaymentEvent {}
+    record Refunded(String orderId, String transactionId, BigDecimal refundAmount) implements PaymentEvent {}
+}
+
+// Handler — exhaustive, type-safe
+void handlePaymentEvent(PaymentEvent event) {
+    switch (event) {
+        case PaymentEvent.Initiated(var orderId, var amount, var currency) -> {
+            log.info("Payment initiated for order {} — {} {}", orderId, amount, currency);
+            metricsService.recordInitiation(amount);
+        }
+        case PaymentEvent.Completed(var orderId, var txId, var completedAt) -> {
+            orderService.markPaid(orderId);
+            notificationService.sendReceipt(orderId, txId);
+            log.info("Payment completed for {} at {}", orderId, completedAt);
+        }
+        case PaymentEvent.Failed(var orderId, var code, var msg) -> {
+            orderService.markPaymentFailed(orderId);
+            alertingService.sendPaymentFailureAlert(orderId, code, msg);
+        }
+        case PaymentEvent.Refunded(var orderId, var txId, var amount) -> {
+            orderService.recordRefund(orderId, amount);
+            notificationService.sendRefundConfirmation(orderId, txId, amount);
+        }
+    }
+}
+
+Example 2 — Type-Safe JSON Processing
+
+Object parseJson(JsonNode node) {
+    return switch (node) {
+        case TextNode t -> t.textValue();
+        case IntNode i -> i.intValue();
+        case DoubleNode d -> d.doubleValue();
+        case ArrayNode a -> a.elements().toList().stream()
+            .map(this::parseJson).toList();
+        case ObjectNode o -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            o.fields().forEachRemaining(e -> map.put(e.getKey(), parseJson(e.getValue())));
+            yield map;
+        }
+        case NullNode n -> null;
+        default -> throw new IllegalArgumentException("Unsupported: " + node.getClass());
+    };
+}
+
+Example 3 — Expression Tree Evaluation
+
+sealed interface Expr
+    permits Num, Add, Multiply, Negate {
+    record Num(double value) implements Expr {}
+    record Add(Expr left, Expr right) implements Expr {}
+    record Multiply(Expr left, Expr right) implements Expr {}
+    record Negate(Expr expr) implements Expr {}
+}
+
+// Recursive evaluation using pattern matching
+double eval(Expr expr) {
+    return switch (expr) {
+        case Num(double v) -> v;
+        case Add(Expr l, Expr r) -> eval(l) + eval(r);
+        case Multiply(Expr l, Expr r) -> eval(l) * eval(r);
+        case Negate(Expr e) -> -eval(e);
+    };
+}
+
+// Usage: (3 + 4) * -(2)
+Expr calculation = new Multiply(
+    new Add(new Num(3), new Num(4)),
+    new Negate(new Num(2))
+);
+double result = eval(calculation); // -14.0
+
+7. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain Java's evolution of pattern matching from Java 14 to 21. What makes it powerful?"
+
+5 Crore Answer:
+
+Java's pattern matching evolution spans several releases, each building on the previous.
+
+Java 14 introduced switch expressions — switch constructs that return values, with arrow syntax eliminating fall-through and making case groups cleaner. This is the syntactic foundation.
+
+Java 16 brought pattern matching for instanceof — instead of the traditional instanceof check followed by an explicit cast, you can now write instanceof Type binding in one expression. The compiler tracks that within the true branch, the binding variable is definitively typed — no cast, no unsafe operation.
+
+Java 21 is where pattern matching becomes truly powerful. Switch expressions gained type pattern support — each case can be a type pattern, matching and binding simultaneously. Guarded patterns add when clauses to add conditions alongside type patterns. Sealed classes with pattern matching switch achieve exhaustiveness: the compiler knows all permitted subtypes and requires all to be handled, generating a compile error if any are missing.
+
+Java 21 also introduced record deconstruction patterns — within a pattern, record components can be recursively destructured. case Line(Point start, Point end) in a switch will both match a Line and destructure its start and end fields, which themselves can be further destructured.
+
+The power comes from combining these features: sealed type hierarchy + record components + exhaustive pattern switch = algebraic data types with pattern matching, bringing to Java what languages like Haskell, Scala, Rust, and Kotlin have had for years.
+
+In enterprise code, this eliminates entire categories of runtime errors. A PaymentResult sealed interface with Completed, Declined, Error subtypes — processed with an exhaustive switch — means it's physically impossible to forget the Declined case. Refactoring — adding a new subtype — automatically surfaces all sites that need updating as compile errors. This is a fundamental improvement in correctness guarantees.
+
+8. Complete Revision Notes
+
+Pattern matching: test value against pattern + bind to typed variable in one step.
+instanceof pattern (Java 16): if (obj instanceof String s) — binds s if obj is String.
+Scope: bound variable in scope only where the pattern is true.
+Negation: if (!(obj instanceof String s)) — s in scope AFTER this check.
+Guard: if (obj instanceof String s && s.length() > 5) — both conditions.
+Switch expression (Java 14): returns value, arrow syntax, no fall-through, yield for blocks.
+yield: returns value from switch block (like break with value).
+Switch pattern matching (Java 21): type patterns in case clauses.
+Guarded patterns: case Integer i when i > 0 → condition on matched type.
+Sealed + switch: exhaustive matching — no default needed, compiler verifies all cases.
+Null handling in switch: case null → handle null explicitly.
+Record patterns (Java 21): case Line(Point start, Point end) — destructure components.
+Nested record patterns: case Line(Point(int x1, int y1), Point(int x2, int y2)).
+Enterprise use: PaymentResult sealed hierarchy → exhaustive handling → correctness guarantee.
+Expression evaluators: sealed Expr hierarchy → recursive pattern matching evaluator.
+Type-safe JSON: dispatch on JsonNode subtypes via pattern matching.
+Java version summary: 14 (switch expr), 16 (instanceof pattern), 17 (sealed stable), 21 (switch patterns + record patterns stable).
+Algebraic data types: sealed (sum types) + records (product types) + pattern matching.
+Guarded patterns replace: instanceof chain with multiple conditions.
+All of these features together: Rust-like ergonomics for Java.

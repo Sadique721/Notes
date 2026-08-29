@@ -1,0 +1,614 @@
+---
+title: "Memory Management in JVM"
+slug: "memory-management"
+moduleSlug: "jvm-internals"
+order: 1
+summaryOneLiner: "JVM Memory Management — Heap, Stack, Method Area, GC roots, object allocation, and tuning — is the foundation for solving production OutOfMemoryErrors and performance bottlenecks."
+estimatedReadMinutes: 45
+generated: false
+prerequisiteTopicSlugs: ["oop-principles"]
+---
+
+Module 7 → Topic 1 → JVM Memory Management (Part 1)
+
+1. JVM Memory Management — Introduction
+
+Why is Memory Management Critical?
+
+Most developers:
+
+Write code.
+Run it.
+It works.
+
+Senior developers must know:
+
+Where in memory are objects stored?
+How is memory allocated?
+When is memory released?
+What causes OutOfMemoryError?
+How to tune memory for production?
+How to diagnose memory leaks?
+What JVM flags control memory?
+
+Without this knowledge:
+
+Production crashes with OOM errors.
+Application pauses for 10+ seconds (GC pauses).
+Memory leaks cause gradual degradation.
+Cannot debug heap dumps.
+
+History of Memory Management
+
+Manual Memory (C/C++)
+
+malloc() to allocate.
+free() to release.
+Forget to free → Memory leak.
+Double free → Crash.
+Buffer overflow → Security vulnerability.
+
+Java's Innovation — Automatic Memory Management
+
+Java's JVM manages memory automatically.
+
+Garbage Collector (GC) reclaims memory.
+
+Developer does NOT call free() or delete.
+
+Cost: GC pauses. Benefit: No memory leaks (mostly).
+
+2. JVM Memory Areas
+
+JVM divides memory into distinct areas:
+
+JVM Memory Layout:
+
+┌─────────────────────────────────────┐
+│               JVM Process           │
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │           HEAP              │   │
+│  │  ┌───────────────────────┐ │   │
+│  │  │   Young Generation    │ │   │
+│  │  │ ┌──────┐  ┌─────────┐ │ │   │
+│  │  │ │ Eden │  │Survivor │ │ │   │
+│  │  │ │Space │  │ S0 | S1 │ │ │   │
+│  │  │ └──────┘  └─────────┘ │ │   │
+│  │  └───────────────────────┘ │   │
+│  │  ┌───────────────────────┐ │   │
+│  │  │   Old Generation      │ │   │
+│  │  │   (Tenured Space)     │ │   │
+│  │  └───────────────────────┘ │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │       METHOD AREA           │   │
+│  │  (Metaspace in Java 8+)     │   │
+│  │  Class definitions, static  │   │
+│  │  variables, constant pool   │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  Per-Thread:                        │
+│  ┌─────────┐ ┌─────────┐           │
+│  │  Stack  │ │  Stack  │           │
+│  │Thread 1 │ │Thread 2 │           │
+│  └─────────┘ └─────────┘           │
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │     PC REGISTER             │   │
+│  │   (Current instruction)     │   │
+│  └─────────────────────────────┘   │
+│                                     │
+│  ┌─────────────────────────────┐   │
+│  │   NATIVE METHOD STACK       │   │
+│  │   (For JNI native methods)  │   │
+│  └─────────────────────────────┘   │
+└─────────────────────────────────────┘
+
+3. Heap Memory — Deep Dive
+
+The Heap is where all objects live.
+
+Shared across all threads.
+
+Managed by Garbage Collector.
+
+Heap is divided into Generations.
+
+3.1 Young Generation
+
+Where newly created objects are born.
+
+Divided into:
+
+Eden Space:
+
+New objects created here.
+Most objects die young (die in Eden).
+When Eden fills → Minor GC triggered.
+
+Survivor Spaces (S0 and S1):
+
+Two survivor spaces.
+Objects that survive Eden GC are moved here.
+Only one survivor space is active at a time.
+Objects bounce between S0 and S1 across GCs.
+
+Minor GC (Young Generation GC):
+
+Eden fills up.
+GC pauses application (Stop-The-World).
+Live objects → moved to active Survivor space.
+Dead objects → cleaned up.
+Surviving objects' age incremented.
+Old Survivor space → cleared.
+S0 and S1 roles swap.
+
+Young Generation is typically small (1/3 to 1/4 of heap).
+
+Most objects are short-lived → cleaned quickly.
+
+Minor GC is fast (small area, most objects dead).
+
+3.2 Old Generation (Tenured Space)
+
+Objects that survived many Minor GCs are promoted here.
+
+Promotion threshold: When object's age exceeds MaxTenuringThreshold (default 15).
+
+Also:
+
+Large objects bypass Eden → directly allocated in Old Gen (G1 GC: humongous regions).
+
+Old Gen is larger than Young Gen.
+
+Objects in Old Gen live longer.
+
+Major GC (Old Generation GC):
+
+When Old Gen fills → Major GC triggered.
+Also called Full GC when it includes both Young and Old.
+Slower, longer pauses.
+Stop-The-World for longer.
+
+3.3 Object Promotion Flow
+
+New Object
+    ↓
+Eden Space
+    ↓
+Minor GC (Eden full)
+    ↓
+Still alive?
+    ├── No → Garbage collected
+    └── Yes → Survivor S0 (age=1)
+                ↓
+           Minor GC (Eden full again)
+                ↓
+           Still alive?
+                ├── No → Garbage collected
+                └── Yes → Survivor S1 (age=2)
+                            ↓
+                        ... repeat ...
+                            ↓
+                        Age ≥ 15 (MaxTenuringThreshold)
+                            ↓
+                        Old Generation (Tenured)
+                            ↓
+                        Major GC eventually
+
+4. Method Area (Metaspace in Java 8+)
+
+Before Java 8: PermGen (Permanent Generation)
+
+Part of the JVM heap.
+Stored: class definitions, static variables, constant pool.
+Fixed size at startup: -XX:MaxPermSize=256m.
+Common problem: java.lang.OutOfMemoryError: PermGen space.
+Too many classes loaded (dynamic proxies, JSP compilation) → PermGen full.
+
+Java 8 Change: PermGen removed → Metaspace introduced
+
+Metaspace is in NATIVE MEMORY (outside JVM heap).
+
+No more PermGen OOM for class metadata.
+
+Metaspace can grow dynamically.
+
+Only bounded by native memory available.
+
+Metaspace contains:
+
+Class metadata (name, fields, methods, constant pool).
+Static variables (references stored here, objects in heap).
+JIT compiled method code.
+
+JVM flags:
+
+-XX:MetaspaceSize=128m     // Initial size
+-XX:MaxMetaspaceSize=512m  // Maximum (prevent unbounded growth)
+
+5. JVM Stack Memory
+
+Each thread has its own Stack.
+
+Stack is NOT managed by GC.
+
+Stack is freed when thread terminates.
+
+Stack Frame:
+
+Each method call creates a Stack Frame.
+
+Stack Frame contains:
+
+Local variables (primitive types and references).
+Operand stack (intermediate computation values).
+Frame data (reference to current class, constant pool, return address).
+
+Stack structure during execution:
+
+main() → Thread stack
+
+[Frame: main()]
+    ↓ calls
+[Frame: processOrder()]
+    ↓ calls
+[Frame: validatePayment()]
+    ↓ calls
+[Frame: checkFraud()]
+
+When checkFraud() returns → Frame popped.
+When validatePayment() returns → Frame popped.
+... etc.
+
+StackOverflowError:
+
+Stack frames accumulate without returning (infinite recursion).
+
+void infiniteRecursion() {
+    infiniteRecursion(); // Calls itself infinitely
+    // Stack fills up → StackOverflowError!
+}
+
+JVM flag: -Xss512k (stack size per thread).
+
+Key differences between Stack and Heap:
+
+Feature          | Stack               | Heap
+─────────────────┼─────────────────────┼────────────────────────
+Allocation       | Static (compile)    | Dynamic (runtime)
+Management       | Auto (frame pop)    | GC managed
+Scope            | Per-thread          | Shared
+Contents         | Primitives, refs    | Objects
+Error            | StackOverflowError  | OutOfMemoryError
+Speed            | Very fast           | Slower (GC overhead)
+
+6. Object Allocation in Detail
+
+TLAB — Thread-Local Allocation Buffer
+
+Problem without TLAB:
+
+All threads share Eden.
+Multiple threads simultaneously allocating → contention → locking.
+Slow.
+
+Solution — TLAB:
+
+Each thread gets a private chunk of Eden (its TLAB).
+Thread allocates within its own TLAB — no locking!
+Fast allocation.
+When TLAB exhausted → thread gets new TLAB from shared Eden.
+When Eden exhausted → Minor GC.
+
+Object Allocation Process:
+
+Thread needs new object
+    ↓
+Space available in TLAB?
+    ├── Yes → Allocate in TLAB (very fast)
+    └── No → Request new TLAB from Eden
+                ↓
+           Eden has space?
+                ├── Yes → New TLAB allocated, object created
+                └── No → Minor GC triggered → retry
+
+JVM attempts escape analysis and stack allocation:
+
+If JIT determines an object never escapes a method:
+    Object can be allocated on stack (no GC needed).
+    Freed automatically when method returns.
+
+7. GC Roots — Starting Points for Collection
+
+Garbage Collector identifies live objects from GC Roots.
+
+An object is alive if reachable from a GC Root.
+
+GC Roots are:
+
+1. JVM Stack References — local variables and parameters of active methods.
+2. Static Variables — references in class fields marked static.
+3. JNI References — objects referenced from native (C/C++) code.
+4. Active Threads — thread objects themselves.
+5. Internal JVM References — class objects, exception objects, etc.
+
+Reachability graph:
+
+GC Roots
+    ↓
+Object A (referenced by root)
+    ↓
+Object B (referenced by A)
+    ↓
+Object C (referenced by B)
+
+A, B, C are all LIVE.
+
+Object D (referenced only by other unreachable objects) = DEAD → collected.
+
+8. Memory Leak in Java
+
+Memory leaks happen when objects are unintentionally kept referenced.
+
+GC cannot collect them.
+
+Memory grows over time.
+
+OOM eventually.
+
+Common Memory Leak Causes:
+
+1 — Static Collections
+
+static Map<String, Object> cache = new HashMap<>();
+
+// Items added but never removed
+cache.put(key, heavyObject); // Memory grows unboundedly
+
+Fix: Use WeakHashMap or explicit eviction.
+
+2 — Unclosed Resources
+
+Connection conn = dataSource.getConnection();
+// Exception thrown here — conn never closed!
+// Connection object held in memory + connection pool exhausted
+
+Fix: try-with-resources always.
+
+3 — Inner Class Holding Outer Reference
+
+// Non-static inner class holds implicit reference to outer class
+class EventSystem {
+    private List<Object> bigData = new ArrayList<>(100000);
+
+    class EventListener { // Holds implicit ref to EventSystem
+        // Even if listener registered elsewhere, EventSystem cannot be GC'd
+    }
+}
+
+Fix: Use static inner classes if outer reference not needed.
+
+4 — ThreadLocal Misuse
+
+ThreadLocal<Database> threadLocalDb = new ThreadLocal<>();
+
+// Set in thread pool thread
+threadLocalDb.set(new Database());
+
+// Thread pool reuses threads
+// ThreadLocal values persist between requests!
+// Previous request's Database object leaked to next request
+
+Fix: Always remove ThreadLocal in finally: threadLocalDb.remove();
+
+9. JVM Memory Flags
+
+Heap Size:
+
+-Xms512m      // Initial heap size (min)
+-Xmx4g        // Maximum heap size
+-Xms = -Xmx  // Set equal to avoid resize
+
+Young Generation:
+
+-XX:NewRatio=2        // Old:Young = 2:1 → Young = 1/3 of heap
+-XX:NewSize=256m      // Young Gen initial size
+-XX:MaxNewSize=512m   // Young Gen max size
+-Xmn512m              // Young Gen fixed size
+
+GC Logging (Java 9+):
+
+-Xlog:gc*:file:gc.log:time,uptime:filecount=5,filesize=20m
+
+GC Algorithm Selection:
+
+-XX:+UseG1GC           // G1 GC (default Java 9+)
+-XX:+UseZGC            // Z GC (low latency, Java 15+)
+-XX:+UseShenandoahGC   // Shenandoah (RedHat)
+-XX:+UseParallelGC     // Parallel GC (throughput-focused)
+
+10. Production Memory Considerations
+
+OOM Types and Their Meaning:
+
+java.lang.OutOfMemoryError: Java heap space
+    → Objects in heap exceed -Xmx limit.
+    → Fix: Increase -Xmx or fix memory leak.
+
+java.lang.OutOfMemoryError: Metaspace
+    → Class metadata exceeds MetaspaceSize limit.
+    → Fix: Increase -XX:MaxMetaspaceSize or fix classloader leak.
+
+java.lang.OutOfMemoryError: GC overhead limit exceeded
+    → GC running > 98% of time, recovering < 2% memory.
+    → Heap is almost full and GC cannot make progress.
+    → Fix: Increase heap, optimize allocations, fix leak.
+
+java.lang.OutOfMemoryError: Direct buffer memory
+    → NIO direct buffers exceed limit.
+    → Fix: Increase -XX:MaxDirectMemorySize.
+
+java.lang.StackOverflowError
+    → Stack depth exceeded.
+    → Fix: Fix infinite recursion, or increase -Xss.
+
+Heap Dump Analysis:
+
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=/tmp/heapdump.hprof
+
+Analyze with Eclipse MAT or VisualVM.
+
+11. Real-World Examples
+
+Example 1 — Netflix Memory Tuning
+
+Netflix JVM configuration for streaming service:
+
+-Xms8g -Xmx8g        // Fixed 8GB heap — no resize pauses
+-XX:+UseG1GC          // G1 for predictable pause times
+-XX:MaxGCPauseMillis=100  // Target max 100ms GC pauses
+-XX:G1HeapRegionSize=16m  // Large regions for large objects
+-XX:InitiatingHeapOccupancyPercent=45  // Start concurrent GC at 45% full
+
+Example 2 — Banking High-Throughput
+
+SBI transaction service:
+
+-Xms16g -Xmx16g
+-XX:+UseZGC                // Z GC — sub-millisecond pauses for transaction SLA
+-XX:ZCollectionInterval=5  // Run GC every 5 seconds
+-XX:ZUncommitDelay=300     // Keep memory committed for 5 minutes
+
+Example 3 — Detecting Memory Leak (E-Commerce)
+
+Symptoms:
+
+Application healthy at 8 AM.
+Memory grows 100MB/hour.
+At 2 PM: OOM crash.
+
+Investigation:
+
+Take heap dumps at 10 AM, 12 PM, 2 PM.
+
+Open in Eclipse MAT.
+
+Compare dominator trees.
+
+Find object type growing from 10M → 100M → 1000M objects.
+
+Trace to code.
+
+Common finding:
+
+Spring's @Cacheable with no eviction policy.
+HashMap used as cache, keys never removed.
+EventListeners registered but never unregistered.
+
+12. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Walk me through JVM memory areas and how objects are allocated and collected."
+
+5 Crore Answer:
+
+JVM memory is organized into distinct areas serving different purposes.
+
+The Heap is the largest and most critical — it's shared across all threads and is where all objects live. It's organized generationally based on the observation that most objects are short-lived: Young Generation contains newly allocated objects, divided into Eden space (where objects are born) and two Survivor spaces (S0, S1). Old Generation holds objects that have survived multiple garbage collections.
+
+Object allocation happens via Thread-Local Allocation Buffers — TLAB. Each thread receives a private chunk of Eden, enabling allocation without synchronization overhead. When a thread's TLAB fills, it gets a new chunk. When Eden fills, a Minor GC is triggered — a stop-the-world pause that identifies live objects (those reachable from GC roots — active stack frames, static variables, JNI references), copies them to a Survivor space, and clears Eden.
+
+Objects that survive across several Minor GCs have their age incremented. When age exceeds MaxTenuringThreshold (default 15), they're promoted to Old Generation. When Old Generation fills, a Major GC — typically a full heap collection — occurs. These are slower because the Old Gen is larger.
+
+Java 8 replaced PermGen with Metaspace — class metadata now lives in native memory rather than the JVM heap, eliminating the chronic PermGen space errors common in dynamic proxy-heavy applications.
+
+The Stack is per-thread and non-GC-managed. Each method call pushes a frame containing local variables and computation operands. The frame is popped upon method return, making stack allocation self-managing.
+
+Memory leaks occur when objects remain unintentionally reachable — unclosed resources keeping references, static collections growing unboundedly, ThreadLocals not cleared in thread pools, or inner classes holding implicit outer class references.
+
+For production tuning: set -Xms equal to -Xmx to prevent resize pauses, use G1GC for balanced throughput/latency, or ZGC for sub-millisecond latency requirements. Enable HeapDumpOnOutOfMemoryError for post-mortem analysis.
+
+13. Follow-Up Interview Questions
+
+Q1. What is the difference between -Xms and -Xmx?
+
+-Xms: Initial heap size — JVM starts with this much memory allocated.
+-Xmx: Maximum heap size — JVM cannot exceed this.
+
+When Xms < Xmx: JVM starts with Xms, grows as needed up to Xmx.
+Resizing has cost — resize pauses.
+Production best practice: Set Xms = Xmx to pre-allocate all memory, prevent resize pauses.
+
+Q2. What is TLAB and why does it matter?
+
+Thread-Local Allocation Buffer — a region of Eden allocated exclusively to one thread.
+
+Without TLAB: All threads compete for Eden space → synchronization → slow allocation.
+With TLAB: Each thread allocates in its own region → no contention → very fast.
+
+Result: Object allocation is nearly as fast as stack allocation (pointer bump).
+
+Q3. What happens during a Stop-The-World pause?
+
+All application threads are paused.
+Only GC threads run.
+JVM must pause app to safely trace all object references.
+
+Duration depends on: GC algorithm, heap size, live object count, hardware.
+
+G1GC: Tunable pause targets (MaxGCPauseMillis).
+ZGC / Shenandoah: Concurrent most of GC work, sub-millisecond pauses.
+
+Q4. What is the difference between Minor GC and Major GC?
+
+Minor GC: Collects Young Generation (Eden + Survivor). Fast (small area). Frequent. Most objects die.
+Major GC: Collects Old Generation. Slower (larger area). Less frequent.
+Full GC: Collects entire heap (Young + Old + Metaspace). Slowest. Often triggered by System.gc() or OOM prevention.
+
+Q5. What is escape analysis?
+
+JVM optimization that analyzes whether an object "escapes" its creating method.
+
+If an object is used only within the method (doesn't escape):
+
+Object can be allocated on the stack — no GC needed.
+Object can be scalar replaced — broken into individual fields on stack.
+
+Result: Reduced GC pressure for short-lived objects.
+
+Enabled by default in JVM: -XX:+DoEscapeAnalysis.
+
+Q6. What causes java.lang.OutOfMemoryError: GC overhead limit exceeded?
+
+JVM spends > 98% of time doing GC and recovers < 2% of heap per GC.
+
+Means: Heap is nearly full, GC can barely free any memory.
+Root cause: Memory leak or heap too small for workload.
+Fix: Analyze heap dump, fix leak, or increase -Xmx.
+
+14. Complete Revision Notes
+
+JVM memory: Heap, Metaspace, Stack (per-thread), PC Register, Native Method Stack.
+Heap = shared across threads, GC-managed, holds all objects.
+Young Gen = Eden + Survivor (S0 + S1). New objects born in Eden.
+Old Gen = long-lived objects, promoted from Young Gen after MaxTenuringThreshold (default 15) GCs.
+Metaspace (Java 8+) = class metadata in native memory. Replaced PermGen.
+Stack = per-thread, auto-managed, holds stack frames (local vars + operand stack).
+Stack frame = local variables + operand stack + frame data. Created on method call, destroyed on return.
+TLAB = Thread-Local Allocation Buffer in Eden — fast, lockless allocation per thread.
+GC Roots = stack refs, static vars, JNI refs, active threads — starting points for live object tracing.
+Reachable from GC Root → alive. Not reachable → eligible for collection.
+Minor GC = Young Gen collection, fast, stop-the-world. Major GC = Old Gen, slower.
+Full GC = entire heap, slowest, avoid in production.
+Common memory leaks: static collections, unclosed resources, inner class refs, ThreadLocal not cleared.
+OOM types: heap space, Metaspace, GC overhead limit, direct buffer, StackOverflowError.
+JVM flags: -Xms, -Xmx (heap), -XX:MaxMetaspaceSize, -XX:+UseG1GC, -XX:MaxGCPauseMillis.
+Escape analysis: if object doesn't escape method, can be stack-allocated or scalar replaced.
+Heap dump: -XX:+HeapDumpOnOutOfMemoryError. Analyze with Eclipse MAT.
+Production: Xms=Xmx (no resize), G1GC (balanced), ZGC (sub-ms latency).
+GC tuning is system-specific — measure first, then tune.

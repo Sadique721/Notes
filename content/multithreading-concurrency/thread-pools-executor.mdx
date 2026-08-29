@@ -1,0 +1,466 @@
+---
+title: "Thread Pools and ExecutorService"
+slug: "thread-pools-executor"
+moduleSlug: "multithreading-concurrency"
+order: 2
+summaryOneLiner: "Thread pools via ExecutorService enable controlled concurrency — understanding pool types, task queuing, rejection policies, and proper shutdown is essential for every production Java application."
+estimatedReadMinutes: 40
+generated: false
+prerequisiteTopicSlugs: ["thread-lifecycle"]
+---
+
+Module 8 → Topic 2 → Thread Pools and ExecutorService (Part 1)
+
+1. Thread Pools — Introduction
+
+Why Thread Pools?
+
+Without thread pools:
+
+for (HttpRequest request : requests) {
+    Thread thread = new Thread(() -> handleRequest(request));
+    thread.start(); // Create new thread for each request!
+}
+
+Problems with creating threads on demand:
+
+Thread creation is expensive:
+    - OS must allocate stack memory (~1MB by default)
+    - Kernel thread created (kernel mode switch)
+    - Takes ~50-100 microseconds
+
+Thread destruction is expensive:
+    - OS must reclaim resources
+
+Under high load: 10,000 requests → 10,000 threads → OOM!
+
+Thread scheduling overhead: Too many threads → CPU wastes time context switching.
+
+Thread Pool Solution:
+
+Create N threads once.
+Keep them alive, ready to accept work.
+Reuse threads for multiple tasks.
+When task complete → thread available for next task.
+
+Benefits:
+
+Thread reuse — no creation overhead per task.
+Bounded concurrency — max N threads regardless of work volume.
+Task queuing — excess work waits in queue, not creating new threads.
+Better resource management.
+
+2. ExecutorService — The Java Thread Pool API
+
+java.util.concurrent.ExecutorService is the main interface:
+
+public interface ExecutorService extends Executor {
+    void execute(Runnable command);           // Fire and forget
+    <T> Future<T> submit(Callable<T> task);  // Submit task, get Future
+    <T> Future<T> submit(Runnable task, T result);
+    Future<?> submit(Runnable task);
+
+    void shutdown();         // Stop accepting new tasks, complete existing
+    List<Runnable> shutdownNow(); // Stop immediately, return pending tasks
+    boolean isShutdown();
+    boolean isTerminated();
+    boolean awaitTermination(long timeout, TimeUnit unit);
+
+    <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks);
+    <T> T invokeAny(Collection<? extends Callable<T>> tasks);
+}
+
+3. ThreadPoolExecutor — The Core Implementation
+
+All standard thread pools are built on ThreadPoolExecutor.
+
+Understanding its constructor parameters is essential:
+
+new ThreadPoolExecutor(
+    int corePoolSize,          // Minimum threads kept alive
+    int maximumPoolSize,       // Maximum threads ever created
+    long keepAliveTime,        // How long idle non-core threads survive
+    TimeUnit unit,             // Time unit for keepAliveTime
+    BlockingQueue<Runnable> workQueue,  // Queue for waiting tasks
+    ThreadFactory threadFactory,        // Factory for creating threads
+    RejectedExecutionHandler handler    // What to do if queue full and max threads reached
+);
+
+ThreadPoolExecutor Task Flow:
+
+New task arrives
+    │
+    ├── Active threads < corePoolSize?
+    │       Yes → Create new thread (even if idle threads exist)
+    │
+    ├── corePoolSize reached → Try to queue
+    │       Queue not full → Task added to queue
+    │
+    ├── Queue full → Active threads < maximumPoolSize?
+    │       Yes → Create new thread (beyond core)
+    │
+    └── Queue full AND max threads reached
+            → RejectedExecutionHandler invoked
+
+Idle thread lifetime:
+
+If active threads > corePoolSize AND thread idle > keepAliveTime:
+    Thread terminates (shrinks pool back to core size).
+
+4. Executors Factory Methods
+
+Executors class provides common configurations:
+
+newFixedThreadPool(int nThreads):
+
+ExecutorService pool = Executors.newFixedThreadPool(10);
+
+corePoolSize = maximumPoolSize = 10.
+WorkQueue: LinkedBlockingQueue (UNBOUNDED!).
+10 threads, always alive.
+Tasks queue indefinitely.
+
+Risk: Unbounded queue → OOM if tasks pile up faster than processed.
+
+newCachedThreadPool():
+
+ExecutorService pool = Executors.newCachedThreadPool();
+
+corePoolSize = 0, maximumPoolSize = Integer.MAX_VALUE.
+WorkQueue: SynchronousQueue (0 capacity).
+Creates new thread for each task (up to Integer.MAX_VALUE).
+Idle threads removed after 60 seconds.
+
+Risk: Integer.MAX_VALUE threads → OOM under high load!
+
+Good for: Many short-lived tasks, bursty workloads with mostly idle periods.
+
+newSingleThreadExecutor():
+
+ExecutorService pool = Executors.newSingleThreadExecutor();
+
+corePoolSize = maximumPoolSize = 1.
+Tasks execute sequentially.
+
+Good for: Sequential processing, I/O serialization.
+
+newScheduledThreadPool(int corePoolSize):
+
+ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+
+Supports scheduled and periodic task execution.
+
+5. Custom ThreadPoolExecutor — Enterprise Pattern
+
+Never use Executors.newFixedThreadPool() in production!
+
+Why? Unbounded queue → OOM.
+
+Enterprise-grade thread pool:
+
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+    10,                          // corePoolSize
+    50,                          // maximumPoolSize
+    60, TimeUnit.SECONDS,        // keepAliveTime for non-core threads
+    new ArrayBlockingQueue<>(1000), // Bounded queue!
+    new ThreadFactoryBuilder()
+        .setNameFormat("order-processor-%d")
+        .setDaemon(false)
+        .setUncaughtExceptionHandler((t, e) -> {
+            log.error("Thread {} threw uncaught exception", t.getName(), e);
+            alertingService.send(new Alert("Thread Failure", t.getName(), e));
+        })
+        .build(),
+    new ThreadPoolExecutor.CallerRunsPolicy() // Rejection policy
+);
+
+// Enable core thread timeout (Java 9+)
+executor.allowCoreThreadTimeOut(true);
+
+Rejection Policies:
+
+AbortPolicy (default): Throws RejectedExecutionException.
+CallerRunsPolicy: Caller's thread executes the task. Provides backpressure!
+DiscardPolicy: Silently discards the task.
+DiscardOldestPolicy: Discards oldest queued task, retries new task.
+
+CallerRunsPolicy is usually best:
+
+When pool is full: Caller thread runs the task itself.
+This slows the submitter → natural backpressure.
+No tasks lost. Pool gets time to drain queue.
+
+6. Work Queue Types
+
+LinkedBlockingQueue (unbounded — default for fixedThreadPool):
+
+No capacity limit.
+Tasks pile up in memory → OOM risk.
+Never use this in production without monitoring!
+
+ArrayBlockingQueue (bounded — recommended):
+
+Fixed capacity.
+When full → rejection policy activates.
+Provides backpressure.
+
+SynchronousQueue (zero capacity — used in cachedThreadPool):
+
+Every task must be immediately handed to a thread.
+If no thread available → create new or reject.
+No buffering.
+
+PriorityBlockingQueue (priority ordering):
+
+Tasks executed in priority order.
+Tasks must implement Comparable or provide Comparator.
+Unbounded — OOM risk.
+
+7. Future and CompletableFuture
+
+Future<T>:
+
+ExecutorService pool = Executors.newFixedThreadPool(4);
+
+Future<Integer> future = pool.submit(() -> {
+    Thread.sleep(1000);
+    return 42;
+});
+
+// Do other work while computation runs...
+
+Integer result = future.get(); // Blocks until done
+Integer result = future.get(5, TimeUnit.SECONDS); // With timeout
+
+future.cancel(true); // Interrupt if running
+
+future.isDone();    // Completed (success or failure)?
+future.isCancelled(); // Was cancelled?
+
+Problem with Future: Blocking get(). Callback chaining not possible.
+
+CompletableFuture<T> (Java 8+):
+
+CompletableFuture<String> future = CompletableFuture
+    .supplyAsync(() -> fetchUser(userId), executor)
+    .thenApply(user -> user.getName())
+    .thenApply(String::toUpperCase)
+    .exceptionally(e -> "DEFAULT_USER")
+    .thenAccept(name -> System.out.println("User: " + name));
+
+// Non-blocking! Callbacks attached.
+
+Combining futures:
+
+CompletableFuture<User> userFuture = fetchUserAsync(userId);
+CompletableFuture<Orders> ordersFuture = fetchOrdersAsync(userId);
+
+// Run both concurrently, combine result
+CompletableFuture<UserDashboard> dashboard = userFuture
+    .thenCombine(ordersFuture, (user, orders) -> new UserDashboard(user, orders));
+
+allOf:
+
+CompletableFuture<Void> all = CompletableFuture.allOf(f1, f2, f3);
+all.join(); // Wait for all to complete
+
+anyOf:
+
+CompletableFuture<Object> any = CompletableFuture.anyOf(f1, f2, f3);
+Object first = any.join(); // Return whichever completes first
+
+8. ScheduledExecutorService
+
+For periodic and delayed tasks:
+
+ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+
+// Run once after delay
+scheduler.schedule(task, 5, TimeUnit.SECONDS);
+
+// Run periodically (fixed RATE — start times are fixed regardless of task duration)
+scheduler.scheduleAtFixedRate(
+    () -> sendHeartbeat(),
+    0,   // Initial delay
+    30,  // Period
+    TimeUnit.SECONDS
+);
+
+// Run periodically (fixed DELAY — next start is DELAY after previous ENDS)
+scheduler.scheduleWithFixedDelay(
+    () -> processBatch(),
+    0,  // Initial delay
+    5,  // Delay after completion
+    TimeUnit.SECONDS
+);
+
+scheduleAtFixedRate vs scheduleWithFixedDelay:
+
+FixedRate: Task starts every N seconds. If task takes longer than N, next starts immediately (overlap possible, but ScheduledExecutorService prevents overlap by delaying next start if current is still running — it runs next as soon as possible).
+
+FixedDelay: Next task starts N seconds AFTER previous COMPLETES. Stable delay between tasks.
+
+9. Proper Shutdown
+
+Always shut down executor services properly:
+
+@Bean(destroyMethod = "shutdown")
+public ExecutorService orderProcessorPool() {
+    return new ThreadPoolExecutor(...);
+}
+
+// Or manually:
+@PreDestroy
+public void shutdown() {
+    log.info("Shutting down thread pool...");
+    executor.shutdown(); // Stop accepting new tasks
+
+    try {
+        if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+            log.warn("Pool did not terminate in 30s, forcing shutdown...");
+            executor.shutdownNow(); // Interrupt running tasks
+            if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                log.error("Pool still running after forced shutdown!");
+            }
+        }
+    } catch (InterruptedException e) {
+        executor.shutdownNow();
+        Thread.currentThread().interrupt();
+    }
+    log.info("Thread pool shutdown complete");
+}
+
+10. Thread Pool Sizing
+
+How many threads?
+
+CPU-bound tasks (computation, no I/O blocking):
+
+poolSize = CPU cores + 1
+// or
+poolSize = Runtime.getRuntime().availableProcessors() + 1
+
+I/O-bound tasks (HTTP calls, DB queries, file I/O — mostly waiting):
+
+poolSize = CPU cores × (1 + waitTime / serviceTime)
+// If 50ms wait, 5ms service: ratio = 11 → poolSize = cores × 11
+
+Rule of thumb for I/O-heavy:
+
+poolSize = CPU cores × 10 (for typical I/O-heavy microservices)
+
+// Spring Boot typical production config
+spring.task.execution.pool.core-size=20
+spring.task.execution.pool.max-size=200
+spring.task.execution.pool.queue-capacity=1000
+
+11. Real-World Enterprise Examples
+
+Example 1 — Order Processing Thread Pool
+
+@Configuration
+public class ThreadPoolConfig {
+    @Bean("orderProcessorPool")
+    public ThreadPoolExecutor orderProcessorPool() {
+        return new ThreadPoolExecutor(
+            20,                              // Core threads (always alive)
+            100,                             // Max threads
+            60, TimeUnit.SECONDS,           // Idle thread timeout
+            new ArrayBlockingQueue<>(5000), // Bounded queue
+            new ThreadFactoryBuilder()
+                .setNameFormat("order-processor-%d")
+                .setUncaughtExceptionHandler((t, e) ->
+                    log.error("Order processor exception in {}", t.getName(), e))
+                .build(),
+            new ThreadPoolExecutor.CallerRunsPolicy() // Backpressure
+        );
+    }
+}
+
+Example 2 — Parallel External API Calls
+
+public UserDashboard getDashboard(Long userId) {
+    // Fetch all data in parallel
+    CompletableFuture<User> userFuture =
+        CompletableFuture.supplyAsync(() -> userService.getUser(userId), apiPool);
+    CompletableFuture<List<Order>> ordersFuture =
+        CompletableFuture.supplyAsync(() -> orderService.getOrders(userId), apiPool);
+    CompletableFuture<Wallet> walletFuture =
+        CompletableFuture.supplyAsync(() -> walletService.getWallet(userId), apiPool);
+
+    return userFuture
+        .thenCombine(ordersFuture, (user, orders) -> Pair.of(user, orders))
+        .thenCombine(walletFuture, (userOrders, wallet) ->
+            new UserDashboard(userOrders.first(), userOrders.second(), wallet))
+        .orTimeout(3, TimeUnit.SECONDS) // Fail fast
+        .join();
+}
+
+Example 3 — Scheduled Background Jobs
+
+@Service
+public class MaintenanceService {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+
+    @PostConstruct
+    public void startJobs() {
+        // Clean expired sessions every 30 minutes
+        scheduler.scheduleAtFixedRate(
+            sessionService::cleanExpiredSessions, 0, 30, TimeUnit.MINUTES);
+
+        // Send daily reports at 11 PM
+        long initialDelay = computeInitialDelay(23, 0); // 11 PM
+        scheduler.scheduleAtFixedRate(
+            reportService::generateDailyReport, initialDelay, 24 * 60 * 60, TimeUnit.SECONDS);
+    }
+
+    @PreDestroy
+    public void stop() {
+        scheduler.shutdown();
+    }
+}
+
+12. ₹5 Crore Interview Answer
+
+Interviewer:
+
+"Explain ThreadPoolExecutor parameters. What happens when both queue and max threads are exhausted?"
+
+5 Crore Answer:
+
+ThreadPoolExecutor is the foundation of Java's thread pool architecture. Its seven constructor parameters define its behavior completely.
+
+corePoolSize defines the minimum thread count — threads created on demand up to this count, then kept alive even when idle. maximumPoolSize is the upper bound — threads beyond core are created only when the queue is full. keepAliveTime with its TimeUnit governs how long non-core threads survive when idle before being terminated.
+
+The workQueue is the most critical parameter. When all core threads are busy, new tasks are offered to the queue. If the queue accepts the task, it waits there. If the queue is full, a new thread is created up to maximumPoolSize. If maximum threads are also reached, the RejectedExecutionHandler determines what happens.
+
+The task flow: submit task → active threads < core? Create thread. Otherwise, offer to queue. Queue full? Active threads < max? Create thread. Both exhausted? Invoke rejection handler.
+
+The rejection policies each have different semantics: AbortPolicy throws RejectedExecutionException, which is visible to callers but may cause task loss if not caught. CallerRunsPolicy makes the submitting thread execute the task directly — this is the most intelligent policy for most cases because it creates natural backpressure: the submitting thread slows down while executing tasks, giving the pool time to drain. DiscardPolicy silently drops tasks — only acceptable if tasks are ephemeral. DiscardOldestPolicy replaces the oldest queued task — useful for "keep only latest" scenarios.
+
+The critical production mistake with Executors.newFixedThreadPool(): it uses LinkedBlockingQueue with no capacity limit. Under sustained overload, tasks queue indefinitely, consuming unbounded memory, eventually causing OOM. Always use ArrayBlockingQueue with a calculated capacity in production.
+
+Thread count sizing: CPU-bound tasks → core count + 1. I/O-bound tasks → core count × (1 + waitTime/serviceTime), often 10-20× the core count for typical microservices calling external APIs.
+
+13. Complete Revision Notes
+
+Thread pool: reuse threads, avoid creation/destruction overhead, bound concurrency.
+ExecutorService: submit, shutdown, awaitTermination, invokeAll, invokeAny.
+ThreadPoolExecutor params: corePoolSize, maxPoolSize, keepAliveTime, workQueue, threadFactory, handler.
+Task flow: active < core → create. Queue not full → queue. Queue full, active < max → create. Queue full + max reached → rejection handler.
+Executors.newFixedThreadPool(): unbounded LinkedBlockingQueue → OOM risk. Avoid in production.
+Executors.newCachedThreadPool(): Integer.MAX_VALUE threads → OOM risk under heavy load.
+Production: use ArrayBlockingQueue(N) + CallerRunsPolicy for bounded, backpressure-enabled pool.
+CallerRunsPolicy: Best rejection policy — caller executes, provides backpressure, no task loss.
+ThreadFactory: name threads, set daemon, set UncaughtExceptionHandler.
+Future<T>: get() blocks until done. cancel(), isDone(), isCancelled().
+CompletableFuture: non-blocking, callback chaining. supplyAsync, thenApply, thenCombine, allOf, anyOf.
+ScheduledExecutorService: schedule (once), scheduleAtFixedRate, scheduleWithFixedDelay.
+FixedRate: starts every N seconds. FixedDelay: N seconds after previous completes.
+Shutdown pattern: shutdown() → awaitTermination(30s) → shutdownNow() → awaitTermination(10s).
+CPU-bound: pool size = cores + 1. IO-bound: pool size = cores × (1 + wait/service time).
+allowCoreThreadTimeOut(true): even core threads time out when idle — save resources.
+Spring @Async: uses configurable ThreadPoolTaskExecutor — configure in AsyncConfigurer.
+Spring default @Async pool: single thread! Configure explicitly in production.
+Virtual threads (Java 21): lightweight alternative to thread pools for I/O-bound tasks.
+Monitor pool: pool.getPoolSize(), pool.getActiveCount(), pool.getQueue().size().

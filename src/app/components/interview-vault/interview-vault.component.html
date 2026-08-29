@@ -1,0 +1,180 @@
+<div class="min-h-screen bg-[#0b0c10] text-[#c5c6c7] font-sans pb-20">
+  <!-- Top Navigation Header -->
+  <header class="h-16 border-b border-white/10 px-8 flex items-center justify-between bg-black/60 backdrop-blur-md sticky top-0 z-20">
+    <div class="flex items-center gap-4">
+      <a routerLink="/" class="text-xs font-bold tracking-widest text-[#10E39B] uppercase hover:underline">
+        &larr; Admin Panel
+      </a>
+      <span class="text-white/20">|</span>
+      <h1 class="text-sm font-bold tracking-wider text-white uppercase">Interview Vault</h1>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="max-w-4xl mx-auto px-8 mt-12 space-y-8">
+    
+    <!-- Title & summary -->
+    <div class="text-center space-y-3">
+      <h2 class="text-4xl font-extrabold text-white tracking-tight">The Interview Vault</h2>
+      <p class="text-sm text-white/50 max-w-xl mx-auto leading-relaxed">
+        Master technical design answers for device unlocking APIs, optimistic transaction queues, and network payloads.
+      </p>
+    </div>
+
+    <!-- Filters Panel -->
+    <div class="border border-white/5 bg-white/2 p-6 rounded-2xl space-y-6">
+      
+      <!-- Search Input -->
+      <div class="relative">
+        <input 
+          type="text" 
+          placeholder="Search questions, answers, topics..."
+          [(ngModel)]="searchQuery"
+          (input)="currentPage = 1"
+          class="w-full bg-black/60 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#10E39B]/50 transition-all"
+        />
+        <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </div>
+
+      <!-- Difficulty Selector Tab Buttons -->
+      <div class="space-y-2">
+        <span class="text-[10px] font-mono uppercase tracking-widest text-white/40 block">Filter Difficulty</span>
+        <div class="flex flex-wrap gap-2">
+          <button 
+            *ngFor="let diff of ['all', 'five-crore', 'hard', 'medium']"
+            (click)="filterByDifficulty(diff)"
+            [class]="activeDifficulty === diff ? 'px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer bg-[#10E39B]/10 text-[#10E39B] border-[#10E39B]/25' : 'px-3 py-1.5 rounded-xl text-xs font-medium border border-white/5 bg-white/2 text-white/40 hover:text-white transition-colors'"
+          >
+            {{ diff === 'all' ? 'All Questions' : diff === 'five-crore' ? '₹5 Crore Core' : diff === 'hard' ? 'Hard Core' : 'Medium Core' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Module Selector list -->
+      <div class="space-y-2">
+        <span class="text-[10px] font-mono uppercase tracking-widest text-white/40 block">Filter Module Dimensions</span>
+        <div class="flex flex-wrap gap-1.5">
+          <button 
+            *ngFor="let mod of modules"
+            (click)="filterByModule(mod.slug)"
+            [class]="activeModule === mod.slug ? 'px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer bg-[#10E39B]/10 text-[#10E39B] border-[#10E39B]/25' : 'px-3 py-1.5 rounded-xl text-xs font-medium border border-white/5 bg-white/2 text-white/40 hover:text-white transition-colors'"
+            [style.color]="activeModule === mod.slug ? getModuleColor(mod.slug) : ''"
+            [style.borderColor]="activeModule === mod.slug ? getModuleColor(mod.slug) + '40' : ''"
+            [style.backgroundColor]="activeModule === mod.slug ? getModuleColor(mod.slug) + '10' : ''"
+          >
+            {{ mod.label }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- QA Cards List -->
+    <div class="space-y-4" *ngIf="!loading; else spinnerTemplate">
+      <div *ngIf="paginatedQAs.length > 0; else emptyTemplate" class="space-y-3">
+        
+        <div 
+          *ngFor="let qa of paginatedQAs"
+          class="border border-white/5 bg-white/2 rounded-2xl overflow-hidden transition-all duration-300"
+        >
+          <!-- Header block clickable -->
+          <div 
+            (click)="toggleQA(qa.topicSlug, qa.qaNumber)"
+            class="p-5 flex items-center justify-between gap-4 cursor-pointer bg-white/3 hover:bg-white/5 transition-colors"
+          >
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[9px] font-mono text-white/30 uppercase tracking-wider">
+                  {{ qa.topicTitle }}
+                </span>
+                <span class="w-1 h-1 rounded-full bg-white/20"></span>
+                <span 
+                  class="text-[9px] font-mono font-bold uppercase tracking-wider"
+                  [style.color]="getModuleColor(qa.moduleSlug)"
+                >
+                  {{ qa.moduleTitle }}
+                </span>
+              </div>
+              <h4 class="text-sm font-bold text-white leading-snug mt-1">
+                {{ qa.qaQuestion }}
+              </h4>
+            </div>
+            
+            <div class="flex items-center gap-3 flex-shrink-0">
+              <!-- Checked button -->
+              <button 
+                (click)="toggleQAProgress(qa.qaNumber, $event)"
+                [class]="progressService.isQAReviewed(qa.qaNumber) ? 'p-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' : 'p-1.5 rounded-full bg-white/5 border border-white/10 text-white/30 hover:text-white hover:border-white/20'"
+              >
+                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+              </button>
+              <svg class="w-4 h-4 text-white/30 transition-transform" [class.rotate-180]="isQAOpen(qa.topicSlug, qa.qaNumber)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+            </div>
+          </div>
+
+          <!-- Answer block expandable -->
+          <div 
+            class="p-5 border-t border-white/5 bg-black/20 text-sm text-white/70 leading-relaxed space-y-4" 
+            *ngIf="isQAOpen(qa.topicSlug, qa.qaNumber)"
+          >
+            <p>{{ qa.qaAnswer }}</p>
+            <div class="flex items-center gap-4 text-[10px] font-mono uppercase tracking-wider text-white/45">
+              <span>Difficulty: {{ qa.difficulty }}</span>
+              <span>•</span>
+              <span [style.color]="qa.isFiveCrore ? '#fbbf24' : '#10e39b'">
+                {{ qa.isFiveCrore ? '₹5 Crore Core' : 'Technical Standard' }}
+              </span>
+              <span>•</span>
+              <a [routerLink]="['/topic', qa.topicSlug]" class="text-blue-400 hover:underline">
+                View Topic &rarr;
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex items-center justify-between pt-6 border-t border-white/5" *ngIf="totalPages > 1">
+          <span class="text-xs text-white/35 font-mono">
+            Page <span class="text-white/60">{{ currentPage }}</span> of <span class="text-white/60">{{ totalPages }}</span>
+            · <span class="text-white/60">{{ filteredQAs.length }}</span> questions
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button 
+              (click)="setPage(currentPage - 1)"
+              [disabled]="currentPage === 1"
+              class="px-2.5 py-1.5 border border-white/10 rounded-xl hover:bg-white/5 text-xs text-white/60 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+            >
+              &larr; Prev
+            </button>
+            <button 
+              (click)="setPage(currentPage + 1)"
+              [disabled]="currentPage === totalPages"
+              class="px-2.5 py-1.5 border border-white/10 rounded-xl hover:bg-white/5 text-xs text-white/60 disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
+            >
+              Next &rarr;
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Spinner template -->
+<ng-template #spinnerTemplate>
+  <div class="py-20 text-center space-y-4">
+    <div class="w-10 h-10 border-4 border-t-[#10E39B] border-white/10 rounded-full animate-spin mx-auto"></div>
+    <p class="text-xs font-mono text-white/30 uppercase tracking-widest">Loading questions dataset...</p>
+  </div>
+</ng-template>
+
+<!-- Empty state template -->
+<ng-template #emptyTemplate>
+  <div class="text-center py-16 space-y-3">
+    <div class="text-4xl">🔍</div>
+    <p class="text-white/40 text-sm font-mono">No questions matched your filters.</p>
+  </div>
+</ng-template>
