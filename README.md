@@ -1,3 +1,39 @@
+<!-- ========== NEW: ANIMATED WAVE HEADER ========== -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=200&section=header&text=Notes&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Developer%20Study%20Notes%20%26%20Code%20Snippets&descAlignY=60&descAlign=50" width="100%">
+</p>
+
+<!-- ========== NEW: TYPING ANIMATION INTRO ========== -->
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=500&color=22D3EE&center=true&vCenter=true&width=700&lines=Java %26 Spring Boot Notes;Data Structures %26 Algorithms;System Design Concepts;Technical Interview Prep" alt="Typing SVG">
+</p>
+
+<!-- ========== NEW: AUTHOR & ARCHITECT SECTION ========== -->
+## 👨‍💻 Author & Architect
+
+<table>
+<tr>
+<td align="center" width="160">
+  <a href="https://github.com/Sadique721">
+    <img src="https://avatars.githubusercontent.com/Sadique721" width="110" style="border-radius:50%"><br>
+    <b>Md Sadique Amin</b><br>
+    <sub>Backend Java Developer</sub>
+  </a>
+</td>
+<td>
+
+**Md Sadique Amin** — Backend Java Developer.
+
+- 🔗 GitHub: [@Sadique721](https://github.com/Sadique721)
+- 📧 Email: mdsadiqueamin721786@gmail.com
+- 🏗️ Built: Enterprise BSS-OSS Telecom Suite, Backend Java Developer, IR Interconnect & Roaming
+
+</td>
+</tr>
+</table>
+
+---
+
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0ea5e9,100:ef4444&height=220&section=header&text=InJoy%20v3.0&fontSize=58&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Interactive%20Java%20and%20Spring%20Boot%20Learning%20Universe&descAlignY=60&descAlign=50" width="100%">
 </p>
@@ -291,4 +327,10 @@ sell copies of the Software.
 <p align="center">
   <b>Built with ❤️ by <a href="https://github.com/Sadique721">Md Sadique Amin</a></b><br>
   <sub>Software Engineer & Full-Stack Architect & AI Systems Developer</sub>
+</p>
+
+
+<!-- ========== NEW: FOOTER WAVE ANIMATION ========== -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=120&section=footer&width=100%">
 </p>
