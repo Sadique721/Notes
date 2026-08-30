@@ -32,6 +32,19 @@
 </tr>
 </table>
 
+<!-- ========== NEW: SYSTEM DIAGRAM SECTION ========== -->
+## 📊 System Architecture & Workflow
+
+```mermaid
+graph TD
+    A[Study Roadmap] --> B(Data Structures & Algorithms)
+    A --> C(Java & Spring Boot Core)
+    A --> D(System Design & Architecture)
+    B --> E[LeetCode Problem Solving]
+    C --> F[Enterprise Applications]
+    D --> G[Scalable Cloud Solutions]
+```
+
 ---
 
 <p align="center">
