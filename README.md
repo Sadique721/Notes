@@ -1,11 +1,7 @@
 <!-- ========== NEW: ANIMATED WAVE HEADER ========== -->
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=200&section=header&text=Notes&fontSize=50&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Developer%20Study%20Notes%20%26%20Code%20Snippets&descAlignY=60&descAlign=50" width="100%">
-</p>
-
 <!-- ========== NEW: TYPING ANIMATION INTRO ========== -->
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=500&color=22D3EE&center=true&vCenter=true&width=700&lines=Java %26 Spring Boot Notes;Data Structures %26 Algorithms;System Design Concepts;Technical Interview Prep" alt="Typing SVG">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&amp;weight=600&amp;size=24&amp;duration=3000&amp;pause=500&amp;color=22D3EE&amp;center=true&amp;vCenter=true&amp;width=700&amp;lines=Java%20%26%20Spring%20Boot%20Notes;Data%20Structures%20%26%20Algorithms;System%20Design%20Concepts;Technical%20Interview%20Prep" alt="Typing SVG">
 </p>
 
 <!-- ========== NEW: AUTHOR & ARCHITECT SECTION ========== -->
