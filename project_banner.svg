@@ -19,13 +19,13 @@
   <rect x="50" y="50" width="700" height="200" rx="10" fill="rgba(0, 0, 0, 0.25)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5" />
   
   <text x="90" y="115" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="800" fill="#ffffff" letter-spacing="0.5">Notes</text>
-  <text x="90" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="400" fill="#e0f2fe" opacity="0.85">Developer Study Notes & Code Snippets</text>
+  <text x="90" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="400" fill="#e0f2fe" opacity="0.85">Developer Study Notes &amp; Code Snippets</text>
   
   <rect x="90" y="180" width="160" height="32" rx="6" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" />
-  <text x="170" y="201" font-family="monospace" font-size="12" font-weight="bold" fill="#38bdf8" text-anchor="middle">JAVA & SPRING</text>
+  <text x="170" y="201" font-family="monospace" font-size="12" font-weight="bold" fill="#38bdf8" text-anchor="middle">JAVA &amp; SPRING</text>
   
   <rect x="265" y="180" width="160" height="32" rx="6" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" />
-  <text x="345" y="201" font-family="monospace" font-size="12" font-weight="bold" fill="#c084fc" text-anchor="middle">DSA & SYSTEM DESIGN</text>
+  <text x="345" y="201" font-family="monospace" font-size="12" font-weight="bold" fill="#c084fc" text-anchor="middle">DSA &amp; SYSTEM DESIGN</text>
   
   <rect x="600" y="100" width="70" height="90" rx="8" fill="none" stroke="rgba(255, 255, 255, 0.4)" stroke-width="4" />
                <line x1="615" y1="130" x2="655" y2="130" stroke="rgba(255, 255, 255, 0.4)" stroke-width="4" stroke-linecap="round" />
